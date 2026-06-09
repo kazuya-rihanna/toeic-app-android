@@ -42,7 +42,12 @@ class SocketManager @Inject constructor() {
 
             ocrSocket?.on("ocr_result") { args ->
                 try {
-                    val data = args[0] as? JSONObject ?: JSONObject(args[0].toString())
+                    val firstArg = args?.getOrNull(0)
+                    val data = if (firstArg is JSONObject) {
+                        firstArg
+                    } else {
+                        JSONObject(firstArg?.toString() ?: "{}")
+                    }
                     _ocrText.value = data.optString("text")
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -51,7 +56,12 @@ class SocketManager @Inject constructor() {
 
             dropboxSocket?.on("status_update") { args ->
                 try {
-                    val data = args[0] as? JSONObject ?: JSONObject(args[0].toString())
+                    val firstArg = args?.getOrNull(0)
+                    val data = if (firstArg is JSONObject) {
+                        firstArg
+                    } else {
+                        JSONObject(firstArg?.toString() ?: "{}")
+                    }
                     _ocrStatus.value = data.optString("status")
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -60,7 +70,12 @@ class SocketManager @Inject constructor() {
 
             buttonSocket?.on("flic_event") { args ->
                 try {
-                    val data = args[0] as? JSONObject ?: JSONObject(args[0].toString())
+                    val firstArg = args?.getOrNull(0)
+                    val data = if (firstArg is JSONObject) {
+                        firstArg
+                    } else {
+                        JSONObject(firstArg?.toString() ?: "{}")
+                    }
                     _buttonPress.value = data.optString("action")
                 } catch (e: Exception) {
                     e.printStackTrace()
