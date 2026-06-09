@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.async
+import kotlinx.coroutines.supervisorScope
 import com.example.myapplication.data.remote.ChartEntry
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -49,11 +50,11 @@ class ScoreViewModel @Inject constructor(
                 val startDate = displayMonth.atDay(1).format(DateTimeFormatter.ISO_LOCAL_DATE)
                 val endDate = displayMonth.atEndOfMonth().format(DateTimeFormatter.ISO_LOCAL_DATE)
 
-                val progressDeferred = async { repository.getProgress(currentUserId) }
-                val chartDataDeferred = async { repository.getChartData(currentUserId, startDate, endDate) }
-
-                val progressResponse = progressDeferred.await()
-                val chartResponse = chartDataDeferred.await()
+                val (progressResponse, chartResponse) = supervisorScope {
+                    val progressDeferred = async { repository.getProgress(currentUserId) }
+                    val chartDataDeferred = async { repository.getChartData(currentUserId, startDate, endDate) }
+                    progressDeferred.await() to chartDataDeferred.await()
+                }
 
                 if (progressResponse.isSuccessful) {
                     val progress = progressResponse.body()?.progress ?: emptyMap()
