@@ -54,6 +54,24 @@ interface ToeicApiService {
         @Body request: TTSRequest
     ): Response<ResponseBody>
 
+    @Multipart
+    @POST("/stt")
+    suspend fun transcribeAudio(
+        @Part audio: MultipartBody.Part
+    ): Response<SttResponse>
+    
+    @Multipart
+    @POST("/save_ocr_data")
+    suspend fun saveOcrData(
+        @Part file: MultipartBody.Part,
+        @Part("raw_output") rawOutput: okhttp3.RequestBody,
+        @Part("correct_text") correctText: okhttp3.RequestBody,
+        @Part("prompt") prompt: okhttp3.RequestBody,
+        @Part("user_id") userId: okhttp3.RequestBody,
+        @Part("collection_id") collectionId: okhttp3.RequestBody,
+        @Part("page") page: okhttp3.RequestBody
+    ): Response<ResponseBody>
+
     @GET("/chart-data/{userId}")
     suspend fun getChartData(
         @Path("userId") userId: String,
@@ -110,4 +128,8 @@ data class ChartEntry(
     @SerializedName("stt") val stt: Int,
     @SerializedName("livescribe") val livescribe: Int,
     @SerializedName("typing") val typing: Int
+)
+
+data class SttResponse(
+    @SerializedName("transcribed_text") val transcribedText: String
 )

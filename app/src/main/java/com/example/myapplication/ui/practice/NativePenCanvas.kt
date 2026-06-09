@@ -25,11 +25,23 @@ fun NativePenCanvas(
     currentStroke: List<Dot>,
     modifier: Modifier = Modifier,
     backgroundColor: Color = Color.White,
-    strokeColor: Color = Color.Black
+    strokeColor: Color = Color.Black,
+    orientation: Int = 0
 ) {
-    android.util.Log.d("NativePenCanvas", "Recomposing: strokes=${strokes.size}, currentDots=${currentStroke.size}")
+    android.util.Log.d("NativePenCanvas", "Recomposing: strokes=${strokes.size}, currentDots=${currentStroke.size}, orientation=$orientation")
+    
+    // Transform coordinates based on orientation
+    fun getTransformedCoords(dot: Dot): Pair<Float, Float> {
+        return when (orientation) {
+            1 -> Pair(dot.y, -dot.x)
+            2 -> Pair(-dot.x, -dot.y)
+            3 -> Pair(-dot.y, dot.x)
+            else -> Pair(dot.x, dot.y)
+        }
+    }
+
     // Dynamic bounds calculation (similar to web PenCanvas.tsx)
-    val bounds = remember(strokes, currentStroke) {
+    val bounds = remember(strokes, currentStroke, orientation) {
         val allDots = strokes.flatMap { it.dots } + currentStroke
         if (allDots.isEmpty()) {
             android.util.Log.d("NativePenCanvas", "Bounds: NULL (empty)")
@@ -39,11 +51,12 @@ fun NativePenCanvas(
             var minY = Float.MAX_VALUE
             var maxX = Float.MIN_VALUE
             var maxY = Float.MIN_VALUE
-            allDots.forEach {
-                minX = minOf(minX, it.x)
-                minY = minOf(minY, it.y)
-                maxX = maxOf(maxX, it.x)
-                maxY = maxOf(maxY, it.y)
+            allDots.forEach { dot ->
+                val (tx, ty) = getTransformedCoords(dot)
+                minX = minOf(minX, tx)
+                minY = minOf(minY, ty)
+                maxX = maxOf(maxX, tx)
+                maxY = maxOf(maxY, ty)
             }
             android.util.Log.d("NativePenCanvas", "Bounds: L=$minX, T=$minY, R=$maxX, B=$maxY")
             // Add margin (similar to web's margin = 2)
@@ -69,25 +82,38 @@ fun NativePenCanvas(
                 fun transformX(x: Float) = x * scale + offsetX
                 fun transformY(y: Float) = y * scale + offsetY
 
-                val drawStroke = { dots: List<Dot> ->
-                    if (dots.size > 1) {
+                strokes.forEach { stroke ->
+                    if (stroke.dots.size > 1) {
                         val path = androidx.compose.ui.graphics.Path()
-                        dots.forEachIndexed { index, dot ->
-                            val tx = transformX(dot.x)
-                            val ty = transformY(dot.y)
+                        stroke.dots.forEachIndexed { index, dot ->
+                            val (txCoords, tyCoords) = getTransformedCoords(dot)
+                            val tx = transformX(txCoords)
+                            val ty = transformY(tyCoords)
                             if (index == 0) path.moveTo(tx, ty)
                             else path.lineTo(tx, ty)
                         }
                         drawPath(
                             path = path,
                             color = strokeColor,
-                            style = Stroke(width = 2f * scale / 20f) // Adjust width based on scale
+                            style = Stroke(width = 2f * scale / 20f)
                         )
                     }
                 }
-
-                strokes.forEach { drawStroke(it.dots) }
-                drawStroke(currentStroke)
+                if (currentStroke.size > 1) {
+                    val path = androidx.compose.ui.graphics.Path()
+                    currentStroke.forEachIndexed { index, dot ->
+                        val (txCoords, tyCoords) = getTransformedCoords(dot)
+                        val tx = transformX(txCoords)
+                        val ty = transformY(tyCoords)
+                        if (index == 0) path.moveTo(tx, ty)
+                        else path.lineTo(tx, ty)
+                    }
+                    drawPath(
+                        path = path,
+                        color = strokeColor,
+                        style = Stroke(width = 2f * scale / 20f)
+                    )
+                }
             }
         }
     }
@@ -104,11 +130,22 @@ private data class Rect(val left: Float, val top: Float, val right: Float, val b
 fun createBitmapFromStrokes(
     strokes: List<PenStroke>,
     width: Int = 800,
-    height: Int = 300
+    height: Int = 300,
+    orientation: Int = 0
 ): Bitmap {
     val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
     val canvas = android.graphics.Canvas(bitmap)
     canvas.drawColor(android.graphics.Color.WHITE)
+
+    // Transform helper for bitmap output
+    fun getTransformedCoords(dot: Dot): Pair<Float, Float> {
+        return when (orientation) {
+            1 -> Pair(dot.y, -dot.x)
+            2 -> Pair(-dot.x, -dot.y)
+            3 -> Pair(-dot.y, dot.x)
+            else -> Pair(dot.x, dot.y)
+        }
+    }
 
     val allDots = strokes.flatMap { it.dots }
     if (allDots.isEmpty()) return bitmap
@@ -117,11 +154,12 @@ fun createBitmapFromStrokes(
     var minY = Float.MAX_VALUE
     var maxX = Float.MIN_VALUE
     var maxY = Float.MIN_VALUE
-    allDots.forEach {
-        minX = minOf(minX, it.x)
-        minY = minOf(minY, it.y)
-        maxX = maxOf(maxX, it.x)
-        maxY = maxOf(maxY, it.y)
+    allDots.forEach { dot ->
+        val (tx, ty) = getTransformedCoords(dot)
+        minX = minOf(minX, tx)
+        minY = minOf(minY, ty)
+        maxX = maxOf(maxX, tx)
+        maxY = maxOf(maxY, ty)
     }
     
     val margin = 5f
@@ -150,8 +188,9 @@ fun createBitmapFromStrokes(
         if (stroke.dots.size > 1) {
             val path = Path()
             stroke.dots.forEachIndexed { index, dot ->
-                val tx = dot.x * scale + offsetX
-                val ty = dot.y * scale + offsetY
+                val (txCoords, tyCoords) = getTransformedCoords(dot)
+                val tx = txCoords * scale + offsetX
+                val ty = tyCoords * scale + offsetY
                 if (index == 0) path.moveTo(tx, ty)
                 else path.lineTo(tx, ty)
             }

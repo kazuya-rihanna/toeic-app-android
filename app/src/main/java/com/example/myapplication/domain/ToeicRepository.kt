@@ -3,6 +3,8 @@ package com.example.myapplication.domain
 import com.example.myapplication.data.model.*
 import com.example.myapplication.data.remote.ToeicApiService
 import com.example.myapplication.data.remote.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -36,4 +38,40 @@ class ToeicRepository @Inject constructor(
         apiService.updateProgress(ProgressUpdateRequest(userId, collectionId, page, inputMethod))
 
     suspend fun getTTS(text: String): Response<ResponseBody> = apiService.getTTS(TTSRequest(text))
+
+    suspend fun transcribeAudio(file: java.io.File): Response<SttResponse> {
+        val requestFile = okhttp3.RequestBody.create("audio/wav".toMediaType(), file)
+        val body = okhttp3.MultipartBody.Part.createFormData("audio", file.name, requestFile)
+        return apiService.transcribeAudio(body)
+    }
+
+    suspend fun saveOcrData(
+        imageBytes: ByteArray,
+        rawOutput: String,
+        correctText: String,
+        userId: String,
+        collectionId: String,
+        page: Int
+    ): Response<ResponseBody> {
+        val imageRequestBody = imageBytes.toRequestBody("image/png".toMediaType())
+        val filePart = okhttp3.MultipartBody.Part.createFormData("file", "drawing.png", imageRequestBody)
+        
+        val textType = "text/plain".toMediaType()
+        val rawOutputBody = rawOutput.toRequestBody(textType)
+        val correctTextBody = correctText.toRequestBody(textType)
+        val promptBody = "transcribe handwriting".toRequestBody(textType)
+        val userIdBody = userId.toRequestBody(textType)
+        val collectionIdBody = collectionId.toRequestBody(textType)
+        val pageBody = page.toString().toRequestBody(textType)
+        
+        return apiService.saveOcrData(
+            filePart,
+            rawOutputBody,
+            correctTextBody,
+            promptBody,
+            userIdBody,
+            collectionIdBody,
+            pageBody
+        )
+    }
 }

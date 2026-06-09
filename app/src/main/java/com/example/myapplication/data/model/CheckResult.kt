@@ -16,7 +16,10 @@ data class CheckResult(
     @SerializedName("is_correct") val isCorrect: Boolean? = null,
     @SerializedName("exact_match") val exactMatch: ExactMatch? = null,
     @SerializedName("word_level_match") val wordLevelMatch: WordLevelMatch? = null,
-    @SerializedName("word_level_details") val wordLevelDetails: WordLevelMatch? = null, // Fallback
+    @SerializedName("word_level_details") val wordLevelDetails: List<WordMatch>? = null,
+    @SerializedName("details") val details: List<WordMatch>? = null,
+    @SerializedName("result_details") val resultDetails: List<WordMatch>? = null,
+    @SerializedName("word_matches") val directWordMatches: List<WordMatch>? = null,
     @SerializedName("overall_stats") val overallStats: OverallStats? = null,
     @SerializedName("processed") val processed: ProcessedText? = null,
     @SerializedName("similarity") val similarity: Double? = null
@@ -26,7 +29,9 @@ data class ExactMatch(
     @SerializedName("exact_match") val exactMatch: Boolean,
     @SerializedName("is_similar") val isSimilar: Boolean,
     @SerializedName("normalized_match") val normalizedMatch: Boolean,
-    @SerializedName("similarity_ratio") val similarityRatio: Double
+    @SerializedName("similarity_ratio") val similarityRatio: Double,
+    @SerializedName("normalized_correct") val normalizedCorrect: String?,
+    @SerializedName("normalized_input") val normalizedInput: String?
 )
 
 data class WordLevelMatch(

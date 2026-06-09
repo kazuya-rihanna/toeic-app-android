@@ -14,12 +14,8 @@ import kr.neolab.sdk.pen.penmsg.IPenMsgListener
 import kr.neolab.sdk.pen.penmsg.PenMsg
 import kr.neolab.sdk.pen.penmsg.PenMsgType
 import kr.neolab.sdk.ink.structure.Dot
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 import javax.inject.Singleton
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -107,6 +103,9 @@ class PenManager @Inject constructor(
         refreshListeners()
     }
 
+    private val _isAutoConnecting = MutableStateFlow(false)
+    val isAutoConnecting = _isAutoConnecting.asStateFlow()
+
     fun refreshListeners() {
         val h = this.hashCode()
         android.util.Log.i("PenManager", "Refreshing all SDK listeners... [$h]")
@@ -191,57 +190,51 @@ class PenManager @Inject constructor(
                     val connThread = it.get(adt)
                     logEvent("ConnThread: ${connThread?.javaClass?.simpleName}")
 
-                    if (connThread != null) {
-                        // ConnectedThread -> getPacketProcessor()
-                        val getProcMethod = connThread.javaClass.methods.find { it.name == "getPacketProcessor" }
-                        val processor = getProcMethod?.invoke(connThread)
-                        logEvent("Processor: ${processor?.javaClass?.simpleName}")
+                    // ConnectedThread -> getPacketProcessor()
+                    val getProcMethod = connThread?.javaClass?.methods?.find { it.name == "getPacketProcessor" }
+                    val processor = getProcMethod?.invoke(connThread)
+                    logEvent("Processor: ${processor?.javaClass?.simpleName}")
 
-                        if (processor != null) {
-                            val pClass = processor.javaClass
-                            val sb = StringBuilder("Proc: ")
-                            
-                            val pFields = listOf(
-                                "isReceivedPageIdChange", "sectionId", "ownerId", "noteId", "pageId",
-                                "isHoverMode", "isDotHover", "isPenAuthenticated", "receiveProtocolVer", "FW_VER"
-                            )
+                    if (processor != null) {
+                        val pClass = processor.javaClass
+                        val sb = StringBuilder("Proc: ")
+                        val pFields = listOf(
+                            "isReceivedPageIdChange", "sectionId", "ownerId", "noteId", "pageId",
+                            "isHoverMode", "isDotHover", "isPenAuthenticated", "receiveProtocolVer", "FW_VER"
+                        )
 
-                            pFields.forEach { name ->
-                                try {
-                                    val f = pClass.getDeclaredField(name)
-                                    f.isAccessible = true
-                                    val v = f.get(processor)
-                                    sb.append("$name=$v; ")
-                                    
-                                    if (name == "isReceivedPageIdChange" && v == false) {
-                                        logEvent("FIX: Forcing isReceivedPageIdChange=true")
-                                        f.set(processor, true)
-                                    }
-                                } catch (e: Exception) {
-                                    // Try superclass for inherited fields
-                                    try {
-                                        val f = pClass.superclass?.getDeclaredField(name)
-                                        f?.isAccessible = true
-                                        val v = f?.get(processor)
-                                        sb.append("$name(sup)=$v; ")
-                                    } catch (e2: Exception) {}
-                                }
-                            }
-                            logEvent(sb.toString())
-
-                            // Inspect FilterForPaper
+                        pFields.forEach { name ->
                             try {
-                                val filterField = pClass.getDeclaredField("dotFilterPaper")
-                                filterField.isAccessible = true
-                                val filter = filterField.get(processor)
-                                if (filter != null) {
-                                    val fClass = filter.javaClass
-                                    val fNoteId = fClass.getDeclaredField("mNoteId").apply { isAccessible = true }.get(filter)
-                                    val fPageId = fClass.getDeclaredField("mPageId").apply { isAccessible = true }.get(filter)
-                                    logEvent("Filter: note=$fNoteId, page=$fPageId")
+                                val f = pClass.getDeclaredField(name)
+                                f.isAccessible = true
+                                val v = f.get(processor)
+                                sb.append("$name=$v; ")
+                                if (name == "isReceivedPageIdChange" && v == false) {
+                                    f.set(processor, true)
                                 }
-                            } catch (e: Exception) {}
+                            } catch (e: Exception) {
+                                try {
+                                    val f = pClass.superclass?.getDeclaredField(name)
+                                    f?.isAccessible = true
+                                    val v = f?.get(processor)
+                                    sb.append("$name(sup)=$v; ")
+                                } catch (e2: Exception) {}
+                            }
                         }
+                        logEvent(sb.toString())
+
+                        // Inspect FilterForPaper
+                        try {
+                            val filterField = pClass.getDeclaredField("dotFilterPaper")
+                            filterField.isAccessible = true
+                            val filter = filterField.get(processor)
+                            if (filter != null) {
+                                val fClass = filter.javaClass
+                                val fNoteId = fClass.getDeclaredField("mNoteId").apply { isAccessible = true }.get(filter)
+                                val fPageId = fClass.getDeclaredField("mPageId").apply { isAccessible = true }.get(filter)
+                                logEvent("Filter: note=$fNoteId, page=$fPageId")
+                            }
+                        } catch (e: Exception) {}
                     }
                 }
             }
@@ -263,6 +256,10 @@ class PenManager @Inject constructor(
             if (it == -1) content?.optInt("Battery", -1) else it
         }.let {
             if (it == -1) content?.optInt("battery_status", -1) else it
+        }.let {
+            if (it == -1) content?.optInt("batt", -1) else it
+        }.let {
+            if (it == -1) content?.optInt("battery_per", -1) else it
         } ?: -1
 
         if (battery != -1) {
@@ -297,48 +294,45 @@ class PenManager @Inject constructor(
                 _message.value = "Failed (Code: $typeStr)"
             }
             PenMsgType.PEN_DISCONNECTED -> {
+                logEvent("PEN DISCONNECTED (RawMsg=$raw)")
                 _isConnected.value = false
                 _batteryLevel.value = null
                 _message.value = "Disconnected"
             }
             PenMsgType.PEN_AUTHORIZED -> {
-                _message.value = "Authorized"
+                logEvent("PEN AUTHORIZED (Type=$type)")
                 _isConnected.value = true
-                logEvent("AUTHORIZED - Ready!")
-                refreshListeners()
-                // Force status and system info requests to get battery immediately
                 managerScope.launch {
                     try {
-                        penCtrl?.reqPenStatus()
-                        logEvent("Requested Pen Status")
-                        kotlinx.coroutines.delay(1000)
-                        penCtrl?.reqSystemInfo()
-                        logEvent("Requested System Info")
-                    } catch (e: Exception) {
-                        logEvent("Failed to req info: ${e.message}")
-                    }
+                        penCtrl?.inputPassword("")
+                    } catch (e: Exception) {}
+                    
+                    // Delay slightly to ensure ConnectedThread is fully initialized
+                    delay(500)
+                    refreshListeners()
                 }
             }
-            PenMsgType.PEN_STATUS -> {
-                logEvent("Pen Status (17) received")
-            }
-            130 -> { // SYSTEM_INFO_VALUE
-                logEvent("System Info (130) received")
+            16 -> { // Authentication/Bonding/Protocol Info
+                logEvent("AUTH/SECURITY MSG (RawMsg=$raw)")
             }
             PenMsgType.PASSWORD_REQUEST -> {
                 logEvent("PASSWORD REQUESTED! Pen is locked.")
             }
-            PenMsgType.PEN_STATUS -> {
-                logEvent("Pen Status received")
+            130 -> { // SYSTEM_INFO_VALUE
+                logEvent("System Info (130) received")
+            }
+            else -> {
+                logEvent("PenMsg: type=$type, raw=$raw")
             }
         }
     }
 
     override fun onReceiveDot(macAddress: String?, dot: Dot?) {
         if (dot == null) return
-        logEvent("DOT! x=${dot.x.toInt()}, y=${dot.y.toInt()}, type=${dot.dotType}")
-        val copy = Dot(dot) 
-        android.util.Log.d("PenManager", "onReceiveDot: x=${copy.x}, y=${copy.y}, type=${copy.dotType}, pressure=${copy.pressure}")
+        val copy = Dot(dot)
+        // Full ID dump for debugging area detection
+        android.util.Log.d("PenManager", "DOT: section=${copy.sectionId}, owner=${copy.ownerId}, book=${copy.noteId}, page=${copy.pageId}, x=${copy.x}, y=${copy.y}, type=${copy.dotType}")
+        logEvent("DOT sec=${copy.sectionId} own=${copy.ownerId} bk=${copy.noteId} x=${copy.x.toInt()} y=${copy.y.toInt()} t=${copy.dotType}")
         _lastDot.value = copy
     }
 
@@ -370,50 +364,23 @@ class PenManager @Inject constructor(
             
             val ctrl = penCtrl!!
             
-            // Diagnostic: Log current status
-            val startStatus = ctrl.getPenStatus()
-            android.util.Log.i("PenManager", "Before connect: Status=${startStatus}, Connected=${ctrl.getConnectedDevice()}")
-
-            if (startStatus != 1) {
-                // Force reset state if not in pristine INIT state
-                ctrl.disconnect()
-                ctrl.clear()
-                android.util.Log.i("PenManager", "Waiting for SDK async unbind...")
-                kotlinx.coroutines.delay(1000)
-            }
-
-            ctrl.unregisterBroadcastBTDuplicate()
-            ctrl.registerBroadcastBTDuplicate()
-            
-            val leSuccess = ctrl.setLeMode(true)
-            android.util.Log.i("PenManager", "setLeMode(true) returned: $leSuccess (Final Status: ${ctrl.getPenStatus()})")
-
             val upperSpp = sppAddress.uppercase()
             val upperLe = leAddress.uppercase()
             
-            // RE-REGISTER Listeners just before connection to ensure they are active
             try {
-                ctrl.setListener(this)
-                ctrl.setDotListener(this)
-                val multiCtrl = MultiPenCtrl.getInstance()
-                multiCtrl.setListener(this)
-                multiCtrl.setDotListener(this)
-                android.util.Log.i("PenManager", "Listeners re-registered before connect")
-            } catch (e: Throwable) {
-                android.util.Log.e("PenManager", "Listener re-registration failed: ${e.message}")
-            }
-
-            android.util.Log.i("PenManager", "Initiating double-MAC connection to SPP $upperSpp / LE $upperLe")
-            
-            try {
-                android.util.Log.i("PenManager", "Looking up UUID_VER.VER_5 enum...")
+                android.util.Log.i("PenManager", "Executing Reflection-based Double-MAC: SPP $upperSpp / LE $upperLe")
+                _message.value = "Connecting (VER_5)..."
+                
+                // Ensure LE mode is active
+                ctrl.setLeMode(true)
+                
+                // Micro-stabilization for SDK state machine (300ms)
+                Thread.sleep(300)
+                
+                // Reflected call for NASDK 2.12 Double-MAC
                 val enumClass = Class.forName("kr.neolab.sdk.pen.bluetooth.BTLEAdt\$UUID_VER")
                 val ver5 = java.lang.Enum.valueOf(enumClass as Class<out Enum<*>>, "VER_5")
                 
-                android.util.Log.i("PenManager", "Attempting SDK 5-arg connect for VER_5 SPP/LE")
-                _message.value = "Connecting via BLE (V5)..."
-                
-                // connect(String sppAddress, String leAddress, UUID_VER uuidVer, short appType, String reqProtocolVer)
                 val method = ctrl.javaClass.getMethod(
                     "connect",
                     String::class.java,
@@ -425,14 +392,10 @@ class PenManager @Inject constructor(
                 method.invoke(ctrl, upperSpp, upperLe, ver5, 4353.toShort(), "2.12")
                 
             } catch (e: Throwable) {
-                android.util.Log.e("PenManager", "5-arg connect failed: ${e.message}", e)
-                
-                // Fallback attempt just in case Reflection fails
-                _message.value = "Connecting via BLE (Fallback)..."
-                ctrl.connect(upperSpp, upperLe) 
+                android.util.Log.e("PenManager", "Reflection connect failed, trying fallback", e)
+                _message.value = "Connecting (Fallback)..."
+                ctrl.connect(upperSpp, upperLe)
             }
-            
-            android.util.Log.i("PenManager", "SDK Connect command sent for SPP=$upperSpp")
         } catch (e: Throwable) {
             android.util.Log.e("PenManager", "Critical error during connect", e)
             _message.value = "Connect Error: ${e.message}"

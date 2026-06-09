@@ -74,12 +74,10 @@ class BleScanner @Inject constructor(
             val nameUpper = deviceName.uppercase()
             val hasMatchName = nameUpper.startsWith("NWP-") || 
                               nameUpper.contains("NEOSMARTPEN") || 
-                              nameUpper.contains("SMARTPEN") ||
-                              nameUpper.contains("NEO") ||
-                              nameUpper.startsWith("PEN")
+                              nameUpper.contains("SMARTPEN")
             
             val hasMatchUuid = serviceUuids.any { 
-                it.contains("1901") || it.contains("6e400001") || it.contains("180a")
+                it.contains("1901") || it.contains("6e400001")
             }
 
             val isNeoPen = hasMatchName || hasMatchUuid
@@ -107,17 +105,47 @@ class BleScanner @Inject constructor(
             // We will show ANY device that matches "Neosmartpen" or "NWP".
             val shouldShow = isNeoPen || hasNeoLabId
 
+            if (!shouldShow) return // PURE NOISE FILTER: Discard non-pens immediately.
+
             if (shouldShow) {
-                val currentList = _foundPens.value
-                if (currentList.none { it.address == address }) {
-                    val sppAddress = try {
-                        kr.neolab.sdk.util.UuidUtil.changeAddressFromLeToSpp(bytes) ?: address
-                    } catch (e: Exception) {
-                        address
-                    }
-                    val hex = bytes.take(16).joinToString("") { "%02X ".format(it) }
-                    _foundPens.value = currentList + DiscoveredPen(deviceName, address, sppAddress, result.rssi, hex, isGenuine)
+                val currentList = _foundPens.value.toMutableList()
+                val sppAddressFromSdk = try {
+                    kr.neolab.sdk.util.UuidUtil.changeAddressFromLeToSpp(bytes)
+                } catch (e: Exception) { null }
+                
+                // Fallback: If SDK fails but it's a known NeoSmartpen, LE is usually SPP + 1.
+                val sppAddress = if (sppAddressFromSdk == null && isNeoPen) {
+                    try {
+                        val parts = address.split(":")
+                        val last = parts.last().toInt(16)
+                        val nextByte = (last - 1) and 0xFF
+                        val newLast = nextByte.toString(16).uppercase().padStart(2, '0')
+                        parts.dropLast(1).joinToString(":") + ":" + newLast
+                    } catch (e: Exception) { address }
+                } else {
+                    sppAddressFromSdk ?: address
                 }
+                
+                val hex = bytes.take(16).joinToString("") { "%02X ".format(it) }
+                
+                // Existing entry? 
+                val existingIndex = currentList.indexOfFirst { it.address == address }
+                if (existingIndex != -1) {
+                    val existing = currentList[existingIndex]
+                    // Strict Priority: If existing is BONDED, keep BONDED and keep its address mapping
+                    val isBonded = (existing.scanRecordHex == "BONDED") || (hex == "BONDED")
+                    
+                    currentList[existingIndex] = existing.copy(
+                        rssi = result.rssi,
+                        name = if (deviceName != "Unknown" && (existing.name == "Unknown" || !isBonded)) deviceName else existing.name,
+                        scanRecordHex = if (isBonded) "BONDED" else hex,
+                        // NEVER let a live scan overwrite a BONDED sppAddress (= address)
+                        sppAddress = if (isBonded) existing.address else sppAddress 
+                    )
+                } else {
+                    currentList.add(DiscoveredPen(deviceName, address, sppAddress, result.rssi, hex, isGenuine))
+                }
+                _foundPens.value = currentList
             }
         }
     }
@@ -133,8 +161,19 @@ class BleScanner @Inject constructor(
                 }
                 
                 device?.let { 
-                    val address = it.address
                     val name = it.name ?: "Unknown Classic"
+                    val address = it.address
+                    
+                    // STRICT FILTER: Only allow NeoSmartpen products in Classic results
+                    val nameUpper = name.uppercase()
+                    val isNeoPen = nameUpper.startsWith("NWP-") || 
+                                  nameUpper.contains("NEOSMARTPEN") || 
+                                  nameUpper.contains("SMARTPEN")
+                    
+                    if (!isNeoPen) return@let
+                    
+                    android.util.Log.d("BleScanner", "Classic Match Found: $name ($address)")
+                    
                     val currentList = _foundPens.value
                     if (currentList.none { p -> p.address == address }) {
                         val isGenuine = address.uppercase().startsWith("9C:7B:D2") || 
@@ -147,22 +186,32 @@ class BleScanner @Inject constructor(
     }
 
     fun checkBondedDevices() {
-        val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
-        val adapter = bluetoothManager?.adapter
-        val bondedDevices = adapter?.bondedDevices ?: emptySet()
-        
-        val currentList = _foundPens.value.toMutableList()
-        bondedDevices.forEach { device ->
-            if (currentList.none { it.address == device.address }) {
+        try {
+            val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+            val adapter = bluetoothManager?.adapter
+            val bondedDevices = adapter?.bondedDevices ?: emptySet()
+            
+            val currentList = _foundPens.value.toMutableList()
+            bondedDevices.forEach { device ->
                 val name = device.name ?: "Bonded Device"
-                val isGenuine = device.address.uppercase().startsWith("9C:7B:D2") || 
-                               device.address.uppercase().startsWith("00:07:80")
+                val addr = device.address.uppercase()
+                val isGenuine = addr.startsWith("9C:7B:D2") || addr.startsWith("00:07:80")
+                
                 if (name.contains("Neo", ignoreCase = true) || isGenuine) {
-                    currentList.add(DiscoveredPen(name, device.address, device.address, -1, "BONDED", isGenuine))
+                    val existingIndex = currentList.indexOfFirst { it.address == addr }
+                    
+                    val updated = DiscoveredPen(name, addr, addr, -1, "BONDED", isGenuine)
+                    if (existingIndex >= 0) {
+                        currentList[existingIndex] = updated
+                    } else {
+                        currentList.add(updated)
+                    }
                 }
             }
+            _foundPens.value = currentList
+        } catch (e: SecurityException) {
+            android.util.Log.e("BleScanner", "SecurityException: checkBondedDevices requires BLUETOOTH_CONNECT", e)
         }
-        _foundPens.value = currentList
     }
 
     fun startClassicDiscovery() {
@@ -313,7 +362,9 @@ class BleScanner @Inject constructor(
 
         if (!_isScanning.value) {
             _isScanning.value = true
-            _foundPens.value = emptyList()
+            // IMPORTANT: Clear the list and addresses at the start of a new scan
+            // This prevents "One-Tap" from picking up stale devices from previous scans.
+            _foundPens.value = emptyList() 
             _uniqueAddresses.clear()
             _totalUniqueDevices.value = 0
             

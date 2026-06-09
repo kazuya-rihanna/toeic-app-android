@@ -6,6 +6,9 @@ import com.example.myapplication.domain.ToeicRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
@@ -28,11 +31,38 @@ class TtsManager @Inject constructor(
                     FileOutputStream(tempFile).use { it.write(body.bytes()) }
                     
                     withContext(Dispatchers.Main) {
-                        mediaPlayer?.release()
-                        mediaPlayer = MediaPlayer().apply {
-                            setDataSource(tempFile.absolutePath)
-                            prepare()
-                            start()
+                        suspendCancellableCoroutine<Unit> { continuation ->
+                            mediaPlayer?.release()
+                            val player = MediaPlayer()
+                            mediaPlayer = player
+                            
+                            player.apply {
+                                setDataSource(tempFile.absolutePath)
+                                setOnCompletionListener { 
+                                    it.release()
+                                    if (mediaPlayer == it) mediaPlayer = null
+                                    if (continuation.isActive) continuation.resume(Unit) 
+                                }
+                                setOnErrorListener { it, _, _ ->
+                                    it.release()
+                                    if (mediaPlayer == it) mediaPlayer = null
+                                    if (continuation.isActive) continuation.resumeWithException(Exception("MediaPlayer error"))
+                                    true
+                                }
+                                try {
+                                    prepare()
+                                    start()
+                                } catch (e: Exception) {
+                                    release()
+                                    if (mediaPlayer == this) mediaPlayer = null
+                                    if (continuation.isActive) continuation.resumeWithException(e)
+                                }
+                            }
+
+                            continuation.invokeOnCancellation {
+                                player.release()
+                                if (mediaPlayer == player) mediaPlayer = null
+                            }
                         }
                     }
                 }
