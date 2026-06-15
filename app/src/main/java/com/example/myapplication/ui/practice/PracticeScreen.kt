@@ -314,19 +314,37 @@ fun PracticeScreen(
                                 color = MaterialTheme.colorScheme.secondary
                             )
                         }
+                        val hasDrawing = strokes.isNotEmpty() || currentStroke.isNotEmpty()
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(200.dp)
+                                .then(
+                                    if (hasDrawing) Modifier.wrapContentHeight()
+                                    else Modifier.height(80.dp)
+                                )
                                 .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.medium)
                                 .padding(4.dp)
                         ) {
-                            NativePenCanvas(
-                                strokes = strokes,
-                                currentStroke = currentStroke,
-                                orientation = canvasOrientation,
-                                modifier = Modifier.fillMaxSize()
-                            )
+                            if (hasDrawing) {
+                                NativePenCanvas(
+                                    strokes = strokes,
+                                    currentStroke = currentStroke,
+                                    orientation = canvasOrientation,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            } else {
+                                // プレースホルダー
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Draw with your pen",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                    )
+                                }
+                            }
                         }
                         
                         // Button Row 1: Primary actions

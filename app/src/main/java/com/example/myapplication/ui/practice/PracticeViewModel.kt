@@ -172,6 +172,7 @@ class PracticeViewModel @Inject constructor(
         val y = dot.y
         val book = dot.noteId
         val owner = dot.ownerId
+        val page = dot.pageId
 
         // Ensure app is in Success state (an active question is loaded)
         if (_uiState.value !is PracticeUiState.Success) return false
@@ -194,10 +195,16 @@ class PracticeViewModel @Inject constructor(
             // 2. New top-right area based on user log (82.94, 7.45)
             owner == 50 && book == 100 && (x in 75.0f..95.0f && y in 0.0f..20.0f) -> true
 
-            // Plain (Section 3, Owner 27, Book 551) - PUI Submit Areas
-            // Updated based on log (4.92, 112.38) and symmetric corner (31.5, 112.4)
-            dot.sectionId == 3 && owner == 27 && book == 551 && (x in 0.0f..10.0f && y in 105.0f..120.0f) -> true
-            dot.sectionId == 3 && owner == 27 && book == 551 && (x in 25.0f..40.0f && y in 105.0f..120.0f) -> true
+            // Book 551 (Section 3, Owner 27) - PUI Submit Areas, page-specific
+            // page:2 Submit 左 (X≈5.94, Y≈65.85)
+            dot.sectionId == 3 && owner == 27 && book == 551 && page == 2 && (x in 0.0f..12.0f && y in 60.0f..72.0f) -> true
+            // page:2 Submit 右 (X≈74.01, Y≈65.71)
+            dot.sectionId == 3 && owner == 27 && book == 551 && page == 2 && (x in 68.0f..80.0f && y in 60.0f..72.0f) -> true
+            // page:3 Submit 右 (X≈74.76, Y≈111.06)
+            dot.sectionId == 3 && owner == 27 && book == 551 && page == 3 && (x in 68.0f..81.0f && y in 105.0f..117.0f) -> true
+            // page:3 Submit 左 (X≈6.41, Y≈110.61)
+            dot.sectionId == 3 && owner == 27 && book == 551 && page == 3 && (x in 0.0f..13.0f && y in 105.0f..117.0f) -> true
+
             else -> false
         }
     }
@@ -207,6 +214,7 @@ class PracticeViewModel @Inject constructor(
         val y = dot.y
         val book = dot.noteId
         val owner = dot.ownerId
+        val page = dot.pageId
 
         // Ensure app is in Success state (an active question is loaded)
         if (_uiState.value !is PracticeUiState.Success) return false
@@ -220,9 +228,11 @@ class PracticeViewModel @Inject constructor(
             // MOVED TO TOP-LEFT based on trade request (prev Clear area)
             owner == 27 && book == 462 && (x in 0.0f..12.0f && y in 0.0f..12.0f) -> true
 
-            // Plain (Section 3, Owner 27, Book 551) - Audio Trigger
-            // Updated based on log (31.48, 56.16)
-            dot.sectionId == 3 && owner == 27 && book == 551 && (x in 25.0f..40.0f && y in 50.0f..65.0f) -> true
+            // Book 551 (Section 3, Owner 27) - Audio Trigger, page-specific
+            // page:2 音声再生 左 (X≈5.52, Y≈112.45)
+            dot.sectionId == 3 && owner == 27 && book == 551 && page == 2 && (x in 0.0f..12.0f && y in 107.0f..119.0f) -> true
+            // page:3 音声再生 右 (X≈74.82, Y≈59.44)
+            dot.sectionId == 3 && owner == 27 && book == 551 && page == 3 && (x in 68.0f..81.0f && y in 53.0f..66.0f) -> true
 
             else -> false
         }
@@ -233,6 +243,7 @@ class PracticeViewModel @Inject constructor(
         val y = dot.y
         val book = dot.noteId
         val owner = dot.ownerId
+        val page = dot.pageId
 
         // Ensure app is in Success state (an active question is loaded)
         if (_uiState.value !is PracticeUiState.Success) return false
@@ -246,9 +257,11 @@ class PracticeViewModel @Inject constructor(
             // MOVED TO MID-LEFT based on trade request (prev Audio area)
             owner == 27 && book == 462 && (x in 0.0f..10.0f && y in 70.0f..80.0f) -> true
 
-            // Plain (Section 3, Owner 27, Book 551) - Clear Trigger
-            // Updated based on log (4.98, 55.97)
-            dot.sectionId == 3 && owner == 27 && book == 551 && (x in 0.0f..10.0f && y in 50.0f..65.0f) -> true
+            // Book 551 (Section 3, Owner 27) - Clear Trigger, page-specific
+            // page:2 Clear 右 (X≈74.88, Y≈112.4)
+            dot.sectionId == 3 && owner == 27 && book == 551 && page == 2 && (x in 68.0f..81.0f && y in 107.0f..119.0f) -> true
+            // page:3 Clear 左 (X≈6.11, Y≈59.29)
+            dot.sectionId == 3 && owner == 27 && book == 551 && page == 3 && (x in 0.0f..13.0f && y in 53.0f..66.0f) -> true
 
             else -> false
         }

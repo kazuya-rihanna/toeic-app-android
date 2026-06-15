@@ -7,12 +7,15 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import kr.neolab.sdk.ink.structure.Dot
 
 data class PenStroke(
@@ -40,7 +43,7 @@ fun NativePenCanvas(
         }
     }
 
-    // Dynamic bounds calculation (similar to web PenCanvas.tsx)
+    // Dynamic bounds calculation: マージンなしの厳密なバウンディングボックス
     val bounds = remember(strokes, currentStroke, orientation) {
         val allDots = strokes.flatMap { it.dots } + currentStroke
         if (allDots.isEmpty()) {
@@ -49,8 +52,8 @@ fun NativePenCanvas(
         } else {
             var minX = Float.MAX_VALUE
             var minY = Float.MAX_VALUE
-            var maxX = Float.MIN_VALUE
-            var maxY = Float.MIN_VALUE
+            var maxX = -Float.MAX_VALUE
+            var maxY = -Float.MAX_VALUE
             allDots.forEach { dot ->
                 val (tx, ty) = getTransformedCoords(dot)
                 minX = minOf(minX, tx)
@@ -59,65 +62,64 @@ fun NativePenCanvas(
                 maxY = maxOf(maxY, ty)
             }
             android.util.Log.d("NativePenCanvas", "Bounds: L=$minX, T=$minY, R=$maxX, B=$maxY")
-            // Add margin (similar to web's margin = 2)
-            val margin = 5f
-            Rect(minX - margin, minY - margin, maxX + margin, maxY + margin)
+            // マージンなし（余白ゼロ）
+            Rect(minX, minY, maxX, maxY)
         }
     }
 
-    Box(modifier = modifier.background(backgroundColor)) {
+    // 書いた範囲に応じてキャンバスの表示サイズを決定 (scale=20, pixelPad=4px)
+    val scale = 20f
+    val pixelPad = 4f // アンチエイリアス用の最小余白（px）
+    val density = LocalDensity.current
+    val displayModifier = if (bounds != null) {
+        val displayW = (bounds.width * scale + pixelPad * 2).coerceAtLeast(1f)
+        val displayH = (bounds.height * scale + pixelPad * 2).coerceAtLeast(1f)
+        with(density) {
+            modifier.size(
+                width = displayW.toDp(),
+                height = displayH.toDp()
+            )
+        }
+    } else {
+        modifier.fillMaxSize()
+    }
+
+    Box(modifier = displayModifier.background(backgroundColor)) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val canvasWidth = size.width
             val canvasHeight = size.height
-            
-            if (bounds != null && canvasWidth > 0 && canvasHeight > 0) {
-                val scaleX = canvasWidth / bounds.width
-                val scaleY = canvasHeight / bounds.height
-                val scale = minOf(scaleX, scaleY)
-                
-                // Center the drawing
-                val offsetX = (canvasWidth - bounds.width * scale) / 2f - bounds.left * scale
-                val offsetY = (canvasHeight - bounds.height * scale) / 2f - bounds.top * scale
 
-                fun transformX(x: Float) = x * scale + offsetX
-                fun transformY(y: Float) = y * scale + offsetY
+            if (bounds != null && canvasWidth > 0 && canvasHeight > 0) {
+                // 直接線形変換: 書いた座標をキャンバスにぴったりマッピング
+                // minOfによるアスペクト比保持/センタリングを使わないことで余白ゼロを実現
+                val mapX = { x: Float -> (x - bounds.left) * scale + pixelPad }
+                val mapY = { y: Float -> (y - bounds.top) * scale + pixelPad }
 
                 strokes.forEach { stroke ->
                     if (stroke.dots.size > 1) {
                         val path = androidx.compose.ui.graphics.Path()
                         stroke.dots.forEachIndexed { index, dot ->
                             val (txCoords, tyCoords) = getTransformedCoords(dot)
-                            val tx = transformX(txCoords)
-                            val ty = transformY(tyCoords)
-                            if (index == 0) path.moveTo(tx, ty)
-                            else path.lineTo(tx, ty)
+                            if (index == 0) path.moveTo(mapX(txCoords), mapY(tyCoords))
+                            else            path.lineTo(mapX(txCoords), mapY(tyCoords))
                         }
-                        drawPath(
-                            path = path,
-                            color = strokeColor,
-                            style = Stroke(width = 2f * scale / 20f)
-                        )
+                        drawPath(path = path, color = strokeColor, style = Stroke(width = 2f))
                     }
                 }
                 if (currentStroke.size > 1) {
                     val path = androidx.compose.ui.graphics.Path()
                     currentStroke.forEachIndexed { index, dot ->
                         val (txCoords, tyCoords) = getTransformedCoords(dot)
-                        val tx = transformX(txCoords)
-                        val ty = transformY(tyCoords)
-                        if (index == 0) path.moveTo(tx, ty)
-                        else path.lineTo(tx, ty)
+                        if (index == 0) path.moveTo(mapX(txCoords), mapY(tyCoords))
+                        else            path.lineTo(mapX(txCoords), mapY(tyCoords))
                     }
-                    drawPath(
-                        path = path,
-                        color = strokeColor,
-                        style = Stroke(width = 2f * scale / 20f)
-                    )
+                    drawPath(path = path, color = strokeColor, style = Stroke(width = 2f))
                 }
             }
         }
     }
 }
+
 
 private data class Rect(val left: Float, val top: Float, val right: Float, val bottom: Float) {
     val width: Float get() = right - left
