@@ -49,24 +49,102 @@ Even after achieving a stable connection, real-time stroke data (`onReceiveDot`)
 
 ---
 
-## PUI (Paper User Interface) Detection & "Submit" Triggers
+## PUI (Paper User Interface) - Full Command Reference
 
-Unlike the React `toeic-app` which dynamically parses `.nproj` XML files, the Android native implementation in `PracticeViewModel.kt` uses high-performance coordinate-based collision detection for PUI symbols. This ensures real-time response on mobile hardware without XML parsing overhead.
+Detection is implemented in `PracticeViewModel.kt` (Android) and mirrored in `PenCanvas.tsx` (Web).
+All coordinates are in **Ncode Units (NU)**.
 
-### Verified Coordinate Mappings (Ncode Units)
+### Commands
 
-We have calibrated the following notebooks to trigger a "Submit" (OCR initiation) when the pen taps the top-right command area:
+| Command | Action |
+| :--- | :--- |
+| **SUBMIT** | Captures strokes as bitmap, uploads to OCR API, evaluates answer |
+| **AUDIO** | Plays TTS of the current sentence |
+| **CLEAR** | Clears all strokes from the canvas |
 
-| Notebook | Owner ID | Book ID | X Range (NU) | Y Range (NU) | Notes |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Book 462** | 27 | 462 | `47.0 .. 53.0` | `0.0 .. 12.0` | Calibrated to user sample (48.7, 7.4) |
-| **Book 368** | 27 | 368 | `78.0 .. 89.0` | `0.0 .. 22.0` | Deduced from `.nproj` assets |
-| **Book 100** | 50 | 100 | `84.0 .. 93.0` | `101.0.. 112.0` | Expanded to top-left per user req |
+---
 
-### Implementation Logic
-The detection occurs in `isPuiSubmitArea(dot: Dot)`. If a `PEN_ACTION_DOWN` (type 17) is detected within these ranges, the app triggers `handleSubmitDrawing()` and discards the dot, preventing it from being rendered as a stroke.
+### Book 462 (Owner: 27, Section: any)
+
+| Command | X Range (NU) | Y Range (NU) | Sample Dot | Location |
+| :--- | :--- | :--- | :--- | :--- |
+| **SUBMIT** | `47.0 .. 53.0` | `0.0 .. 12.0` | (48.77, 7.4) | Top-right |
+| **AUDIO** | `0.0 .. 12.0` | `0.0 .. 12.0` | - | Top-left |
+| **CLEAR** | `0.0 .. 10.0` | `70.0 .. 80.0` | - | Mid-left |
+
+---
+
+### Book 368 (Owner: 27, Section: any)
+
+| Command | X Range (NU) | Y Range (NU) | Notes |
+| :--- | :--- | :--- | :--- |
+| **SUBMIT** | `78.0 .. 89.0` | `0.0 .. 22.0` | Deduced from `custom_368.nproj` |
+| **AUDIO** | *(undefined)* | *(undefined)* | - |
+| **CLEAR** | *(undefined)* | *(undefined)* | - |
+
+---
+
+### Book 100 (Owner: 50, Section: any)
+
+| Command | X Range (NU) | Y Range (NU) | Notes |
+| :--- | :--- | :--- | :--- |
+| **SUBMIT** (bottom-right) | `84.0 .. 93.0` | `101.0 .. 112.0` | Original area |
+| **SUBMIT** (top-right) | `75.0 .. 95.0` | `0.0 .. 20.0` | Added per user request |
+| **AUDIO** | `0.0 .. 15.0` | `0.0 .. 15.0` | Top-left |
+| **CLEAR** | `0.0 .. 15.0` | `105.0 .. 125.0` | Bottom-left |
+
+---
+
+### Book 551 (Owner: 27, Section: **3** required, Page-specific)
+
+All conditions require `sectionId == 3`.
+
+#### Page 2
+
+| Command | X Range (NU) | Y Range (NU) | Sample Dot | Location |
+| :--- | :--- | :--- | :--- | :--- |
+| **SUBMIT** (left) | `0.0 .. 12.0` | `60.0 .. 72.0` | (5.94, 65.85) | Mid-left |
+| **SUBMIT** (right) | `68.0 .. 80.0` | `60.0 .. 72.0` | (74.01, 65.71) | Mid-right |
+| **AUDIO** (left) | `0.0 .. 12.0` | `107.0 .. 119.0` | (5.52, 112.45) | Bottom-left |
+| **CLEAR** (right) | `68.0 .. 81.0` | `107.0 .. 119.0` | (74.88, 112.4) | Bottom-right |
+
+#### Page 3
+
+| Command | X Range (NU) | Y Range (NU) | Sample Dot | Location |
+| :--- | :--- | :--- | :--- | :--- |
+| **SUBMIT** (right) | `68.0 .. 81.0` | `105.0 .. 117.0` | (74.76, 111.06) | Bottom-right |
+| **SUBMIT** (left) | `0.0 .. 13.0` | `105.0 .. 117.0` | (6.41, 110.61) | Bottom-left |
+| **AUDIO** (right) | `68.0 .. 81.0` | `53.0 .. 66.0` | (74.82, 59.44) | Mid-right |
+| **CLEAR** (left) | `0.0 .. 13.0` | `53.0 .. 66.0` | (6.11, 59.29) | Mid-left |
+
+---
+
+### Book 3138 (Owner: 1012, Section: any)
+
+| Command | X Range (NU) | Y Range (NU) | Notes |
+| :--- | :--- | :--- | :--- |
+| **SUBMIT** | `20.0 .. 45.0` | `0.0 .. 10.0` | Placeholder - not yet calibrated |
+| **AUDIO** | *(undefined)* | *(undefined)* | - |
+| **CLEAR** | *(undefined)* | *(undefined)* | - |
+
+---
+
+### Command Detection Logic (Two-Phase Tap Recognition)
+
+Implemented in `isPuiSubmitArea` / `isAudioTriggerArea` / `isClearTriggerArea` + `processNativeDot`.
+
+**Phase 1 - `PEN_ACTION_DOWN` (dotType 17 on Android / dotType 0 on Web):**
+- If the dot lands in a PUI area AND `now - lastWriteTime >= 1000ms` (cooldown passed), register as `potentialCommand`.
+- Otherwise, treat as a regular stroke start and set `lastWriteTime = now`.
+
+**Phase 2 - `PEN_ACTION_UP` (dotType 20 on Android / dotType 2 on Web):**
+- If the lift-off point is within `COMMAND_MAX_DISTANCE = 3.0 NU` of the DOWN point, execute the command.
+- After execution, `lastWriteTime = now` resets the cooldown.
+- If the stroke drifted beyond 3.0 NU, treat as a regular stroke.
+
+**Bug fixed 2026-06-16:** `lastWriteTime` was not updated after successful command execution. This caused the cooldown to reference a stale timestamp, making PUI taps unresponsive after 2-3 presses. Fixed in both `PracticeViewModel.kt` and `PenCanvas.tsx`.
 
 ---
 
 ## Result
-With these deep-level fixes (Reflection State Sync, Note Unblocking, Context Wrapping, and PUI Calibration), the NeoSmartpen R1 now achieves **perfect, real-time stroke visualization and command detection** on Android 14. 🎉
+With these deep-level fixes (Reflection State Sync, Note Unblocking, Context Wrapping, PUI Calibration, and Cooldown Reset), the NeoSmartpen R1 now achieves **perfect, real-time stroke visualization and command detection** on Android 14.
