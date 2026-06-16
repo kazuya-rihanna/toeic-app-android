@@ -144,7 +144,24 @@ Implemented in `isPuiSubmitArea` / `isAudioTriggerArea` / `isClearTriggerArea` +
 
 **Bug fixed 2026-06-16:** `lastWriteTime` was not updated after successful command execution. This caused the cooldown to reference a stale timestamp, making PUI taps unresponsive after 2-3 presses. Fixed in both `PracticeViewModel.kt` and `PenCanvas.tsx`.
 
+### Web PUI Troubleshooting (Vite Hot-Reload / TypeScript Warning Issue)
+
+**Issue:**
+Even after applying the cooldown fix, the Web PUI remained unresponsive or didn't show changes in the browser.
+
+**Causes and Solutions:**
+1. **TypeScript Warnings Halting Bundling:**
+   - There was an unused prop (`height`) in `PenCanvas.tsx`, causing `error TS6133` during TypeScript checks (`tsc -b`).
+   - Vite dev server or bundler can halt hot-reloading/building the latest JS files when TS validation errors are present. This served a stale version of the bundle (which still had the PUI cooldown bug).
+   - Removed the unused `height` prop from destructuring in `PenCanvas.tsx`, resolving the compilation blockers.
+2. **SDK Module Caching:**
+   - Vite pre-bundles and caches packages under `node_modules` (e.g., `web_pen_sdk`).
+   - When the SDK is patched by `scripts/patch-sdk.cjs`, browser or dev server cache can serve a cached unpatched version.
+   - Restarting Vite with the clean/force option or clearing browser cache forces a complete update of the patched SDK.
+3. **Developer Debug HUD:**
+   - A floating developer Debug HUD was added to the bottom of the Web practice page. It logs real-time DOWN/MOVE/UP events, coordinates, and PUI area collisions to make troubleshooting visible.
+
 ---
 
 ## Result
-With these deep-level fixes (Reflection State Sync, Note Unblocking, Context Wrapping, PUI Calibration, and Cooldown Reset), the NeoSmartpen R1 now achieves **perfect, real-time stroke visualization and command detection** on Android 14.
+With these deep-level fixes (Reflection State Sync, Note Unblocking, Context Wrapping, PUI Calibration, Cooldown Reset, and Compiler Troubleshooting), the NeoSmartpen R1 now achieves **perfect, real-time stroke visualization and command detection** on both Android 14 and Web.
