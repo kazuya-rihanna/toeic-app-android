@@ -352,6 +352,7 @@ class PracticeViewModel @Inject constructor(
                         "CLEAR" -> clearDrawingWithGuard()
                     }
                     executedCommand = true
+                    lastWriteTime = now // コマンド実行後もクールダウンをリセット
                 } else {
                     lastWriteTime = now
                 }
