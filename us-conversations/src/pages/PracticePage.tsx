@@ -322,7 +322,7 @@ export const PracticePage: React.FC<PracticePageProps> = ({
               {/* English Target (チラ見UI) */}
               <div style={{ marginBottom: '2rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <span style={{ ...typescale['label-large'], color: tokens['on-surface'], fontWeight: 700 }}>🇬🇧 Target Answer:</span>
+                  <span style={{ ...typescale['label-large'], color: tokens['on-surface'], fontWeight: 700 }}>🇺🇸 Target Answer:</span>
                   <div style={{ display: 'flex', gap: '0.4rem' }}>
                     <button
                       onMouseDown={() => setShowAnswerPeek(true)}
