@@ -12,6 +12,7 @@ import { typescale, elevation, motionTokens } from '../theme/tokens';
 interface PracticePageProps {
   conversations: Conversation[];
   progress: Record<number, MasteryStatus>;
+  progressLoaded: boolean;
   onStatusChange: (id: number, status: MasteryStatus) => void;
   tokens: Record<string, string>;
   selectedCategory: string;
@@ -22,11 +23,15 @@ interface PracticePageProps {
 
 type RecordingState = 'idle' | 'recording' | 'processing';
 
-export const PracticePage: React.FC<PracticePageProps> = ({
-  conversations, progress, onStatusChange, tokens,
+export function PracticePage({
+  conversations,
+  progress,
+  progressLoaded,
+  onStatusChange,
+  tokens,
   selectedCategory, setSelectedCategory,
   onPlaySuccess, onPlayReview,
-}) => {
+}) {
   const [practiceMode, setPracticeMode]    = useState<PracticeMode>('speech');
   const [filteredCards, setFilteredCards]  = useState<Conversation[]>([]);
   const [cardIndex, setCardIndex]          = useState(0);
@@ -56,16 +61,34 @@ export const PracticePage: React.FC<PracticePageProps> = ({
   const [isSpeakingQ, setIsSpeakingQ] = useState(false);
   const [isSpeakingA, setIsSpeakingA] = useState(false);
 
-  // Filter cards
+  // Auto-resume logic
+  const hasJumpedRef = useRef(false);
+
+  // When category changes, reset the jump flag so we can jump again
+  useEffect(() => {
+    hasJumpedRef.current = false;
+  }, [selectedCategory]);
+
+  // Filter cards and determine starting index
   useEffect(() => {
     const list = selectedCategory === 'all'
       ? [...conversations]
       : conversations.filter(c => c.cat === selectedCategory);
     setFilteredCards(list);
-    setCardIndex(0);
+
+    // If progress is loaded and we haven't jumped yet for this category
+    if (progressLoaded && !hasJumpedRef.current && list.length > 0) {
+      let firstUnmastered = list.findIndex(c => progress[c.id] !== 'mastered');
+      if (firstUnmastered === -1) firstUnmastered = 0; // all mastered
+      setCardIndex(firstUnmastered);
+      hasJumpedRef.current = true;
+    } else if (!progressLoaded) {
+      setCardIndex(0); // fallback before load
+    }
+    
     resetState();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCategory, conversations]);
+  }, [selectedCategory, conversations, progressLoaded, progress]);
 
   const resetState = () => {
     setShowAnswer(false);
@@ -146,12 +169,9 @@ export const PracticePage: React.FC<PracticePageProps> = ({
 
   // ---- Styles ----
   const glassCard: React.CSSProperties = {
-    background: tokens['surface-container'],
-    backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)',
+    background: tokens['surface-container'], borderRadius: '12px',
     border: `1px solid ${tokens['outline-variant']}`,
-    borderRadius: '16px',
-    ...elevation.level2,
+    color: tokens['on-surface'],
   };
   const btnBase: React.CSSProperties = {
     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -234,9 +254,9 @@ export const PracticePage: React.FC<PracticePageProps> = ({
 
         {/* Filter + Mode bar */}
         <div style={{
-          ...glassCard, padding: '0.9rem 1.25rem', marginBottom: '1.5rem',
+          ...glassCard, padding: '0.5rem 0.75rem', marginBottom: '0.75rem',
           display: 'flex', justifyContent: 'space-between',
-          alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem',
+          alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem',
         }}>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <span style={{ ...typescale['label-medium'], color: tokens['on-surface-variant'] }}>Category:</span>
@@ -256,11 +276,11 @@ export const PracticePage: React.FC<PracticePageProps> = ({
         </div>
 
         {filteredCards.length > 0 && currentCard ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <div style={{ ...glassCard, padding: '2.25rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ ...glassCard, padding: '1rem 1.25rem' }}>
 
               {/* Card header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', paddingBottom: '0.75rem', borderBottom: `1px solid ${tokens['outline-variant']}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', paddingBottom: '0.5rem', borderBottom: `1px solid ${tokens['outline-variant']}` }}>
                 <span style={{ ...typescale['label-medium'], color: tokens['primary'], fontWeight: 700, textTransform: 'uppercase' }}>
                   Q&amp;A {String(currentCard.id).padStart(3, '0')} — {currentCard.cat}
                 </span>
@@ -270,8 +290,8 @@ export const PracticePage: React.FC<PracticePageProps> = ({
               </div>
 
               {/* Question */}
-              <div style={{ marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
                   <span style={{ ...typescale['label-large'], color: tokens['on-surface'], fontWeight: 700 }}>🗣️ Partner:</span>
                   <div style={{ display: 'flex', gap: '0.4rem' }}>
                     <button
@@ -290,7 +310,7 @@ export const PracticePage: React.FC<PracticePageProps> = ({
                     </button>
                   </div>
                 </div>
-                <div style={{ fontSize: '1.2rem', fontWeight: 600, lineHeight: 1.65, color: tokens['on-surface'], background: tokens['surface-container-high'], padding: '0.9rem 1rem', borderRadius: '8px', borderLeft: `3px solid ${tokens['primary']}` }}>
+                <div style={{ fontSize: '1rem', fontWeight: 500, lineHeight: 1.4, color: tokens['on-surface'], background: tokens['surface-container-high'], padding: '0.6rem 0.75rem', borderRadius: '8px', borderLeft: `3px solid ${tokens['primary']}` }}>
                   "{currentCard.q}"
                   
                   {/* Inline Translation */}
@@ -310,18 +330,18 @@ export const PracticePage: React.FC<PracticePageProps> = ({
               </div>
 
               {/* Japanese hint (常時表示) */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+              <div style={{ marginBottom: '0.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
                   <span style={{ ...typescale['label-large'], color: tokens['on-surface'], fontWeight: 700 }}>🇯🇵 Meaning to Say:</span>
                 </div>
-                <p style={{ ...typescale['body-large'], color: tokens['on-surface-variant'], lineHeight: 1.65 }}>
+                <p style={{ ...typescale['body-medium'], color: tokens['on-surface-variant'], lineHeight: 1.4, margin: 0 }}>
                   {currentCard.qn}
                 </p>
               </div>
 
               {/* English Target (チラ見UI) */}
-              <div style={{ marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
                   <span style={{ ...typescale['label-large'], color: tokens['on-surface'], fontWeight: 700 }}>🇺🇸 Target Answer:</span>
                   <div style={{ display: 'flex', gap: '0.4rem' }}>
                     <button
@@ -339,8 +359,8 @@ export const PracticePage: React.FC<PracticePageProps> = ({
                 <div style={{
                   position: 'relative', overflow: 'hidden',
                   background: tokens['surface-container-high'],
-                  padding: '0.9rem 1rem', borderRadius: '8px', borderLeft: `3px solid ${tokens['primary']}`,
-                  ...typescale['body-large'], color: tokens['on-surface'], lineHeight: 1.65,
+                  padding: '0.6rem 0.75rem', borderRadius: '8px', borderLeft: `3px solid ${tokens['primary']}`,
+                  ...typescale['body-medium'], color: tokens['on-surface'], lineHeight: 1.4,
                   transition: `filter ${motionTokens.duration.medium2} ${motionTokens.easing.standard}`,
                   filter: showAnswerPeek ? 'none' : 'blur(6px)',
                   cursor: 'default',
@@ -354,8 +374,9 @@ export const PracticePage: React.FC<PracticePageProps> = ({
               <div style={{ borderTop: `1px solid ${tokens['outline-variant']}`, paddingTop: '1.75rem' }}>
 
                 {/* Speech mode (Whisper) */}
+                {/* User Practice Section */}
                 {practiceMode === 'speech' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                       {recordingState === 'idle' && (
                         <button style={{ ...btnPrimary, padding: '0.7rem 1.85rem', borderRadius: '50px', gap: '0.5rem' }}

@@ -35,6 +35,7 @@ export default function App() {
   /* ---- Auth & Progress (Supabase) ---- */
   const [session, setSession] = useState<Session | null>(null);
   const [progress, setProgress] = useState<Record<number, MasteryStatus>>({});
+  const [progressLoaded, setProgressLoaded] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
@@ -56,6 +57,7 @@ export default function App() {
   useEffect(() => {
     if (!session?.user) {
       setProgress({}); // Clear progress on logout
+      setProgressLoaded(false);
       return;
     }
 
@@ -74,6 +76,7 @@ export default function App() {
         });
         setProgress(newProgress);
       }
+      setProgressLoaded(true);
     };
 
     fetchProgress();
@@ -223,6 +226,7 @@ export default function App() {
           <PracticePage
             conversations={conversations}
             progress={progress}
+            progressLoaded={progressLoaded}
             onStatusChange={handleStatusChange}
             tokens={tokens}
             selectedCategory={selectedCategory}
