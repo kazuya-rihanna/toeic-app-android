@@ -1,0 +1,188 @@
+/* ============================================================
+   index.css — US Conversations (toeic-app 技術採用版)
+   
+   - CSS変数ベーステーマ → Material Design 3 JS トークンに移行
+   - このファイルは グローバルリセット・アニメーション・
+     ユーティリティクラス のみを担当
+   - カラー・スペーシングはすべて theme/tokens.ts の
+     materialTokens から inline style で適用される
+============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+
+/* ---- Global Reset ---- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  /* background-color is set dynamically in App.tsx via JS token */
+  background-color: #0B0F19;
+  color: #F3F4F6;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  /* Subtle radial gradient overlay (same as original) */
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(22, 29, 48, 0.4) 0%, transparent 50%);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+h3 { margin: 0; }
+
+button { font-synthesis: none; }
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.10);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover { background: #10B981; }
+
+/* ---- Glassmorphism utility ----
+   Apply backdrop-filter only; colors come from JS tokens.         */
+.glass {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ---- Layout ---- */
+.app-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* ---- Animations ---- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 18px rgba(16, 185, 129, 0.08); }
+  50%       { box-shadow: 0 0 28px rgba(16, 185, 129, 0.22); }
+}
+
+@keyframes pulseScale {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.035); }
+}
+
+@keyframes wave {
+  0%   { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+.animate-fade-in  { animation: fadeIn 0.4s ease-out forwards; }
+.glow-active      { animation: pulseGlow 2.5s infinite ease-in-out; }
+.animate-pulse    { animation: pulseScale 1.5s infinite ease-in-out; }
+
+/* ---- Hover glow card ---- */
+.hover-glow {
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+.hover-glow:hover {
+  transform: translateY(-2px);
+  border-color: rgba(16, 185, 129, 0.30) !important;
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.45),
+    0 0 20px rgba(16, 185, 129, 0.12);
+}
+
+/* ---- Recording wave indicator ---- */
+.recording-wave {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-radius: 50%;
+}
+.recording-wave::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid #10B981;
+  animation: wave 1.2s infinite linear;
+}
+
+/* ---- Diff highlighting ---- */
+.diff-char { padding: 0 1px; border-radius: 2px; white-space: pre-wrap; }
+.diff-match   { color: #F3F4F6; }
+.diff-missing {
+  color: #F87171;
+  text-decoration: line-through;
+  background-color: rgba(239, 68, 68, 0.14);
+  padding: 0 4px;
+  border-radius: 4px;
+}
+.diff-extra {
+  color: #34D399;
+  background-color: rgba(16, 185, 129, 0.14);
+  font-weight: 600;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+/* ---- Explorer table ---- */
+.explorer-table th,
+.explorer-table td {
+  padding: 0.85rem 1rem;
+}
+.explorer-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* ---- Mini play button ---- */
+.play-mini-btn:hover {
+  background: #10B981 !important;
+  color: #fff !important;
+  border-color: #10B981 !important;
+  transform: scale(1.08);
+}
+
+/* ---- Search input focus ---- */
+.search-input:focus {
+  border-color: #10B981 !important;
+  outline: none;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.12);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+  .categories-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    padding: 1.5rem 1rem;
+  }
+}
+
+/* ---- Speech page grid → single column on mobile ---- */
+@media (max-width: 860px) {
+  .speech-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

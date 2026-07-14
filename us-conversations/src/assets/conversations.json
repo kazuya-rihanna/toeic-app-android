@@ -1,0 +1,1602 @@
+[
+  {
+    "cat": "Greetings",
+    "q": "Hi! You must be Kazuya! I'm John, and this is Emily. It's so great to finally meet you in person!",
+    "qa": "Nice to meet you too, John and Emily! Welcome to Saitama! Did you find the meeting spot okay?",
+    "qn": "はじめまして！埼玉へようこそ！待ち合わせ場所はすぐ分かりましたか？",
+    "id": 1,
+    "q_ja": "こんにちは！あなたはカズヤに違いありません！私はジョン、こちらはエミリーです。ついに直接お会いできて本当に嬉しいです！"
+  },
+  {
+    "cat": "Greetings",
+    "q": "Yes, we did! Your directions were perfect. How are you doing today?",
+    "qa": "I'm doing great, thanks! I'm so excited to hang out with you guys today.",
+    "qn": "元気ですよ、ありがとうございます！今日お二人とご一緒できてとてもワクワクしています。",
+    "id": 2,
+    "q_ja": "はい、そうでした！あなたの指示は完璧でした。今日の調子はどうですか？"
+  },
+  {
+    "cat": "Greetings",
+    "q": "We are so excited too! We've been looking forward to this trip all week.",
+    "qa": "That's wonderful to hear. How was the Shinkansen ride from Kyoto?",
+    "qn": "それを聞けて嬉しいです。京都からの新幹線はどうでしたか？",
+    "id": 3,
+    "q_ja": "私たちもとても興奮しています！私たちはこの旅行を一週間ずっと楽しみにしていました。"
+  },
+  {
+    "cat": "Greetings",
+    "q": "It was amazing! So fast and clean. Emily almost fell asleep.",
+    "qa": "Haha, I glad it was comfortable. It takes about two hours, right?",
+    "qn": "はは、快適だったようで良かったです。2時間くらいかかりますよね？",
+    "id": 4,
+    "q_ja": "素晴らしかったです！とても速くてきれいです。エミリーはほとんど眠りに落ちてしまいました。"
+  },
+  {
+    "cat": "Greetings",
+    "q": "Yes, exactly. By the way, thanks for hosting us today.",
+    "qa": "Don't mention it! It's my absolute pleasure to have you here.",
+    "qn": "とんでもない！お越しいただけて本当に嬉しいんですよ。",
+    "id": 5,
+    "q_ja": "はい、その通りです。ところで、今日はご招待いただきありがとうございました。"
+  },
+  {
+    "cat": "Greetings",
+    "q": "It's so nice of you to say that. Emily was a bit nervous, but your warm welcome made her feel right at home.",
+    "qa": "Please don't be nervous! Just relax and enjoy your time in Saitama.",
+    "qn": "緊張しないでくださいね！リラックスして埼玉での時間を楽しんでください。",
+    "id": 6,
+    "q_ja": "そう言っていただけるととても嬉しいです。エミリーは少し緊張していましたが、あなたの温かい歓迎のおかげで、彼女はすっかり家にいるように感じました。"
+  },
+  {
+    "cat": "Greetings",
+    "q": "Thanks! So, is this your first time meeting someone from Kyoto?",
+    "qa": "Actually, yes! It's very special for me to meet a couple who just moved to Kyoto.",
+    "qn": "実はそうなんです！京都に引っ越したばかりのご夫婦にお会いできて、とても特別に感じています。",
+    "id": 7,
+    "q_ja": "ありがとう！それで、京都出身の方にお会いするのは初めてですか？"
+  },
+  {
+    "cat": "Greetings",
+    "q": "Kyoto is beautiful, but Saitama seems very nice too. What's the weather usually like here in July?",
+    "qa": "It gets quite hot and humid, just like Kyoto! Make sure to stay hydrated.",
+    "qn": "京都と同じようにかなり暑くて湿気がありますよ！水分補給をしっかりしてくださいね。",
+    "id": 8,
+    "q_ja": "京都も素敵ですが、埼玉も素敵ですね。ここの7月の天気はいつもどんな感じですか?"
+  },
+  {
+    "cat": "Greetings",
+    "q": "We'll keep that in mind! Do you have a favorite spot around this station?",
+    "qa": "Yes, there's a lovely cafe nearby. Shall we head there first to chat?",
+    "qn": "ええ、近くに素敵なカフェがあります。まずはそこに行って話しませんか？",
+    "id": 9,
+    "q_ja": "それを心に留めておきます!この駅周辺でお気に入りのスポットはありますか？"
+  },
+  {
+    "cat": "Greetings",
+    "q": "That sounds like a great idea. I could really use a cold drink.",
+    "qa": "Perfect, let's walk over. It's only a five-minute walk.",
+    "qn": "いいですね、歩いていきましょう。歩いて5分ほどのところです。",
+    "id": 10,
+    "q_ja": "それは素晴らしいアイデアですね。本当に冷たい飲み物を飲むことができました。"
+  },
+  {
+    "cat": "Greetings",
+    "q": "Lead the way! We'll follow you.",
+    "qa": "Sure, follow me. Watch your step, it's a bit crowded here.",
+    "qn": "はい、ついてきてください。少し混んでいるので足元に気をつけてくださいね。",
+    "id": 11,
+    "q_ja": "道を先導しましょう！私たちはあなたをフォローします。"
+  },
+  {
+    "cat": "Greetings",
+    "q": "Saitama is pretty lively! Is it always this busy?",
+    "qa": "It depends on the time, but yes, the station area is usually bustling.",
+    "qn": "時間帯によりますが、駅の周辺はいつも賑やかですね。",
+    "id": 12,
+    "q_ja": "埼玉は元気いっぱいですね！いつもこんなに忙しいのですか？"
+  },
+  {
+    "cat": "Greetings",
+    "q": "I see. It feels different from Kyoto, but in a good way.",
+    "qa": "I'm glad you think so. Saitama has a mix of urban areas and nature.",
+    "qn": "そう言っていただけて良かったです。埼玉は都会的なエリアと自然が混ざっているんですよ。",
+    "id": 13,
+    "q_ja": "なるほど。良い意味で京都とは違う感じです。"
+  },
+  {
+    "cat": "Greetings",
+    "q": "Emily loves nature, so she's going to love it here.",
+    "qa": "Awesome. We have some great nature spots to visit later if you'd like.",
+    "qn": "最高ですね。もしよければ、後で素晴らしい自然スポットをご案内しますよ。",
+    "id": 14,
+    "q_ja": "エミリーは自然が大好きなので、ここも気に入るでしょう。"
+  },
+  {
+    "cat": "Greetings",
+    "q": "We'd love that! Thank you so much.",
+    "qa": "You're very welcome. Here we are at the cafe!",
+    "qn": "どういたしまして。カフェに到着しました！",
+    "id": 15,
+    "q_ja": "ぜひ！どうもありがとう。"
+  },
+  {
+    "cat": "Greetings",
+    "q": "This cafe has a cozy vibe. What do you recommend here?",
+    "qa": "Their iced coffee and matcha lattes are really good. I'll get an iced coffee.",
+    "qn": "ここのアイスコーヒーと抹茶ラテはとても美味しいですよ。私はアイスコーヒーにします。",
+    "id": 16,
+    "q_ja": "このカフェは居心地の良い雰囲気があります。ここで何をお勧めしますか？"
+  },
+  {
+    "cat": "Greetings",
+    "q": "I think I'll try the matcha latte, and Emily wants a peach tea. Let's order.",
+    "qa": "Sounds good. I'll go order for us. Please take a seat.",
+    "qn": "いいですね。私が注文してきます。席に座っていてください。",
+    "id": 17,
+    "q_ja": "私は抹茶ラテを試してみようと思いますが、エミリーはピーチティーを希望しています。注文しましょう。"
+  },
+  {
+    "cat": "Greetings",
+    "q": "Are you sure? That's so kind of you. Let us pay for our drinks, though.",
+    "qa": "No way, you are my guests today! It's my treat.",
+    "qn": "とんでもない、今日はお二人とも私のゲストですから！私に奢らせてください。",
+    "id": 18,
+    "q_ja": "本気ですか？とても親切ですね。ただし、飲み物代は払いましょう。"
+  },
+  {
+    "cat": "Greetings",
+    "q": "Wow, thank you! We really appreciate your hospitality.",
+    "qa": "You're very welcome. I'll be right back with the drinks.",
+    "qn": "どういたしまして。すぐに飲み物を持って戻ってきますね。",
+    "id": 19,
+    "q_ja": "うわー、ありがとう！皆様のご厚情に心より感謝申し上げます。"
+  },
+  {
+    "cat": "Greetings",
+    "q": "Here you go. Enjoy your drinks!",
+    "qa": "Thank you! Ah, this iced coffee is perfect for a hot day.",
+    "qn": "ありがとう！あぁ、このアイスコーヒーは暑い日にぴったりですね。",
+    "id": 20,
+    "q_ja": "どうぞ。お飲み物をお楽しみください。"
+  },
+  {
+    "cat": "Greetings",
+    "q": "This matcha latte is delicious! Japanese matcha is the best. Do you drink it often?",
+    "qa": "Actually, I don't drink it very often, but I love matcha-flavored sweets.",
+    "qn": "実は普段はあまり飲まないのですが、抹茶味のスイーツは大好物です。",
+    "id": 21,
+    "q_ja": "この抹茶ラテは美味しいですよ！日本の抹茶は最高です。よく飲みますか？"
+  },
+  {
+    "cat": "Greetings",
+    "q": "Matcha sweets are great too! So, how long have you lived in Saitama?",
+    "qa": "I've lived here my entire life. So, I know this area inside out.",
+    "qn": "生まれてからずっとここに住んでいます。だからこのエリアのことは隅々まで知っていますよ。",
+    "id": 22,
+    "q_ja": "抹茶スイーツも美味しいですよ！それで、あなたは埼玉にどのくらい住んでいますか？"
+  },
+  {
+    "cat": "Greetings",
+    "q": "That's wonderful. It must be nice to live in a place you know so well.",
+    "qa": "Yes, it's very comfortable. But I also enjoy visiting new places.",
+    "qn": "はい、とても快適です。低新しい場所を訪れるのも好きなんです。",
+    "id": 23,
+    "q_ja": "それは素晴らしいですね。よく知っている場所に住むのはきっと素敵なことでしょう。"
+  },
+  {
+    "cat": "Greetings",
+    "q": "We feel the same way! That's why we moved to Kyoto. It's a brand new adventure for us.",
+    "qa": "I think that's amazing. Moving to a new country takes a lot of courage.",
+    "qn": "それは本当に素晴らしいと思います。新しい国に移住するのはとても勇気がいりますよね。",
+    "id": 24,
+    "q_ja": "私たちも同じように感じています！それで京都に引っ越したんです。それは私たちにとって全く新しい冒険です。"
+  },
+  {
+    "cat": "Greetings",
+    "q": "It was scary at first, but people in Japan have been so kind, just like you.",
+    "qa": "I'm so glad to hear that. Most Japanese people are happy to help foreigners.",
+    "qn": "そう言っていただけてとても嬉しいです。ほとんどの日本人は外国人を手助けしたいと思っていますよ。",
+    "id": 25,
+    "q_ja": "最初は怖かったですが、日本の人々はあなたと同じようにとても親切でした。"
+  },
+  {
+    "cat": "Greetings",
+    "q": "That's definitely true. We've felt very welcome here.",
+    "qa": "I hope you continue to have good experiences. Now, let's relax and talk more.",
+    "qn": "これからも良い経験が続くといいですね。さて、リラックスして色々お話ししましょう。",
+    "id": 26,
+    "q_ja": "それは間違いなく真実です。私たちはここではとても歓迎されていると感じました。"
+  },
+  {
+    "cat": "Greetings",
+    "q": "Yes! We want to hear all about you.",
+    "qa": "Sure, I'd love to share my story with you.",
+    "qn": "もちろんです、私のストーリーを喜んでお話ししますね。",
+    "id": 27,
+    "q_ja": "はい！私たちはあなたのことをすべて聞きたいと思っています。"
+  },
+  {
+    "cat": "Greetings",
+    "q": "Great, let's start with the basics. What's your name, and what should we call you?",
+    "qa": "My name is Kazuya, but please just call me by my first name.",
+    "qn": "私の名前はKazuyaです。ファーストネームで呼んでください。",
+    "id": 28,
+    "q_ja": "わかりました。基本から始めましょう。あなたの名前は何ですか？何と呼べばいいですか？"
+  },
+  {
+    "cat": "Greetings",
+    "q": "Kazuya! Got it. Nice to officially meet you.",
+    "qa": "Nice to meet you too! I'm really glad we could finally meet.",
+    "qn": "私もです！ついに直接お会いできて本当に嬉しいです。",
+    "id": 29,
+    "q_ja": "カズヤ！わかった。正式にお会いできて嬉しいです。"
+  },
+  {
+    "cat": "Greetings",
+    "q": "Us too. It's much better than just texting online!",
+    "qa": "Absolutely. Face-to-face conversation is the best.",
+    "qn": "本当にその通りですね。対面での会話が一番です。",
+    "id": 30,
+    "q_ja": "私たちもです。オンラインでテキストメッセージを送信するよりもはるかに優れています。"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "So, tell us a bit about yourself! How old are you, if you don't mind me asking?",
+    "qa": "Not at all! I'm 38 years old. I turned 38 this year.",
+    "qn": "全然構いませんよ！私は38歳です。今年38歳になりました。",
+    "id": 31,
+    "q_ja": "それでは、あなた自身について少し教えてください。差し支えなければ、あなたは何歳ですか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "Oh, 38! That's a great age. You look younger than that!",
+    "qa": "Thank you! I try to stay active, but sometimes I feel my age.",
+    "qn": "ありがとうございます！元気に動くようにはしていますが、時々年齢を感じることもあります（笑）。",
+    "id": 32,
+    "q_ja": "ああ、38！すごい年齢ですね。それよりも若く見えますよ！"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "Haha, I know the feeling. What kind of things do you do in your free time?",
+    "qa": "I play basketball regularly to stay active and healthy. I also love listening to music.",
+    "qn": "健康を維持するために普段バスケットボールをしています。それと音楽を聴くのも大好きです。",
+    "id": 33,
+    "q_ja": "ハハハ、その気持ちはわかります。自由時間にはどんなことをしますか?"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "Basketball! That's cool. Do you play in a local league?",
+    "qa": "Yes, I play with a local community team on weekends. It's a great way to stay in shape.",
+    "qn": "はい、週末に地元のコミュニティチームでプレイしています。健康を維持するのに最適なんですよ。",
+    "id": 34,
+    "q_ja": "バスケットボール！かっこいい。地元のリーグでプレーしていますか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "That is wonderful. What position do you play?",
+    "qa": "I usually play as a guard because I like passing and setting up plays.",
+    "qn": "パスを回したりプレイを組み立てるのが好きなので、大抵ガードを務めています。",
+    "id": 35,
+    "q_ja": "それは素晴らしいですね。どのポジションでプレーしますか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "A guard requires a lot of running and quick decisions. Do you play full-court?",
+    "qa": "Yes, we play full-court games. It's exhausting but really fun.",
+    "qn": "はい、フルコートで試合をしています。クタクタになりますが本当に楽しいですよ。",
+    "id": 36,
+    "q_ja": "ガードには多くのランニングと素早い判断が求められます。フルコートでプレーしますか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "I bet! Who are your teammates? Are they friends from school?",
+    "qa": "Actually, they are people from the local community of all ages. It's nice to make different friends.",
+    "qn": "実は、地元の幅広い年齢層のコミュニティの人たちです。多様な友達ができるので良いですね。",
+    "id": 37,
+    "q_ja": "きっと！あなたのチームメイトは誰ですか?彼らは学校の友達ですか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "That's a great way to connect with the neighborhood. How long have you been playing?",
+    "qa": "I've been playing since I was a teenager. It's always been my favorite sport.",
+    "qn": "10代の頃からずっとプレイしています。いつも一番大好きなスポーツなんです。",
+    "id": 38,
+    "q_ja": "それは近所とつながるための素晴らしい方法です。どれくらい遊んでいますか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "Awesome. Do you follow the NBA at all?",
+    "qa": "Yes, I watch NBA highlights online. I love watching fast and creative plays.",
+    "qn": "はい、ネットでNBAのハイライトを見ています。スピーディーでクリエイティブなプレイを見るのが好きです。",
+    "id": 39,
+    "q_ja": "素晴らしい。 NBAを少しでもフォローしていますか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "Me too! Who is your favorite player?",
+    "qa": "I really admire players with great teamwork and passing skills, like Stephen Curry.",
+    "qn": "ステフィン・カリーのように、素晴らしいチームワークやパススキルを持つ選手に憧れます。",
+    "id": 40,
+    "q_ja": "私もです！あなたの好きな選手は誰ですか?"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "Curry is amazing! His shooting range is insane. Do you practice shooting a lot?",
+    "qa": "Yes, I practice three-pointers during our warm-ups. It feels great when the ball goes in.",
+    "qn": "はい、ウォーミングアップの時に3ポイントシュートを練習しています。シュートが決まると最高の気分です。",
+    "id": 41,
+    "q_ja": "カレーってすごいですね！彼の射撃場は非常識だ。射撃の練習はたくさんしますか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "Nothing beats that sound of the net swishing. And you also mentioned music. What kind of music are you into?",
+    "qa": "I love hip-hop and pop. Especially Eminem and Rihanna.",
+    "qn": "ヒップホップとポップスが大好きです。特にエミネムとリアーナがお気に入りです。",
+    "id": 42,
+    "q_ja": "ネットが揺れる音に勝るものはありません。そして音楽についても言及していましたね。どのような音楽に興味がありますか?"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "Eminem! Wow, that's awesome. He is a legend. What's your favorite song of his?",
+    "qa": "I really love 'Lose Yourself'. It always motivates me, whether I'm coding or playing basketball.",
+    "qn": "『Lose Yourself』が本当に好きです。プログラミングしている時もバスケをしている時も、いつもやる気をくれます。",
+    "id": 43,
+    "q_ja": "エミネム！うわー、すごいですね。彼は伝説です。彼の一番好きな曲は何ですか?"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "Classic! Emily loves Rihanna too. Her vocals are amazing, right?",
+    "qa": "Yes, absolutely! 'Umbrella' and 'Diamonds' are my absolute favorites.",
+    "qn": "本当にそうですね！『Umbrella』と『Diamonds』は特にお気に入りです。",
+    "id": 44,
+    "q_ja": "クラシック！エミリーもリアーナが大好きです。彼女のボーカルは素晴らしいですよね？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "Rihanna has so many hits. Did you ever go to any of their concerts?",
+    "qa": "Unfortunately, no. I've only watched their live performances online. I'd love to see them live someday.",
+    "qn": "残念ながらありません。ネットでライブ映像を見ただけです。いつか生で見てみたいですね。",
+    "id": 45,
+    "q_ja": "リアーナにはたくさんのヒット曲があります。彼らのコンサートに行ったことがありますか?"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "Hopefully they'll tour Japan soon! What about your background? Did you grow up in Saitama?",
+    "qa": "Yes, I was born and raised here. But I went to college in a different city.",
+    "qn": "はい、ここで生まれ育ちました。でも大学は別の街のところへ通っていました。",
+    "id": 46,
+    "q_ja": "彼らがすぐに日本ツアーを行うことを願っています!あなたの経歴はどうですか？埼玉で育ったんですか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "Oh, you went to college? What did you major in?",
+    "qa": "I majored in computer science. I've always been interested in technology.",
+    "qn": "情報工学を専攻していました。ずっとテクノロジーに興味があったんです。",
+    "id": 47,
+    "q_ja": "ああ、大学に行ったんですか？何を専攻しましたか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "Computer science is a tough major! Did you graduate?",
+    "qa": "Actually, I dropped out. I had to leave college due to financial reasons.",
+    "qn": "実は中退したんです。金銭的な事情で大学を辞めざるを得ませんでした。",
+    "id": 48,
+    "q_ja": "コンピューターサイエンスは難しい専攻です！卒業しましたか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "Oh, I'm sorry to hear that. That must have been a difficult decision.",
+    "qa": "It was, but it taught me to be independent and work hard.",
+    "qn": "ええ、でもそのおかげで自立することや懸命に働くことを学びました。",
+    "id": 49,
+    "q_ja": "ああ、残念です。それは難しい決断だったに違いない。"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "That's a very positive way to look at it. You should be proud of your resilience.",
+    "qa": "Thank you. I appreciate your kind words.",
+    "qn": "ありがとうございます。そう言っていただいて感謝します。",
+    "id": 50,
+    "q_ja": "それはとてもポジティブな見方ですね。自分の回復力を誇りに思うべきです。"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "So, after you left college, what did you do?",
+    "qa": "I got a job at an auto parts manufacturer. I worked there for a few years.",
+    "qn": "自動車部品のメーカーに就職しました。そこで数年間働きました。",
+    "id": 51,
+    "q_ja": "それで、大学を出た後は何をしていたのですか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "An auto parts manufacturer? That sounds interesting. What was your role?",
+    "qa": "I was mainly involved in the production and quality control department.",
+    "qn": "主に生産や品質管理の部門に関わっていました。",
+    "id": 52,
+    "q_ja": "自動車部品メーカー？それは面白そうですね。あなたの役割は何でしたか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "Quality control is so important in Japan. Did you like working there?",
+    "qa": "It was a good experience, but I wanted to try something different, so I changed jobs.",
+    "qn": "良い経験になりましたが、別のことにも挑戦したくて転職したんです。",
+    "id": 53,
+    "q_ja": "日本では品質管理が非常に重要です。そこで働くのは好きでしたか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "I see. Changing careers takes courage. What kind of job did you transition to?",
+    "qa": "I moved to customer service. Right now, I work part-time in customer service for a restaurant business, handling complaints.",
+    "qn": "カスタマーサービスに移りました。今は飲食関連の会社で、パートタイムとしてクレーム処理の仕事をしています。",
+    "id": 54,
+    "q_ja": "なるほど。転職には勇気が必要です。どのような仕事に転職しましたか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "Customer service? And handling complaints? That sounds like a very stressful job!",
+    "qa": "It can be stressful, but it has definitely improved my communication skills.",
+    "qn": "ストレスが溜まることもありますが、間違いなくコミュニケーション能力は鍛えられましたよ。",
+    "id": 55,
+    "q_ja": "顧客サービス？そして苦情への対応は？とてもストレスのかかる仕事のようですね！"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "I bet! You must have a lot of patience. How do you deal with angry customers?",
+    "qa": "I just listen patiently and try to understand their frustration. Being calm is the key.",
+    "qn": "とにかく根気よく話を聞いて、相手の不満を理解するようにしています。冷静でいることが鍵ですね。",
+    "id": 56,
+    "q_ja": "きっと！かなりの忍耐力が必要です。怒っている顧客にどのように対処しますか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "That is a great approach. It takes a lot of mental strength.",
+    "qa": "Thanks. It's tough, but resolving a problem and satisfying a customer feels rewarding.",
+    "qn": "ありがとうございます。大変ですが、問題を解決してお客様に納得していただけるとやりがいを感じます。",
+    "id": 57,
+    "q_ja": "それは素晴らしいアプローチです。かなりの精神力が必要です。"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "That's amazing. You have a great work ethic.",
+    "qa": "Thank you! I always try to do my best in any job I have.",
+    "qn": "ありがとうございます！どんな仕事でも常にベストを尽くすように心がけています。",
+    "id": 58,
+    "q_ja": "すごいですね。あなたは素晴らしい労働倫理を持っています。"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "So, how does playing basketball help you with work stress?",
+    "qa": "It completely clears my mind. When I'm on the court, I don't think about customer complaints at all.",
+    "qn": "完全に頭がすっきりします。コートの上にいるときは、お客様のクレームのことなんて一切考えませんから。",
+    "id": 59,
+    "q_ja": "では、バスケットボールをすることが仕事のストレスにどのように役立つのでしょうか?"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "I imagine it's a great release. Do you play in the winter too?",
+    "qa": "Yes, we play indoors during winter. The gym can be cold, but we warm up quickly.",
+    "qn": "はい、冬はインドアの体育館でプレイします。体育館は寒いですが、すぐに体が温まりますよ。",
+    "id": 60,
+    "q_ja": "素晴らしいリリースだと思います。冬でも遊ぶんですか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "That's good. Do you ever get injured playing?",
+    "qa": "Just minor scratches and occasional sprains. I try to be careful and stretch beforehand.",
+    "qn": "軽いかすり傷や、たまに捻挫するくらいです。気をつけて事前にストレッチをするようにしています。",
+    "id": 61,
+    "q_ja": "それは良い。遊んで怪我をしたことはありますか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "Yes, stretching is key as we get older! Do you watch basketball anime, like 'Slam Dunk'?",
+    "qa": "Oh, absolutely! 'Slam Dunk' is a masterpiece. It actually inspired me to play basketball when I was younger.",
+    "qn": "あぁ、もちろんです！『スラムダンク』は名作ですよね。若い頃、実際にバスケを始めるきっかけになりました。",
+    "id": 62,
+    "q_ja": "そう、年を重ねるごとにストレッチが重要になってきます！ 「スラムダンク」のようなバスケットボールアニメを見ますか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "It's so popular worldwide. It really captures the passion of the sport.",
+    "qa": "Yes, the characters are great and the story is very inspiring.",
+    "qn": "登場人物が素晴らしく、ストーリーにもとても刺激を受けますよね。",
+    "id": 63,
+    "q_ja": "世界中でとても人気があります。スポーツの情熱を本当に捉えています。"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "Definitely. What about your music taste? Does Eminem's music pump you up for basketball games?",
+    "qa": "Yes! Listening to 'Till I Collapse' or 'Lose Yourself' before a game really gets me in the zone.",
+    "qn": "はい！試合前に『Till I Collapse』や『Lose Yourself』を聴くと、本当に集中モードに入れます。",
+    "id": 64,
+    "q_ja": "絶対に。あなたの音楽の好みはどうですか？エミネムの音楽を聴くとバスケットボールの試合に向けて気持ちが高まりますか?"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "Eminem is perfect for that. What about Rihanna? When do you listen to her?",
+    "qa": "I listen to Rihanna when I want to relax. Her voice is very soothing yet powerful.",
+    "qn": "リラックスしたい時にリアーナを聴きます。彼女の声はとても心地よく、かつ力強いですから。",
+    "id": 65,
+    "q_ja": "エミネムはそれにぴったりだ。リアーナはどうですか？いつ彼女の話を聞きますか？"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "She has a unique voice. Her slower songs like 'Stay' are beautiful.",
+    "qa": "I agree. It's a great song to listen to after a long day.",
+    "qn": "同感です。長い一日の終わりに聴くのに最高の曲ですね。",
+    "id": 66,
+    "q_ja": "彼女は独特の声を持っています。 「Stay」のような彼女のゆっくりとした曲は美しいです。"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "It is. It seems music and sports are your main ways to balance your life.",
+    "qa": "Yes, they keep me balanced and happy.",
+    "qn": "はい、それらのおかげでバランスが取れてハッピーにいられます。",
+    "id": 67,
+    "q_ja": "そうです。音楽とスポーツが生活のバランスをとる主な方法のようです。"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "That's great. It's all about finding what works for you.",
+    "qa": "Exactly. Everyone needs a way to unwind.",
+    "qn": "その通りですね。誰しもリラックスする方法が必要です。",
+    "id": 68,
+    "q_ja": "それは素晴らしいことです。すべては自分に合ったものを見つけることです。"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "True. So, let's talk more about your transition from university to your first job.",
+    "qa": "Sure. It was a big transition, going from studying to factory work.",
+    "qn": "ええ。勉強する立場から工場の仕事へ移るのは、大きな変化でした。",
+    "id": 69,
+    "q_ja": "真実。それでは、大学から最初の仕事への移行について詳しく話しましょう。"
+  },
+  {
+    "cat": "Self-Introduction",
+    "q": "I can imagine. Did you have any manufacturing knowledge before you started?",
+    "qa": "No, I had to learn everything on the job. The senior workers were very strict but helpful.",
+    "qn": "いいえ、仕事を通じてすべて学ぶ必要がありました。先輩社員はとても厳しかったですが助けてくれました。",
+    "id": 70,
+    "q_ja": "想像できます。始める前に製造に関する知識はありましたか?"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "Working at an auto parts factory must have been very physical. What was your typical shift like?",
+    "qa": "I usually worked the day shift, from 8 AM to 5 PM. I stood on my feet all day checking parts.",
+    "qn": "大抵は朝の8時から夕方の5時までの日勤でした。一日中立ちっぱなしで部品をチェックしていました。",
+    "id": 71,
+    "q_ja": "自動車部品工場での仕事は、とても体力を使うものだったと思います。通常のシフトはどのようなものでしたか？"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "Wow, standing all day is exhausting! How did you cope with that?",
+    "qa": "It was tough at first, but playing basketball built my stamina, so my body got used to it.",
+    "qn": "最初はきつかったですが、バスケでスタミナがついていたので、体はすぐに慣れました。",
+    "id": 72,
+    "q_ja": "いやー、一日中立っているのは疲れますね！それにはどう対処しましたか？"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "Ah, basketball helped you there too! Did you work with a lot of people?",
+    "qa": "Yes, there were about fifty people on the factory floor. It was a loud and busy environment.",
+    "qn": "はい、工場のフロアには50人ほどいました。騒がしくて忙しい環境でしたね。",
+    "id": 73,
+    "q_ja": "ああ、バスケットボールもそこで役に立ちましたね！たくさんの人と仕事をしましたか？"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "Why did you decide to leave the factory after a few years?",
+    "qa": "I felt that I wanted to work in an office environment and develop communication skills by talking to customers.",
+    "qn": "オフィスの環境で働き、お客様と話すことでコミュニケーション能力を伸ばしたいと感じたからです。",
+    "id": 74,
+    "q_ja": "なぜ数年後に工場を辞めようと思ったのですか？"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "I see. And you chose customer service. What was your first day in customer service like?",
+    "qa": "I was very nervous! My voice was shaking during my first customer phone call.",
+    "qn": "すごく緊張しました！最初の顧客からの電話対応の時は、声が震えていましたよ。",
+    "id": 75,
+    "q_ja": "なるほど。そしてあなたはカスタマーサービスを選択しました。カスタマーサービスの初日はどんな感じでしたか？"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "Haha, we've all been there! How long did it take to get comfortable?",
+    "qa": "It took about three months of training and practice to feel confident on the phone.",
+    "qn": "電話で自信を持てるようになるまで、研修と練習に3ヶ月ほどかかりました。",
+    "id": 76,
+    "q_ja": "ハハ、私たちはみんなそこに行ったことがあるよ！快適になるまでどれくらいかかりましたか？"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "Three months is pretty quick. Now you handle complaints! That requires a lot of emotional control.",
+    "qa": "Yes, you have to separate your personal feelings from the customer's anger.",
+    "qn": "ええ、個人の感情をお客様の怒りと切り離して考えなければいけません。",
+    "id": 77,
+    "q_ja": "3ヶ月ってかなり早いですね。これで苦情処理ができます。それにはかなりの感情コントロールが必要です。"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "How do you do that? Do you have a mental trick?",
+    "qa": "I remind myself that they are angry at the situation, not at me personally.",
+    "qn": "相手は私個人に対して怒っているのではなく、状況に対して怒っているのだと自分に言い聞かせています。",
+    "id": 78,
+    "q_ja": "どうやってそれを行うのですか？精神的なコツはありますか？"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "That is a very mature perspective. What kind of complaints do you get most often?",
+    "qa": "Usually, it's about incorrect orders, late deliveries, or issues with food quality.",
+    "qn": "大抵は注文の間違い、配達の遅れ、あるいは料理の品質に関する問題です。",
+    "id": 79,
+    "q_ja": "それは非常に成熟した視点です。どのような苦情が最も多く寄せられますか?"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "Food quality? Like cold food?",
+    "qa": "Yes, or if the food didn't taste right. We have to coordinate with the restaurant managers to solve it.",
+    "qn": "はい、あるいは料理の味が良くなかったなどです。解決するために店舗のマネージャーと連携する必要があります。",
+    "id": 80,
+    "q_ja": "食品の品質?冷たい食べ物が好きですか？"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "Do you ever have to visit the restaurants yourself to solve problems?",
+    "qa": "No, I handle everything remotely from the head office. The store staff handles the physical solutions.",
+    "qn": "いいえ、私は本社からすべてリモートで対応します。店舗のスタッフが物理的な解決を行います。",
+    "id": 81,
+    "q_ja": "問題を解決するために自分でレストランを訪問しなければならないことがありますか?"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "Ah, I see. What are your working hours now since you work part-time?",
+    "qa": "I work four days a week, six hours a day. It's a very flexible schedule.",
+    "qn": "週に4日、1日6時間働いています。非常に柔軟なスケジュールです。",
+    "id": 82,
+    "q_ja": "ああ、なるほど。パートタイムで働いているので、今の勤務時間は何時ですか？"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "That sounds like a great schedule. Does working part-time affect your financial stability?",
+    "qa": "It is a trade-off, but the extra time I get for app development is worth it for my future career.",
+    "qn": "トレードオフではありますが、将来のキャリアのためにアプリ開発に充てられる時間が増える価値は大きいです。",
+    "id": 83,
+    "q_ja": "素晴らしいスケジュールですね。パートタイムで働くことは経済的安定に影響しますか?"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "Very smart. You are investing in your future. Do your coworkers know you develop apps?",
+    "qa": "A few close colleagues know. They think it's cool and sometimes ask me tech questions.",
+    "qn": "何人かの親しい同僚は知っています。凄いねと言ってくれますし、たまに技術的な質問をされることもあります。",
+    "id": 84,
+    "q_ja": "とても賢い。あなたは自分の将来に投資しているのです。あなたの同僚はあなたがアプリを開発していることを知っていますか?"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "You're the unofficial IT support at your work! Do you enjoy helping them?",
+    "qa": "Yes, it's fun to solve quick tech issues for them. It builds good relationships.",
+    "qn": "ええ、彼らのちょっとした技術的な問題を解決するのは楽しいですし、良好な関係を築けます。",
+    "id": 85,
+    "q_ja": "あなたは職場の非公式 IT サポートです。彼らを助けるのは楽しいですか?"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "That's great. What is the biggest lesson you've learned from customer service?",
+    "qa": "Empathy is key. If you show the customer you truly care, most of them will calm down.",
+    "qn": "共感することが鍵だということです。本当にお客様のことを気にかけていると示せば、大抵の人は落ち着いてくれます。",
+    "id": 86,
+    "q_ja": "それは素晴らしいことです。カスタマーサービスから学んだ最大の教訓は何ですか?"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "That is so true in life and business. People just want to be heard.",
+    "qa": "Exactly. Listening is a very powerful tool.",
+    "qn": "その通りですね。話を聞くということはとても強力なツールです。",
+    "id": 87,
+    "q_ja": "それは人生でもビジネスでもまったく同じです。人々はただ話を聞いてもらいたいだけなのです。"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "Absolutely. Does Emily complain to you in British English when she's annoyed? Haha.",
+    "qa": "Haha, not yet! But if she does, I'll use my customer service skills to calm her down.",
+    "qn": "はは、まだないです！でももし怒られたら、カスタマーサービスのスキルを使って落ち着かせますよ（笑）。",
+    "id": 88,
+    "q_ja": "絶対に。エミリーはイライラしたとき、イギリス英語であなたに文句を言いますか?ははは。"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "Smart man! Emily is very gentle, though, so you probably won't need to.",
+    "qa": "I glad to hear that. I'm looking forward to chatting with her more today too.",
+    "qn": "それを聞けて良かったです。今日も彼女とさらにたくさんお話しできるのを楽しみにしています。",
+    "id": 89,
+    "q_ja": "賢い男よ！ただし、エミリーはとても優しいので、その必要はないでしょう。"
+  },
+  {
+    "cat": "Work & Career",
+    "q": "She wants to ask you about Japanese apps. Let's move on to the tech stuff next!",
+    "qa": "Great. I'm ready to talk about programming.",
+    "qn": "いいですね。プログラミングについて話す準備はできていますよ。",
+    "id": 90,
+    "q_ja": "彼女は日本のアプリについてあなたに聞きたいと思っています。次は技術的な話に移りましょう！"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "You mentioned you are developing web and mobile apps. What kind of apps are you building right now?",
+    "qa": "Currently, I'm working on a web app for task management and a native mobile app for budget tracking.",
+    "qn": "現在は、タスク管理用のウェブアプリと、家計簿をつけるためのモバイルネイティブアプリを作っています。",
+    "id": 91,
+    "q_ja": "Web アプリやモバイルアプリを開発しているとおっしゃっていました。現在どのようなアプリを開発していますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Oh, a budget tracker! That's very useful. Are you building it for iOS or Android?",
+    "qa": "Actually, I'm building it as a native iOS app using Swift.",
+    "qn": "実は、Swiftを使ってiOSネイティブアプリとして開発しています。",
+    "id": 92,
+    "q_ja": "ああ、予算トラッカーです！それはとても便利です。 iOS 用に構築していますか?それとも Android 用に構築していますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Swift! That's a great language. How did you learn to use it?",
+    "qa": "I'm mostly self-taught. I use online tutorials and documentation.",
+    "qn": "ほとんど独学です。ネットのチュートリアルや公式ドキュメントを利用しています。",
+    "id": 93,
+    "q_ja": "迅速！素晴らしい言語ですね。どのようにして使い方を学びましたか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Self-taught? That's impressive. What is the hardest part of mobile app development for you?",
+    "qa": "Designing a clean and user-friendly interface is the hardest part. I'm more focused on the logic.",
+    "qn": "クリーンで使いやすいインターフェースをデザインするのが一番難しいですね。私はロジックの方に集中しがちなので。",
+    "id": 94,
+    "q_ja": "独学ですか？それは印象的ですね。あなたにとってモバイルアプリ開発で最も難しい部分は何ですか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Have you built any other apps before this budget tracker?",
+    "qa": "Yes, I actually built an English learning app, and I'm currently using my own app to study English!",
+    "qn": "はい、実は英語学習アプリを作って、今まさに自分のアプリを使って英語を勉強しているんです！",
+    "id": 95,
+    "q_ja": "この予算トラッカーを使用する前に、他のアプリを構築したことがありますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Wow, wait, you study English using the app you built yourself? That is genius! How does it work?",
+    "qa": "It helps me organize new vocabulary and phrases, and it has a quiz system to test my memory.",
+    "qn": "新しい単語やフレーズを整理するのに役立ち、記憶をテストするためのクイズ機能もあります。",
+    "id": 96,
+    "q_ja": "え、ちょっと待って、自分で作ったアプリを使って英語を勉強するの？それは天才です！どのように機能するのでしょうか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "That is so cool! It's like customized learning. Does the app run on your phone?",
+    "qa": "Yes, I installed the app on my iPhone, so I can use it to study whenever I'm on the train.",
+    "qn": "はい、iPhoneにそのアプリを入れてあるので、電車に乗っている時などにいつでも勉強できます。",
+    "id": 97,
+    "q_ja": "それはとてもクールですね！カスタマイズされた学習のようなものです。アプリはあなたの携帯電話で動作しますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "That is incredibly practical. You get to learn coding and English at the same time!",
+    "qa": "Exactly. Building the app improves my coding skills, and using it improves my English.",
+    "qn": "その通りです。アプリを作ることでプログラミングスキルが向上し、それを使うことで英語が上達します。",
+    "id": 98,
+    "q_ja": "それは信じられないほど実用的です。コーディングと英語を同時に学べる！"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "I'm so impressed. Do you plan to publish this English learning app on the App Store?",
+    "qa": "I might, after I add more features and clean up the design. But for now, it's just for my personal use.",
+    "qn": "さらに機能を追加してデザインを綺麗にしたら出すかもしれませんね。ただ、今は個人利用のためだけに使っています。",
+    "id": 99,
+    "q_ja": "とても感動しました。この英語学習アプリをApp Storeに公開する予定はありますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Well, if you ever release it, let us know. We'd love to see it! What database stack does it use?",
+    "qa": "I used Supabase to store the phrases. It's very fast and easy to sync with the mobile app.",
+    "qn": "フレーズを保存するのにSupabaseを使用しました。非常に高速で、モバイルアプリとの同期も簡単です。",
+    "id": 100,
+    "q_ja": "そうですね、もしリリースすることがあれば、ぜひお知らせください。ぜひご覧ください！どのようなデータベース スタックが使用されますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Supabase again! That seems to be your favorite tool. What technology do you use for backend API?",
+    "qa": "I use Node.js and Express to handle the API requests between the app and the database.",
+    "qn": "アプリとデータベース間のAPIリクエストを処理するために、Node.jsとExpressを使っています。",
+    "id": 101,
+    "q_ja": "またまたスーパーベース！それはあなたのお気に入りのツールのようです。バックエンド API にはどのようなテクノロジーを使用していますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "You are doing full-stack development even for your study apps. How do you find time for all of this?",
+    "qa": "Working part-time helps a lot. I have more free hours during the day to dedicate to coding.",
+    "qn": "パートタイムで働いていることがとても役立っています。日中にコード作成に専念できる自由な時間が増えますからね。",
+    "id": 102,
+    "q_ja": "学習アプリでもフルスタック開発を行っていますね。これらすべてを行う時間をどうやって見つけますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "That is a great lifestyle design. Balancing work, sports, and learning. Do you code every day?",
+    "qa": "I try to write code for at least one or two hours every evening after my basketball sessions or work.",
+    "qn": "バスケの練習や仕事の後、毎晩少なくとも1〜2時間はコードを書くようにしています。",
+    "id": 103,
+    "q_ja": "素晴らしいライフスタイルデザインですね。仕事、スポーツ、学習のバランスをとる。毎日コーディングしていますか？"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Amazing dedication. How do you handle it when you run into a bug?",
+    "qa": "I use AI, like Gemini, to explain the error. It saves me hours of searching on Google.",
+    "qn": "エラーの原因を説明してもらうためにGeminiなどのAIを使っています。Googleで何時間も検索する手間が省けますよ。",
+    "id": 104,
+    "q_ja": "素晴らしい献身的姿勢。バグに遭遇したとき、どうやって対処しますか？"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "AI is a developer's best friend. Have you coded any feature to practice pronunciation in your app?",
+    "qa": "Not yet, but I'm thinking of adding a speech-to-text feature so I can practice speaking too.",
+    "qn": "まだですが、スピーキングの練習もできるように、音声認識（Speech-to-Text）機能を追加することを考えています。",
+    "id": 105,
+    "q_ja": "AI は開発者の親友です。アプリで発音を練習する機能をコーディングしましたか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "That would be a killer feature! Do you write tests for your code?",
+    "qa": "I'm starting to learn how to write unit tests. It's important to make sure the app doesn't break.",
+    "qn": "ユニットテストの書き方を学び始めているところです。アプリが壊れないようにするために重要ですからね。",
+    "id": 106,
+    "q_ja": "それはキラー機能でしょう！コードのテストを書きますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Yes, testing is crucial. Have you ever participated in any hackathons or local developer meetups?",
+    "qa": "No, not yet. I'm still building my confidence, but I'd love to join one in the future.",
+    "qn": "いいえ、まだありません。まだ自信をつけながらですが、将来はぜひ参加してみたいです。",
+    "id": 107,
+    "q_ja": "はい、テストは非常に重要です。ハッカソンやローカル開発者の交流会に参加したことがありますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "You should! Developer communities are very welcoming. Are there many tech events in Saitama?",
+    "qa": "Most events are in Tokyo, which is very close. It only takes about 30 minutes to get to Tokyo.",
+    "qn": "イベントの多くは東京で開催されますが、とても近いです。東京までは30分ほどで行けますよ。",
+    "id": 108,
+    "q_ja": "あなたがすべき！開発者コミュニティは非常に歓迎的です。埼玉ではテクノロジーイベントがたくさんありますか？"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Convenient location! Do you prefer working on web apps or mobile apps?",
+    "qa": "I think I prefer mobile apps because you can carry them around in your pocket. It feels more personal.",
+    "qn": "ポケットに入れて持ち歩けるので、モバイルアプリの方が好きですね。より身近に感じられます。",
+    "id": 109,
+    "q_ja": "便利なロケーション！ Web アプリとモバイル アプリのどちらで作業することを好みますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "That's true. It's always with you. Keep up the great work on your apps!",
+    "qa": "Thank you! I will keep coding and improving.",
+    "qn": "ありがとうございます！これからもコードを書き続けて向上していきます。",
+    "id": 110,
+    "q_ja": "それは本当だ。それはいつもあなたと一緒です。これからもアプリの開発に頑張ってください!"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "What features did you find hardest to code in your English app?",
+    "qa": "Implementing the local push notifications to remind me to study every day was quite tricky.",
+    "qn": "毎日勉強するよう通知を送るローカルプッシュ通知の実装が、かなり難しかったですね。",
+    "id": 111,
+    "q_ja": "英語アプリでコーディングするのが最も難しいと感じた機能は何ですか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Ah, push notifications can be tough in iOS. How did you test them?",
+    "qa": "I had to use the iOS simulator and send test payloads. It took me a whole weekend to figure out.",
+    "qn": "iOSシミュレータを使ってテスト用のペイロードを送信しました。理解するのに丸一日週末がかかりましたよ。",
+    "id": 112,
+    "q_ja": "ああ、iOS ではプッシュ通知は難しいかもしれません。どのようにテストしましたか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "But you did it! That is real progress. Does your app store pronunciation audio too?",
+    "qa": "Not yet. I'm planning to integrate a Text-to-Speech API to play audio for each phrase.",
+    "qn": "まだです。各フレーズの音声を再生するために、Text-to-Speech（音声合成）のAPIを統合する予定です。",
+    "id": 113,
+    "q_ja": "でも、やったね！それは本当の進歩です。あなたのアプリには発音音声も保存されていますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "That's a great idea. Audio makes vocabulary learning much more effective.",
+    "qa": "Yes, hearing the correct pronunciation is crucial, especially for natural phrases.",
+    "qn": "ええ、特に自然なフレーズを学ぶためには、正しい発音を聞くことが極めて重要ですからね。",
+    "id": 114,
+    "q_ja": "それは素晴らしいアイデアですね。音声により語彙学習がより効果的になります。"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Definitely. Are you using git for version control?",
+    "qa": "Yes, I use Git and push my code to GitHub. It helps me track my changes and not lose code.",
+    "qn": "はい、Gitを使ってコードをGitHubにプッシュしています。変更履歴を追跡し、コードを失わないようにするのに役立ちます。",
+    "id": 115,
+    "q_ja": "絶対に。バージョン管理に git を使用していますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Good developer practice! Is your repository public or private?",
+    "qa": "It's private for now, but I might make it public once the code is cleaner.",
+    "qn": "今はプライベートですが、コードがもう少し綺麗になったら公開するかもしれません。",
+    "id": 116,
+    "q_ja": "開発者の良い実践を!リポジトリはパブリックですか、それともプライベートですか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "A private repo is fine. It protects your personal work. How do you choose which feature to build next?",
+    "qa": "I build features based on what I need during my daily English study sessions.",
+    "qn": "毎日の英語学習の中で、自分が必要だと思ったものに基づいて機能を作っています。",
+    "id": 117,
+    "q_ja": "プライベートリポジトリは問題ありません。それはあなたの個人的な仕事を保護します。次に構築する機能をどのように選択しますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "That's called 'dogfooding' in tech! Using your own product to find improvements.",
+    "qa": "Haha, yes! I'm the developer and the only user, so feedback is very quick.",
+    "qn": "はは、そうですね！開発者であり唯一のユーザーなので、フィードバックは非常に早いですよ。",
+    "id": 118,
+    "q_ja": "それはテクノロジー用語で「ドッグフーディング」と呼ばれます。独自の製品を使用して改善点を見つけます。"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "The best kind of loop. Have you implemented a dark mode in your app?",
+    "qa": "Yes! I prefer dark mode because I often study in the evening or at night.",
+    "qn": "はい！夜や暗い時間帯に勉強することが多いので、ダークモードを好んで使っています。",
+    "id": 119,
+    "q_ja": "最高のループです。アプリにダークモードを実装しましたか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Dark mode is a must for night developers. How does it look?",
+    "qa": "It looks sleek, with a dark slate background and mint green accents.",
+    "qn": "ダークスレートの背景にミントグリーンのアクセントで、とてもスマートな見た目ですよ。",
+    "id": 120,
+    "q_ja": "ダークモードは夜間開発者にとって必須です。見た目はどうですか？"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Sounds stylish! You have a good eye for design. How do you handle app deployment updates?",
+    "qa": "Since it's on my phone, I just build and run it directly from Xcode to my device.",
+    "qn": "自分のスマホに入れているだけなので、Xcodeからデバイスに直接ビルドして実行しています。",
+    "id": 121,
+    "q_ja": "スタイリッシュですね！あなたはデザインに対して優れた目を持っています。アプリ展開の更新はどのように処理しますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Convenient! That saves you from paying the annual Apple Developer fee.",
+    "qa": "Exactly. I'll pay the fee only when I'm ready to publish it on the App Store.",
+    "qn": "その通りです。App Storeに公開する準備ができた時だけ、登録料を払うつもりです。",
+    "id": 122,
+    "q_ja": "便利！これにより、Apple Developer の年間料金を支払う必要がなくなります。"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Smart move. What resources do you use to learn React for your web app?",
+    "qa": "I use the official React documentation and free online courses. The documentation is very good.",
+    "qn": "公式のReactドキュメントと、無料のオンラインコースを使っています。ドキュメントがとても優秀なんですよ。",
+    "id": 123,
+    "q_ja": "賢い動き。 Web アプリの React を学習するためにどのようなリソースを使用しますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Yes, React docs were recently rewritten and are very clear. Do you use functional components?",
+    "qa": "Yes, I only use functional components with hooks. It feels much simpler than class components.",
+    "qn": "はい、フックを使用した関数コンポーネントだけを使っています。クラスコンポーネントよりもずっとシンプルに感じます。",
+    "id": 124,
+    "q_ja": "はい、React ドキュメントは最近書き直され、非常に明確になっています。機能部品を使用していますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Absolutely, hooks are the modern standard. Do you use TypeScript?",
+    "qa": "I'm starting to learn TypeScript. It helps prevent type errors before running the code.",
+    "qn": "TypeScriptを学び始めているところです。コードを実行する前に型エラーを防ぐのに役立ちます。",
+    "id": 125,
+    "q_ja": "間違いなく、フックは現代の標準です。 TypeScript を使用していますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "TypeScript is highly requested in the job market, so that's a great skill to learn.",
+    "qa": "Yes, I saw it in many IT job postings, so I wanted to learn it.",
+    "qn": "ええ、多くのIT系の求人票で見かけたので、ぜひ身につけたいと思ったんです。",
+    "id": 126,
+    "q_ja": "TypeScript は就職市場での需要が高いため、学ぶべき素晴らしいスキルです。"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "It will definitely boost your resume. What about CSS? What styling library do you use?",
+    "qa": "I prefer using vanilla CSS. It gives me maximum control and helps me understand the basics.",
+    "qn": "バニラCSSを使うのが好きです。最大限コントロールできますし、基礎を理解するのに役立ちますから。",
+    "id": 127,
+    "q_ja": "それは間違いなくあなたの履歴書を向上させます。 CSSについてはどうですか？どのスタイリング ライブラリを使用していますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Vanilla CSS is great for learning layout behavior. Do you use Flexbox and Grid?",
+    "qa": "Yes, I use Flexbox for almost everything. It makes responsive layout much easier.",
+    "qn": "はい、ほぼすべてのレイアウトにFlexboxを使っています。レスポンシブ対応がとても簡単になりますね。",
+    "id": 128,
+    "q_ja": "Vanilla CSS は、レイアウトの動作を学習するのに最適です。フレックスボックスとグリッドを使用していますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Flexbox is a lifesaver. You seem to have a solid grasp of modern web development.",
+    "qa": "Thank you. I still have a long way to go, but I enjoy the process of learning.",
+    "qn": "ありがとうございます。まだまだ先は長いですが、学ぶプロセスを楽しんでいます。",
+    "id": 129,
+    "q_ja": "Flexbox は救世主です。あなたは最新の Web 開発についてしっかりと理解しているようです。"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Since you love Eminem, did you build any feature related to his music in your app?",
+    "qa": "Yes, I made a dictation game where I listen to Eminem's fast verses and try to type them out.",
+    "qn": "はい、エミネムの速いバースを聴いてタイピングするディクテーション（書き取り）ゲームを作りました。",
+    "id": 130,
+    "q_ja": "あなたはエミネムが大好きなので、アプリに彼の音楽に関連した機能を構築しましたか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "That is a genius way to practice listening to fast English! How is your score?",
+    "qa": "It was terrible at first, but it is slowly getting better. It's a fun challenge.",
+    "qn": "最初は悲惨でしたが、徐々に良くなっています。楽しい挑戦ですよ。",
+    "id": 131,
+    "q_ja": "これは、速い英語を聞き取る練習をするための天才的な方法です。あなたのスコアはどうですか？"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "I can imagine! Even native speakers struggle with Eminem's speed sometimes.",
+    "qa": "Haha, I'm sure! But it's great for training my ears to catch natural linking sounds.",
+    "qn": "はは、そうでしょうね！でもネイティブ特有の音が繋がる箇所を聞き取るトレーニングには最高です。",
+    "id": 132,
+    "q_ja": "想像できるよ！ネイティブスピーカーでもエミネムのスピードに苦労することがあります。"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Absolutely. What about database stability? Have you lost any data while developing?",
+    "qa": "Once I accidentally ran a delete script without a filter and wiped out fifty phrases.",
+    "qn": "一度、フィルターなしで削除スクリプトを実行してしまい、50個のフレーズを消してしまいました。",
+    "id": 133,
+    "q_ja": "絶対に。データベースの安定性についてはどうですか?開発中にデータを紛失したことがありますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Oh no! Did you have a backup?",
+    "qa": "Fortunately, yes. I had exported the data to a CSV file the day before.",
+    "qn": "幸いなことに、前日にCSVファイルとしてデータをエクスポートしていました。",
+    "id": 134,
+    "q_ja": "なんてこった！バックアップはありましたか？"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "Whew, you dodged a bullet there! Backup is a developer's lifeline.",
+    "qa": "Indeed. Since then, I always double-check my SQL queries before running them.",
+    "qn": "本当に。それ以来、実行する前に必ずSQLクエリをダブルチェックするようになりました。",
+    "id": 135,
+    "q_ja": "おお、そこで銃弾を避けたね！バックアップは開発者の生命線です。"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "A lesson learned the hard way! Do you write your GitHub commit messages in English?",
+    "qa": "Yes, I write all my commits in English. It's another small way to practice writing.",
+    "qn": "はい、コミットメッセージはすべて英語で書いています。これもライティングのちょっとした練習ですね。",
+    "id": 136,
+    "q_ja": "苦労して学んだ教訓です！ GitHub のコミット メッセージを英語で書きますか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "That is great dedication. You are surrounding yourself with English.",
+    "qa": "I believe immersion is the best way to learn, even if it's in small steps.",
+    "qn": "小さなステップでも、英語環境に身を置くことが一番の学習法だと信じています。",
+    "id": 137,
+    "q_ja": "それは素晴らしい献身です。あなたは英語に囲まれています。"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "We agree completely. Have you noticed your English getting better since you started using your app?",
+    "qa": "Definitely. I remember vocabulary much longer because the app quizzes me on my weak words.",
+    "qn": "間違いなく。アプリが苦手な単語を出題してくれるので、語彙の定着期間が長くなりました。",
+    "id": 138,
+    "q_ja": "私たちも完全に同意します。アプリを使い始めてから英語が上達していることに気づきましたか?"
+  },
+  {
+    "cat": "Tech & Apps",
+    "q": "That is the power of custom software. It adapts to you, not the other way around.",
+    "qa": "Yes, that's exactly why I love coding. It solves personal problems.",
+    "qn": "はい、それこそが私がプログラミングを愛する理由です。身近な課題を解決してくれますから。",
+    "id": 139,
+    "q_ja": "それがカスタム ソフトウェアの力です。それはあなたに適応するものであり、その逆ではありません。"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "You mentioned you want to start your own business. What kind of business do you have in mind?",
+    "qa": "I want to start a software development agency, or create a service that solves problems for small businesses.",
+    "qn": "ソフトウェア開発エージェンシーを立ち上げるか、あるいは小規模ビジネスの課題を解決するサービスを作りたいと考えています。",
+    "id": 140,
+    "q_ja": "あなたは自分のビジネスを始めたいと言いました。どのようなビジネスを考えていますか?"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "That's a great goal. Small businesses always need tech help. How would your restaurant customer service experience help you with that?",
+    "qa": "I understand the frustrations of business owners and customers. I can build software that actually solves their real-world problems.",
+    "qn": "ビジネスオーナーや顧客の不満がよく分かります。彼らの現実的な課題を解決できるソフトウェアを作ることができます。",
+    "id": 141,
+    "q_ja": "素晴らしい目標ですね。中小企業は常に技術的なサポートを必要としています。レストランでの顧客サービスの経験は、その点でどのように役立ちますか?"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "That's a huge advantage! You know the market. What about the semiconductor option? What attracts you to semiconductor sales?",
+    "qa": "Semiconductors are the backbone of modern tech. I want to help companies find the right hardware solutions for their products.",
+    "qn": "半導体は現代テクノロジーの根幹です。企業が製品に適したハードウェアソリューションを見つける手助けをしたいんです。",
+    "id": 142,
+    "q_ja": "それは大きな利点です!あなたは市場を知っています。半導体のオプションについてはどうですか?半導体販売の魅力は何ですか?"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "It's definitely a growing industry. Do you think semiconductor companies prefer candidates with coding experience?",
+    "qa": "Yes, having a technical background helps me understand the product specifications much better.",
+    "qn": "はい、技術的なバックグラウンドがあれば、製品の仕様をはるかに深く理解できますからね。",
+    "id": 143,
+    "q_ja": "間違いなく成長産業です。半導体企業はコーディング経験のある候補者を好むと思いますか?"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "Absolutely. Technical sales is a very valuable role. Have you started applying for IT jobs yet?",
+    "qa": "Not yet. I want to finish my current app projects first to show them as my portfolio.",
+    "qn": "まだです。ポートフォリオとして見せられるように、まずは現在のアプリ開発プロジェクトを完成させたいと思っています。",
+    "id": 144,
+    "q_ja": "絶対に。 Technical sales is a very valuable role. Have you started applying for IT jobs yet?"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "Smart move. A working app is the best resume. When do you think you will start applying?",
+    "qa": "I plan to start applying for jobs in the fall, around September or October.",
+    "qn": "秋頃、9月か10月あたりに求人に応募し始める計画です。",
+    "id": 145,
+    "q_ja": "賢い動き。実用的なアプリは最高の履歴書です。いつから申請を開始すると思いますか？"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "That gives you a few months to prepare. Are you looking for jobs in Tokyo or Saitama?",
+    "qa": "Mostly in Tokyo, because there are more opportunities, but I'm open to hybrid or remote work.",
+    "qn": "機会が多い東京を中心に探していますが、ハイブリッド勤務やリモートワークも視野に入れています。",
+    "id": 146,
+    "q_ja": "そのため、準備に数か月かかります。東京または埼玉でお仕事をお探しですか？"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "Remote work is great. You could even work for a company in Kyoto! How would you feel about moving back to Kyoto?",
+    "qa": "I love Kyoto, so that would be a dream come true! But for now, my focus is on building my career here.",
+    "qn": "京都は大好きなので、そうなったら夢のようですね！でも今は、ここでキャリアを築くことに集中しています。",
+    "id": 147,
+    "q_ja": "リモートワークは素晴らしいです。京都の会社で働くことも可能です！京都に戻ることについてはどう思いますか？"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "Fair enough. Step by step. Do you ever feel overwhelmed by trying to learn so many things at once?",
+    "qa": "Sometimes, but I try to focus on one small task at a time. Breaking it down helps a lot.",
+    "qn": "時々ありますが、一度に一つの小さなタスクに集中するようにしています。細かく分けることがとても役立ちます。",
+    "id": 148,
+    "q_ja": "けっこうだ。一歩一歩。一度にたくさんのことを学ぼうとすると、圧倒されてしまうことがありますか?"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "That's a key productivity tip. How do you stay motivated when coding gets difficult?",
+    "qa": "I take a break and listen to some music, like Eminem's 'Not Afraid'. It pumps me up again.",
+    "qn": "一旦休憩して、エミネムの『Not Afraid』のような音楽を聴きます。そうするとまたやる気が湧いてきます。",
+    "id": 149,
+    "q_ja": "それが生産性向上の重要なヒントです。コーディングが難しくなったとき、どうすればモチベーションを維持できますか?"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "Music is a powerful motivator. If you start a business, would you want to work alone or build a team?",
+    "qa": "Eventually, I'd like to build a small, talented team. But I will start as a solo founder.",
+    "qn": "いずれは優秀な小さなチームを作りたいですが、最初は一人で起業するつもりです。",
+    "id": 150,
+    "q_ja": "音楽は強力な動機付けとなります。ビジネスを始めるとしたら、一人で働きたいですか、それともチームを作りたいですか?"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "Starting small is wise. You have the drive and the plan. We really hope you succeed!",
+    "qa": "Thank you so much. Your encouragement means a lot to me.",
+    "qn": "本当にありがとうございます。皆さんの励ましはとても励みになります。",
+    "id": 151,
+    "q_ja": "小さく始めるのが賢明です。あなたには意欲と計画があります。皆さんの成功を心から願っています。"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "We mean it! We need more people with your combination of empathy and tech skills.",
+    "qa": "I appreciate that. I'll keep pushing forward no matter what.",
+    "qn": "感謝します。何があっても前へ進み続けます。",
+    "id": 152,
+    "q_ja": "それは本気です！共感力と技術スキルを兼ね備えた人材をさらに必要としています。"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "That's the spirit! Go get it!",
+    "qa": "Thank you! I will do my best.",
+    "qn": "ありがとうございます！ベストを尽くします。",
+    "id": 153,
+    "q_ja": "それが精神だ！取りに行ってください！"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "We believe in you. Let us know if you ever need someone to test your apps!",
+    "qa": "I will definitely ask you guys to test my apps when they are ready. Thanks!",
+    "qn": "アプリの準備ができたら、間違いなくお二人にテストをお願いしますね。ありがとう！",
+    "id": 154,
+    "q_ja": "私たちはあなたを信じています。アプリをテストしてくれる人が必要な場合はお知らせください。"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "At 38, some people say it's hard to change careers. What do you think about that?",
+    "qa": "I think age is just a number. It's never too late to learn and start a new path.",
+    "qn": "年齢はただの数字に過ぎないと思っています。学び、新しい道を始めるのに遅すぎることはありません。",
+    "id": 155,
+    "q_ja": "38歳になると転職は難しいという人もいます。それについてどう思いますか?"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "Exactly! The maturity and experience you bring are very valuable to employers.",
+    "qa": "Yes, I believe my life experience and work ethic will be great assets.",
+    "qn": "はい、自分の人生経験や労働倫理は大きな資産になると信じています。",
+    "id": 156,
+    "q_ja": "その通り！あなたがもたらす成熟度と経験は、雇用主にとって非常に価値があります。"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "Definitely. How are you preparing for job interviews? Are you practicing coding tests?",
+    "qa": "Yes, I practice solving algorithm problems online. It's challenging but necessary.",
+    "qn": "はい、ネットでアルゴリズムの問題を解く練習をしています。難しいですが必要ですね。",
+    "id": 157,
+    "q_ja": "絶対に。就職面接の準備はどうしていますか?コーディングテストの練習をしていますか？"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "Algorithm tests can be tough. Do you feel confident about the sales role in semiconductors?",
+    "qa": "I do. I think my communication skills from customer service will help me connect with clients.",
+    "qn": "自信はあります。カスタマーサービスで培ったコミュニケーション能力は、クライアントと繋がるのに役立つと思います。",
+    "id": 158,
+    "q_ja": "アルゴリズムのテストは難しい場合があります。半導体の営業職に自信はありますか？"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "It absolutely will. Sales is all about building trust and relationships.",
+    "qa": "Exactly. I want to build long-term relationships with clients based on trust.",
+    "qn": "その通りですね。信頼に基づいてクライアントと長期的な関係を築きたいです。",
+    "id": 159,
+    "q_ja": "絶対そうなりますよ。営業は信頼と関係を築くことがすべてです。"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "That's the best way to do sales. What is your goal for the first year in your new career?",
+    "qa": "My goal is to learn as much as possible, adapt to the new industry, and make a positive impact on my team.",
+    "qn": "できるだけ多くのことを学び、新しい業界に適応し、チームに貢献することが目標です。",
+    "id": 160,
+    "q_ja": "それが販売を行うための最良の方法です。新しいキャリアの最初の1年間の目標は何ですか？"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "A great goal. You have a very clear vision. What does your family think about your career change?",
+    "qa": "They are very supportive. They know I'm working hard and want me to be happy.",
+    "qn": "とても応援してくれています。私が一生懸命努力しているのを知っていますし、幸せになってほしいと願ってくれています。",
+    "id": 161,
+    "q_ja": "素晴らしいゴールだ。あなたはとても明確なビジョンをお持ちです。あなたの転職について家族はどう思っていますか？"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "Support from family is wonderful. It gives you extra strength.",
+    "qa": "Yes, it really does. I'm very grateful for their support.",
+    "qn": "はい、本当にそうですね。彼らのサポートにはとても感謝しています。",
+    "id": 162,
+    "q_ja": "家族のサポートは素晴らしいです。それはあなたに余分な力を与えます。"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "We are rooting for you too! Keep pushing toward your dreams.",
+    "qa": "Thank you. Your support makes me even more motivated.",
+    "qn": "ありがとうございます。皆さんのサポートでさらにやる気が湧いてきます。",
+    "id": 163,
+    "q_ja": "私たちも応援しています！夢に向かって突き進んでください。"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "You've got this! Step by step, you are getting closer.",
+    "qa": "Thank you! I will keep taking steps forward every day.",
+    "qn": "ありがとうございます！毎日一歩ずつ前へ進み続けます。",
+    "id": 164,
+    "q_ja": "これを持っていますね！一歩ずつ、あなたは近づいています。"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "That's all it takes. Consistent effort always pays off.",
+    "qa": "I agree. Consistency is the key to success.",
+    "qn": "同感です。継続こそが成功への鍵ですね。",
+    "id": 165,
+    "q_ja": "必要なのはそれだけです。一貫した努力は必ず報われます。"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "Absolutely. Now that we've talked about your future, let's talk about Saitama! What's the plan for today?",
+    "qa": "Sure, let's talk about sightseeing! I have some great recommendations.",
+    "qn": "はい、観光について話しましょう！いくつか素晴らしいおすすめがありますよ。",
+    "id": 166,
+    "q_ja": "絶対に。将来の話をしたところで、今度は埼玉の話をしましょう！今日の予定は何ですか?"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "Excellent. Emily has her camera ready!",
+    "qa": "Great. I hope she takes some beautiful photos today.",
+    "qn": "素晴らしいですね。今日彼女が美しい写真をたくさん撮れるといいですね。",
+    "id": 167,
+    "q_ja": "素晴らしい。エミリーはカメラを準備しました！"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "She definitely will. Show us the best Saitama spots!",
+    "qa": "With pleasure. Let's start with a very unique town.",
+    "qn": "喜んで。まずはとてもユニークな街から紹介しましょう。",
+    "id": 168,
+    "q_ja": "彼女は間違いなくそうするだろう。埼玉のとっておきスポットをご紹介します！"
+  },
+  {
+    "cat": "Career Vision",
+    "q": "We are ready. Let's go!",
+    "qa": "Awesome. Follow me to the train station.",
+    "qn": "いいですね。駅へついてきてください。",
+    "id": 169,
+    "q_ja": "準備は完了です。さあ行こう！"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "By the way, since we are in Saitama today, what should we do? What do you recommend?",
+    "qa": "I highly recommend visiting Kawagoe. It's a historic town known as 'Little Edo'. It has beautiful old clay warehouses.",
+    "qn": "川越に行くのを強くおすすめします。「小江戸」として知られる歴史的な街で、美しい古い蔵造りの建物があります。",
+    "id": 170,
+    "q_ja": "さて、今日は埼玉にいるのでどうしましょうか？おすすめは何ですか？"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "Little Edo? That sounds lovely! Emily loves historical buildings. How do we get there?",
+    "qa": "We can take the train. It's about a 20-minute ride from here.",
+    "qn": "電車で行くことができます。ここから20分ほどの乗車時間です。",
+    "id": 171,
+    "q_ja": "小江戸？それは素敵ですね！エミリーは歴史的な建物が大好きです。どうやってそこに着くのでしょうか？"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "That's very close. What should we eat in Kawagoe? Is there any local food?",
+    "qa": "Yes, Kawagoe is famous for sweet potato treats and eel dishes. We should definitely try them.",
+    "qn": "はい、川越はサツマイモのお菓子やうなぎ料理が有名です。ぜひ食べてみましょう。",
+    "id": 172,
+    "q_ja": "それは非常に近いです。川越で何を食べようか？地元の食べ物はありますか？"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "Yum, sweet potatoes! What about dinner? Is there a good local dinner spot around here?",
+    "qa": "Yes, we can try Saitama's famous 'Musashino Udon'. The noodles are very thick and chewy.",
+    "qn": "はい、埼玉名物の「武蔵野うどん」を食べに行きましょう。麺がとても太くてコシがあります。",
+    "id": 173,
+    "q_ja": "うーん、サツマイモ！夕食はどうですか？このあたりにおいしい地元のディナースポットはありますか?"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "Thick and chewy noodles? Sounds delicious! I can't wait to try it.",
+    "qa": "It's different from Kyoto's soft udon, so I hope you enjoy the contrast.",
+    "qn": "京都の柔らかいうどんとは違うので、その対比を楽しんでいただけたら嬉しいです。",
+    "id": 174,
+    "q_ja": "太くてコシのある麺？美味しそうですね！試してみるのが待ちきれません。"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "I love trying local variations of food. Are there any other interesting spots in Saitama?",
+    "qa": "If you like trains, there is a massive Railway Museum in Omiya. It's very popular.",
+    "qn": "もし電車が好きなら、大宮に巨大な鉄道博物館があります。とても人気があるんですよ。",
+    "id": 175,
+    "q_ja": "私は地元のさまざまな食べ物を試してみるのが大好きです。埼玉で他に面白いスポットはありますか？"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "A railway museum! That sounds fun, even for adults. What about nature? You mentioned nature spots.",
+    "qa": "Yes, Chichibu is a beautiful mountain area in Saitama, famous for hiking and scenic views. But it's a bit far for today.",
+    "qn": "はい、秩父はハイキングや絶景で有名な、埼玉の美しい山岳地帯です。ただ、今日行くには少し遠いですね。",
+    "id": 176,
+    "q_ja": "鉄道博物館ですよ！大人でも楽しそうですよね。自然についてはどうでしょうか？自然スポットについて言及しました。"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "Ah, maybe next time then. Today, Kawagoe sounds perfect.",
+    "qa": "Great. Let's finish our drinks and head to the station.",
+    "qn": "良かったです。飲み終えたら駅へ向かいましょう。",
+    "id": 177,
+    "q_ja": "ああ、それならまた次回かな。今日の川越は完璧ですね。"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "Sounds like a plan. Thank you so much for being our guide today.",
+    "qa": "My pleasure. I'm really happy to show you guys around my hometown.",
+    "qn": "とんでもないです。私の地元をお二人に案内できて本当に嬉しいです。",
+    "id": 178,
+    "q_ja": "計画のようですね。本日は私たちのガイドになっていただき、誠にありがとうございました。"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "Let's go have a great day!",
+    "qa": "Yes, let's go! I hope you have a memorable day in Saitama.",
+    "qn": "はい、行きましょう！埼玉で思い出に残る一日になりますように。",
+    "id": 179,
+    "q_ja": "楽しい一日を過ごしましょう！"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "Is Kawagoe very crowded on weekends?",
+    "qa": "It can get quite busy, but if we walk along the side streets, we can find some quiet, charming temples.",
+    "qn": "かなり混雑することもありますが、脇道を歩けば静かで魅力的なお寺をいくつか見つけられますよ。",
+    "id": 180,
+    "q_ja": "週末の川越はとても混みますか？"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "That's a great insider tip. What about souvenirs? What should we buy?",
+    "qa": "You should buy some sweet potato chips or traditional candy. They are local specialties.",
+    "qn": "サツマイモチップスや伝統的なお菓子を買うといいですよ。地元の特産品なんです。",
+    "id": 181,
+    "q_ja": "それは素晴らしい内部情報です。お土産にいかがですか？何を買えばいいでしょうか？"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "We'll definitely get some. Are there any traditional festivals in Saitama?",
+    "qa": "Yes, the Chichibu Night Festival in December is very famous. It features huge, beautiful floats.",
+    "qn": "はい、12月に開催される秩父夜祭がとても有名です。巨大で美しい山車が登場します。",
+    "id": 182,
+    "q_ja": "必ずいくつか手に入れます。埼玉に伝統的なお祭りはありますか？"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "A night festival in winter! That sounds magical. I'd love to visit Saitama again in December.",
+    "qa": "Please do! I'd be happy to guide you to Chichibu then.",
+    "qn": "ぜひ来てください！その時は喜んで秩父をご案内しますよ。",
+    "id": 183,
+    "q_ja": "冬の夜祭り！それは魔法のように聞こえます。 12月にまた埼玉に行きたいです。"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "We'll hold you to that! How far is Chichibu from here?",
+    "qa": "It takes about an hour and a half by train. It's a nice day trip.",
+    "qn": "電車で約1時間半かかります。ちょうどいい日帰り旅行になりますよ。",
+    "id": 184,
+    "q_ja": "それは我慢させていただきます！ここから秩父までどれくらいですか?"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "That's not too bad. We love train journeys anyway.",
+    "qa": "Saitama has a special train called the 'SL Paleo Express' which is a steam locomotive.",
+    "qn": "埼玉には「SLパレオエクスプレス」という蒸気機関車の特別な列車もあるんですよ。",
+    "id": 185,
+    "q_ja": "それはそれほど悪いことではありません。私たちはとにかく電車の旅が大好きです。"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "A steam locomotive! No way! That is so cool. Emily would love that.",
+    "qa": "It runs in Chichibu, so it's another great reason to go there next time.",
+    "qn": "秩父を走っているので、次回行くための素晴らしい理由がもう一つ増えましたね。",
+    "id": 186,
+    "q_ja": "蒸気機関車だ！とんでもない！それはとてもクールです。エミリーはそれを喜ぶでしょう。"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "Absolutely. Japanese trains are the best. What about the food near the station we are going to?",
+    "qa": "There's a quiet shopping street with great street food. We can grab a quick snack before the main tour.",
+    "qn": "美味しい食べ歩きフードがある静かな商店街があります。メインの観光の前に、軽くつまみ食いできますよ。",
+    "id": 187,
+    "q_ja": "絶対に。日本の電車は最高だ。これから行く駅の近くの食べ物はどうですか？"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "Perfect. I love street food. Let's head out then!",
+    "qa": "Sure, let's go. I'll get the tickets for us.",
+    "qn": "いいですね、行きましょう。切符は私が買っておきますね。",
+    "id": 188,
+    "q_ja": "完璧。私は屋台の食べ物が大好きです。それでは出かけましょう！"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "Thank you so much! You are the best host ever. We are ready for a great adventure.",
+    "qa": "My pleasure. Let's make today a fantastic and fun day!",
+    "qn": "どういたしまして。今日は最高に楽しく素晴らしい一日にしましょう！",
+    "id": 189,
+    "q_ja": "どうもありがとうございます！あなたは史上最高のホストです。私たちは素晴らしい冒険の準備ができています。"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "I heard Saitama is sometimes teased in movies like 'Tonde Saitama', is it really that bad?",
+    "qa": "Haha, no! It's just a joke. Saitama is actually very peaceful and is ranked one of the most livable prefectures in Japan.",
+    "qn": "はは、いいえ！ただのジョークですよ。埼玉はとても平和で、日本で最も住みやすい県の一つにランクインしているんですよ。",
+    "id": 190,
+    "q_ja": "映画「翔んで埼玉」などで埼玉がからかわれることがあるそうですが、そんなにひどいのでしょうか？"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "I knew it. It feels very comfortable here. Is there a big park nearby?",
+    "qa": "Yes, Omiya Park is very close. It has a small zoo and is famous for cherry blossoms in spring.",
+    "qn": "はい、大宮公園がすぐ近くにあります。小さな動物園があり、春の桜がとても有名です。",
+    "id": 191,
+    "q_ja": "私はそれを知っていた。ここはとても快適です。近くに大きな公園はありますか？"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "A zoo inside a park? That's lovely. What kind of animals do they have?",
+    "qa": "Mostly smaller animals like monkeys, capybaras, and colorful birds. It's free to enter!",
+    "qn": "主にサルやカピバラ、カラフルな鳥などの小さめの動物です。なんと入場無料なんですよ！",
+    "id": 192,
+    "q_ja": "公園の中に動物園？素敵ですね。彼らはどんな動物を飼っているのでしょう？"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "Free? That is amazing. We should visit there next time too.",
+    "qa": "Absolutely. We can also visit Hikawa Shrine, which has a very long and beautiful approach.",
+    "qn": "ぜひ。氷川神社にも行けますよ。非常に長くて美しい参道があるんです。",
+    "id": 193,
+    "q_ja": "無料？それはすごいですね。次回もそこに行ってみよう。"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "A shrine with a long approach? That sounds very peaceful. Saitama has a lot of hidden gems.",
+    "qa": "It really does. Many people pass through without knowing how much history is here.",
+    "qn": "本当にそうなんです。多くの人がこれほど多くの歴史があることを知らずに通り過ぎてしまいます。",
+    "id": 194,
+    "q_ja": "参道が長い神社？それはとても平和的に聞こえます。埼玉には隠れた魅力がたくさんあります。"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "Well, we are lucky to have you to show us. What about the local sports scene? Are people here passionate?",
+    "qa": "Yes! The local soccer teams, Urawa Reds and Omiya Ardija, have very passionate fans. The stadium atmosphere is incredible.",
+    "qn": "はい！地元のサッカーチーム、浦和レッズや大宮アルディージャは非常に熱狂的なファンがいます。スタジアムの雰囲気は凄いですよ。",
+    "id": 195,
+    "q_ja": "そうですね、見せていただけるのは幸運です。地元のスポーツシーンはどうですか？ここの人たちは情熱的ですか？"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "Wow, soccer is big here. Do you go to watch games?",
+    "qa": "Occasionally, but I prefer playing basketball. However, the energy in the soccer stadium is worth experiencing.",
+    "qn": "たまに行きますが、私はやはりバスケをプレイする方が好きですね。でもサッカースタジアムの熱量は一度経験する価値がありますよ。",
+    "id": 196,
+    "q_ja": "うわー、ここではサッカーが盛んです。試合を見に行きますか？"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "We should go to a game together sometime. Now, let's get on the train to Kawagoe!",
+    "qa": "Sounds great. The train is coming. Let's get on board.",
+    "qn": "いつか一緒に試合観戦に行きましょう。さて、川越行きの電車に乗りましょう！",
+    "id": 197,
+    "q_ja": "いつか一緒に試合を見に行こうかな。さあ、川越行きの電車に乗りましょう！"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "This is going to be a fun day. I'm glad we met.",
+    "qa": "Me too. I'm really looking forward to sharing this day with you both.",
+    "qn": "私もです。今日という日をお二人と共有できることを本当に楽しみにしています。",
+    "id": 198,
+    "q_ja": "今日は楽しい一日になりそうです。会えてよかったです。"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "Let's make some great memories today!",
+    "qa": "Yes! Let's go and have a wonderful time.",
+    "qn": "はい！出発して素晴らしい時間を過ごしましょう。",
+    "id": 199,
+    "q_ja": "今日も素敵な思い出を作りましょう！"
+  },
+  {
+    "cat": "Saitama Guide",
+    "q": "Thank you so much! Let's get going.",
+    "qa": "Yes, let's head out! It's going to be a memorable day.",
+    "qn": "本当にありがとう！行きましょう。思い出に残る素晴らしい一日にしますよ。",
+    "id": 200,
+    "q_ja": "どうもありがとうございます！さあ、行きましょう。"
+  }
+]
