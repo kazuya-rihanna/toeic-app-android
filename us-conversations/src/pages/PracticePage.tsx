@@ -7,7 +7,7 @@ import { startWhisperRecording } from '../utils/whisper';
 import type { WhisperSession } from '../utils/whisper';
 import { getWordDiff, getSimilarityScore } from '../utils/diff';
 import type { DiffToken } from '../utils/diff';
-import { typescale, elevation, motionTokens } from '../theme/tokens';
+import { typescale, motionTokens } from '../theme/tokens';
 
 interface PracticePageProps {
   conversations: Conversation[];
@@ -21,17 +21,19 @@ interface PracticePageProps {
   onPlayReview: () => void;
 }
 
-type RecordingState = 'idle' | 'recording' | 'processing';
+type RecordingState = 'idle' | 'starting' | 'recording' | 'processing';
 
-export function PracticePage({
+export const PracticePage: React.FC<PracticePageProps> = ({
   conversations,
   progress,
   progressLoaded,
   onStatusChange,
   tokens,
-  selectedCategory, setSelectedCategory,
-  onPlaySuccess, onPlayReview,
-}) {
+  selectedCategory,
+  setSelectedCategory,
+  onPlaySuccess,
+  onPlayReview,
+}) => {
   const [practiceMode, setPracticeMode]    = useState<PracticeMode>('speech');
   const [filteredCards, setFilteredCards]  = useState<Conversation[]>([]);
   const [cardIndex, setCardIndex]          = useState(0);
@@ -124,11 +126,13 @@ export function PracticePage({
 
   // ---- Whisper recording ----
   const startRecording = async (target: string) => {
+    if (recordingState !== 'idle') return;
     setRecogError(null);
     setSpokenText('');
     setSimilarity(null);
     setDiffTokens([]);
-    setRecordingState('recording');
+    setRecordingState('starting');
+    sessionRef.current = null;
 
     const session = await startWhisperRecording(
       (text) => {
@@ -156,6 +160,7 @@ export function PracticePage({
       setRecordingState('idle');
     } else {
       sessionRef.current = session;
+      setRecordingState('recording');
     }
   };
 
@@ -382,6 +387,12 @@ export function PracticePage({
                         <button style={{ ...btnPrimary, padding: '0.7rem 1.85rem', borderRadius: '50px', gap: '0.5rem' }}
                           onClick={() => startRecording(currentCard.qa)}>
                           🎙️ Tap to Speak Answer
+                        </button>
+                      )}
+                      {recordingState === 'starting' && (
+                        <button disabled style={{ ...btnSecondary, padding: '0.7rem 1.85rem', borderRadius: '50px', display: 'flex', gap: '0.5rem', alignItems: 'center', opacity: 0.8, cursor: 'default' }}>
+                          <span style={spinnerStyle} />
+                          マイク準備中…
                         </button>
                       )}
                       {recordingState === 'recording' && (

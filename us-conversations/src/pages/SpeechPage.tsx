@@ -12,7 +12,7 @@ interface SpeechPageProps {
   tokens: Record<string, string>;
 }
 
-type RecordingState = 'idle' | 'recording' | 'processing';
+type RecordingState = 'idle' | 'starting' | 'recording' | 'processing';
 
 export const SpeechPage: React.FC<SpeechPageProps> = ({ tokens }) => {
   const [isSpeakingUs, setIsSpeakingUs]         = useState(false);
@@ -65,11 +65,13 @@ export const SpeechPage: React.FC<SpeechPageProps> = ({ tokens }) => {
 
   // ---- Whisper recording ----
   const startRecording = async () => {
+    if (recordingState !== 'idle') return;
     setError(null);
     setSpokenText('');
     setSimilarity(null);
     setDiff([]);
-    setRecordingState('recording');
+    setRecordingState('starting');
+    sessionRef.current = null;
 
     const session = await startWhisperRecording(
       // onTranscript
@@ -89,6 +91,7 @@ export const SpeechPage: React.FC<SpeechPageProps> = ({ tokens }) => {
       setRecordingState('idle');
     } else {
       sessionRef.current = session;
+      setRecordingState('recording');
     }
   };
 
@@ -104,6 +107,14 @@ export const SpeechPage: React.FC<SpeechPageProps> = ({ tokens }) => {
         <button style={{ ...btnPrimary, padding: '0.85rem 2.5rem', borderRadius: '50px', fontSize: '1.05rem', gap: '0.6rem' }}
           onClick={startRecording}>
           <span style={{ fontSize: '1.2rem' }}>🎙️</span> Start Speaking
+        </button>
+      );
+    }
+    if (recordingState === 'starting') {
+      return (
+        <button disabled style={{ ...btnSecondary, padding: '0.85rem 2.5rem', borderRadius: '50px', fontSize: '1.05rem', opacity: 0.8, cursor: 'default', display: 'flex', gap: '0.65rem', alignItems: 'center' }}>
+          <span style={{ display: 'inline-block', width: '16px', height: '16px', border: `2px solid ${tokens['primary']}`, borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+          Starting Mic…
         </button>
       );
     }
