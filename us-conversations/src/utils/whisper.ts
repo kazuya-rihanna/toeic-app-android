@@ -40,14 +40,22 @@ export async function startWhisperRecording(
     return null;
   }
 
-  // ブラウザがサポートする最適な MIME タイプを選択
-  const mimeType =
-    MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' :
-    MediaRecorder.isTypeSupported('audio/webm')             ? 'audio/webm'             :
-    MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')  ? 'audio/ogg;codecs=opus'  :
-    'audio/ogg';
+  let mediaRecorder: MediaRecorder;
+  try {
+    const mimeType =
+      MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' :
+      MediaRecorder.isTypeSupported('audio/webm')             ? 'audio/webm'             :
+      MediaRecorder.isTypeSupported('audio/mp4')              ? 'audio/mp4'              :
+      ''; // fallback to browser default
 
-  const mediaRecorder = new MediaRecorder(stream, { mimeType });
+    const options = mimeType ? { mimeType } : undefined;
+    mediaRecorder = new MediaRecorder(stream, options);
+  } catch (err) {
+    console.error('MediaRecorder initialization failed:', err);
+    onError('お使いのブラウザは録音をサポートしていない可能性があります。');
+    return null;
+  }
+
   const chunks: Blob[] = [];
 
   mediaRecorder.ondataavailable = (e) => {
@@ -59,10 +67,12 @@ export async function startWhisperRecording(
     stream.getTracks().forEach(t => t.stop());
     onEnd();
 
-    const blob = new Blob(chunks, { type: mimeType });
+    // The browser-selected mime type
+    const finalMime = mediaRecorder.mimeType || 'audio/webm';
+    const blob = new Blob(chunks, { type: finalMime });
 
-    // Whisper が受け付けるファイル名に合わせる (.webm / .ogg)
-    const ext = mimeType.includes('ogg') ? 'ogg' : 'webm';
+    // Whisper が受け付けるファイル名に合わせる
+    const ext = finalMime.includes('mp4') ? 'mp4' : finalMime.includes('ogg') ? 'ogg' : 'webm';
     const formData = new FormData();
     formData.append('audio', blob, `recording.${ext}`);
 
