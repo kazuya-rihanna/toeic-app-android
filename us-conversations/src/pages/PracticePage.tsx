@@ -78,17 +78,20 @@ export const PracticePage: React.FC<PracticePageProps> = ({
       : conversations.filter(c => c.cat === selectedCategory);
     setFilteredCards(list);
 
+    let shouldReset = false;
     // If progress is loaded and we haven't jumped yet for this category
     if (progressLoaded && !hasJumpedRef.current && list.length > 0) {
       let firstUnmastered = list.findIndex(c => progress[c.id] !== 'mastered');
       if (firstUnmastered === -1) firstUnmastered = 0; // all mastered
       setCardIndex(firstUnmastered);
       hasJumpedRef.current = true;
+      shouldReset = true;
     } else if (!progressLoaded) {
       setCardIndex(0); // fallback before load
+      shouldReset = true;
     }
     
-    resetState();
+    if (shouldReset) resetState();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategory, conversations, progressLoaded, progress]);
 
@@ -143,7 +146,7 @@ export const PracticePage: React.FC<PracticePageProps> = ({
         setRecordingState('idle');
 
         // Auto-Mastered Logic
-        if (score === 100) {
+        if (score >= 85) {
           handleMarkStatus(currentCard.id, 'mastered');
           setShowCorrectAnimation(true);
           setTimeout(() => {
@@ -449,8 +452,17 @@ export const PracticePage: React.FC<PracticePageProps> = ({
                     <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                       <button style={btnPrimary}
                         onClick={() => {
-                          setSimilarity(getSimilarityScore(currentCard.qa, typingInput));
+                          const score = getSimilarityScore(currentCard.qa, typingInput);
+                          setSimilarity(score);
                           setDiffTokens(getWordDiff(currentCard.qa, typingInput));
+                          if (score >= 85) {
+                            handleMarkStatus(currentCard.id, 'mastered');
+                            setShowCorrectAnimation(true);
+                            setTimeout(() => {
+                              setShowCorrectAnimation(false);
+                              handleNext();
+                            }, 1500);
+                          }
                         }}>
                         Check Typing ✓
                       </button>
@@ -510,12 +522,18 @@ export const PracticePage: React.FC<PracticePageProps> = ({
                     <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.25rem' }}>
                       <button
                         style={{ ...btnBase, flex: 1, background: progress[currentCard.id] === 'review' ? 'rgba(251,191,36,0.12)' : tokens['surface-container-high'], border: `1px solid ${progress[currentCard.id] === 'review' ? '#FBBF24' : tokens['outline-variant']}`, color: '#FBBF24' }}
-                        onClick={() => handleMarkStatus(currentCard.id, 'review')}>
+                        onClick={() => {
+                          handleMarkStatus(currentCard.id, 'review');
+                          setTimeout(() => handleNext(), 500);
+                        }}>
                         ⚠️ Needs Practice
                       </button>
                       <button
                         style={{ ...btnPrimary, flex: 1, background: progress[currentCard.id] === 'mastered' ? tokens['primary'] : `linear-gradient(135deg, #059669, ${tokens['primary']})` }}
-                        onClick={() => handleMarkStatus(currentCard.id, 'mastered')}>
+                        onClick={() => {
+                          handleMarkStatus(currentCard.id, 'mastered');
+                          setTimeout(() => handleNext(), 500);
+                        }}>
                         ✓ Mastered
                       </button>
                     </div>
