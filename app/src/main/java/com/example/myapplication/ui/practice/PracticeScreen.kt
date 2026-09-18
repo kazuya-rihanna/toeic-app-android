@@ -721,26 +721,42 @@ fun PracticeScreen(
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Button(
                                 onClick = { viewModel.prevSentence() },
-                                enabled = canPrev
+                                enabled = canPrev,
+                                modifier = Modifier.weight(1f),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 10.dp)
                             ) {
-                                Text("Previous")
+                                Text("Previous", maxLines = 1)
                             }
                             OutlinedButton(
                                 onClick = { showJumpDialog = true },
-                                shape = RoundedCornerShape(8.dp)
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier.weight(1.2f),
+                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 10.dp)
                             ) {
-                                Text(pageIndicatorText)
+                                Text(
+                                    text = if (selectedCategory != null && activeCategoryTotal > 0) {
+                                        "${activeCategoryIndex ?: "-"}/$activeCategoryTotal (P.${state.currentPage})"
+                                    } else {
+                                        "${state.currentPage} / ${state.totalPages}"
+                                    },
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Medium
+                                )
                             }
                             Button(
                                 onClick = { viewModel.nextSentence() },
-                                enabled = canNext
+                                enabled = canNext,
+                                modifier = Modifier.weight(1f),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 10.dp)
                             ) {
-                                Text("Next")
+                                Text("Next", maxLines = 1)
                             }
                         }
 
