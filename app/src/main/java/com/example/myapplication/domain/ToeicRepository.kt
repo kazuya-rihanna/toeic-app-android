@@ -21,6 +21,7 @@ class ToeicRepository @Inject constructor(
         return ocrApiService.uploadDrawing(body)
     }
 
+    suspend fun getCategoryIndex(collection: String) = apiService.getCategoryIndex(collection)
     suspend fun getVocabularyPage(collection: String, page: Int) = apiService.getVocabularyPage(collection, page)
     suspend fun getFirstVocabulary(collection: String, userId: String) = apiService.getFirstVocabulary(collection, userId)
     suspend fun getNextVocabulary(collection: String, lastId: String) = apiService.getNextVocabulary(collection, lastId)

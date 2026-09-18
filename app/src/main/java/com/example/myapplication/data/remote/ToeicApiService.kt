@@ -9,6 +9,11 @@ import retrofit2.http.*
 
 interface ToeicApiService {
 
+    @GET("/vocabulary/category_index")
+    suspend fun getCategoryIndex(
+        @Query("collection") collection: String
+    ): Response<CategoryIndexResponse>
+
     @GET("/vocabulary/page")
     suspend fun getVocabularyPage(
         @Query("collection") collection: String,
@@ -132,4 +137,10 @@ data class ChartEntry(
 
 data class SttResponse(
     @SerializedName("transcribed_text") val transcribedText: String
+)
+
+data class CategoryIndexResponse(
+    @SerializedName("collection") val collection: String,
+    @SerializedName("counts") val counts: Map<String, Int>? = null,
+    @SerializedName("pages") val pages: Map<String, List<Int>>? = null
 )

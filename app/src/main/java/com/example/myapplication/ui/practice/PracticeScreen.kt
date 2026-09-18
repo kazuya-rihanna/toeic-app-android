@@ -22,8 +22,14 @@ import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.RotateRight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.foundation.rememberScrollState
@@ -42,7 +48,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun PracticeScreen(
     collectionId: String,
@@ -62,8 +68,11 @@ fun PracticeScreen(
     val penBattery by viewModel.penBattery.collectAsState()
     val currentProgress by viewModel.currentProgress.collectAsState()
     val canvasOrientation by viewModel.canvasOrientation.collectAsState()
+    val categoryIndex by viewModel.categoryIndex.collectAsState()
+    val selectedCategory by viewModel.selectedCategory.collectAsState()
 
     var isBlurred by remember { mutableStateOf(true) }
+    var showJumpDialog by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
     val penEvents by viewModel.penEvents.collectAsState()
 
@@ -157,6 +166,27 @@ fun PracticeScreen(
                     ) {
                         // Top Navigation Row: Page indicator (Left) and Copy (Right)
                         val clipboardManager = LocalClipboardManager.current
+                        val catLabel = when (selectedCategory) {
+                            "word" -> "単語"
+                            "phrasal_verb" -> "句動詞"
+                            "collocation_idiom" -> "イディオム・成句"
+                            else -> null
+                        }
+                        val activeCategoryPages = if (selectedCategory != null) {
+                            categoryIndex?.pages?.get(selectedCategory) ?: emptyList()
+                        } else null
+                        val activeCategoryIndex = if (activeCategoryPages != null) {
+                            val idx = activeCategoryPages.indexOf(state.currentPage)
+                            if (idx >= 0) idx + 1 else null
+                        } else null
+                        val activeCategoryTotal = activeCategoryPages?.size ?: 0
+
+                        val pageIndicatorText = if (catLabel != null && activeCategoryTotal > 0) {
+                            "$catLabel ${activeCategoryIndex ?: "-"}/$activeCategoryTotal (P.${state.currentPage})"
+                        } else {
+                            "Page ${state.currentPage} / ${state.totalPages}"
+                        }
+
                         Row(
                             modifier = Modifier.fillMaxWidth(), 
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -166,11 +196,30 @@ fun PracticeScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Text(
-                                    text = "Page ${state.currentPage} / ${state.totalPages}",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.outline
-                                )
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                                    modifier = Modifier.clickable { showJumpDialog = true }
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Text(
+                                            text = pageIndicatorText,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Medium,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        Icon(
+                                            Icons.Default.ArrowDropDown,
+                                            contentDescription = "Jump Page",
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
                                 if (state.sentence.hasOcrDataset == true) {
                                     Row(
                                         modifier = Modifier
@@ -208,6 +257,47 @@ fun PracticeScreen(
                             }
                         }
 
+                        // Category Filter Chips
+                        val wordCount = categoryIndex?.counts?.get("word") ?: 0
+                        val phrasalCount = categoryIndex?.counts?.get("phrasal_verb") ?: 0
+                        val collocCount = categoryIndex?.counts?.get("collocation_idiom") ?: 0
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState())
+                                .padding(vertical = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            FilterChip(
+                                selected = selectedCategory == null,
+                                onClick = { viewModel.selectCategory(null) },
+                                label = { Text("すべて (${state.totalPages})", style = MaterialTheme.typography.labelSmall) }
+                            )
+                            if (wordCount > 0) {
+                                FilterChip(
+                                    selected = selectedCategory == "word",
+                                    onClick = { viewModel.selectCategory(if (selectedCategory == "word") null else "word") },
+                                    label = { Text("単語 ($wordCount)", style = MaterialTheme.typography.labelSmall) }
+                                )
+                            }
+                            if (phrasalCount > 0) {
+                                FilterChip(
+                                    selected = selectedCategory == "phrasal_verb",
+                                    onClick = { viewModel.selectCategory(if (selectedCategory == "phrasal_verb") null else "phrasal_verb") },
+                                    label = { Text("句動詞 ($phrasalCount)", style = MaterialTheme.typography.labelSmall) }
+                                )
+                            }
+                            if (collocCount > 0) {
+                                FilterChip(
+                                    selected = selectedCategory == "collocation_idiom",
+                                    onClick = { viewModel.selectCategory(if (selectedCategory == "collocation_idiom") null else "collocation_idiom") },
+                                    label = { Text("コロケーション・成句 ($collocCount)", style = MaterialTheme.typography.labelSmall) }
+                                )
+                            }
+                        }
+
                         // Display API Error if any
                         errorMessage?.let { error ->
                             Surface(
@@ -236,66 +326,221 @@ fun PracticeScreen(
                             modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                         ) {
-                            Box(modifier = Modifier.padding(vertical = 32.dp, horizontal = 16.dp).fillMaxWidth()) {
-                                
-                                Row(
-                                    modifier = Modifier.align(Alignment.TopStart).offset(y = (-16).dp),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    if (clearedTyping) Icon(Icons.Default.Keyboard, contentDescription = "Cleared Typing", modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
-                                    if (clearedStt) Icon(Icons.Default.Mic, contentDescription = "Cleared Dictation", modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.secondary)
-                                    if (clearedLive) Icon(Icons.Default.EditNote, contentDescription = "Cleared Sync", modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.tertiary)
-                                }
-
-                                val sentenceText = if (isBlurred) "••••••••••••" else (state.sentence.example ?: "")
-                                val annotatedString = androidx.compose.ui.text.buildAnnotatedString {
-                                    append(sentenceText)
-                                    if (!isBlurred) {
-                                        val wordRegex = "[a-zA-Z0-9_'-]+".toRegex()
-                                        wordRegex.findAll(sentenceText).forEach { matchResult ->
-                                            addStringAnnotation(
-                                                tag = "WORD",
-                                                annotation = matchResult.value,
-                                                start = matchResult.range.first,
-                                                end = matchResult.range.last + 1
-                                            )
-                                        }
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Box(modifier = Modifier.padding(top = 28.dp, bottom = 20.dp, start = 16.dp, end = 16.dp).fillMaxWidth()) {
+                                    
+                                    Row(
+                                        modifier = Modifier.align(Alignment.TopStart).offset(y = (-12).dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        if (clearedTyping) Icon(Icons.Default.Keyboard, contentDescription = "Cleared Typing", modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
+                                        if (clearedStt) Icon(Icons.Default.Mic, contentDescription = "Cleared Dictation", modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.secondary)
+                                        if (clearedLive) Icon(Icons.Default.EditNote, contentDescription = "Cleared Sync", modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.tertiary)
                                     }
-                                }
 
-                                androidx.compose.foundation.text.ClickableText(
-                                    text = annotatedString,
-                                    style = MaterialTheme.typography.headlineMedium.copy(
-                                        textAlign = TextAlign.Center,
-                                        color = androidx.compose.material3.LocalContentColor.current
-                                    ),
-                                    modifier = Modifier.align(Alignment.Center).padding(horizontal = 40.dp),
-                                    onClick = { offset ->
+                                    val sentenceText = if (isBlurred) "••••••••••••" else (state.sentence.example ?: "")
+                                    val annotatedString = androidx.compose.ui.text.buildAnnotatedString {
+                                        append(sentenceText)
                                         if (!isBlurred) {
-                                            annotatedString.getStringAnnotations(tag = "WORD", start = offset, end = offset)
-                                                .firstOrNull()?.let { annotation ->
-                                                    val clickedWord = annotation.item
-                                                    val copyText = """
-                                                        Act as a Lexicographer. From the provided URL, extract ONLY the definition and the specific example sentence that matches the context of the input sentence. Output the result in a clean Markdown blockquote. Do not provide any introductory text or conversational filler.
-                                                        
-                                                        URL: https://www.ldoceonline.com/dictionary/${clickedWord.lowercase()}
-                                                        Input: ${state.sentence.example}
-                                                    """.trimIndent()
-                                                    clipboardManager.setText(AnnotatedString(copyText))
-                                                    android.widget.Toast.makeText(context, "Copied: $clickedWord", android.widget.Toast.LENGTH_SHORT).show()
-                                                }
+                                            val wordRegex = "[a-zA-Z0-9_'-]+".toRegex()
+                                            wordRegex.findAll(sentenceText).forEach { matchResult ->
+                                                addStringAnnotation(
+                                                    tag = "WORD",
+                                                    annotation = matchResult.value,
+                                                    start = matchResult.range.first,
+                                                    end = matchResult.range.last + 1
+                                                )
+                                            }
                                         }
                                     }
-                                )
-                                IconButton(
-                                    onClick = { isBlurred = !isBlurred },
-                                    modifier = Modifier.align(Alignment.TopEnd)
-                                ) {
-                                    Icon(
-                                        if (isBlurred) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                        contentDescription = "Toggle Visibility",
-                                        tint = MaterialTheme.colorScheme.primary
+
+                                    androidx.compose.foundation.text.ClickableText(
+                                        text = annotatedString,
+                                        style = MaterialTheme.typography.headlineMedium.copy(
+                                            textAlign = TextAlign.Center,
+                                            color = androidx.compose.material3.LocalContentColor.current
+                                        ),
+                                        modifier = Modifier.align(Alignment.Center).padding(horizontal = 40.dp),
+                                        onClick = { offset ->
+                                            if (!isBlurred) {
+                                                annotatedString.getStringAnnotations(tag = "WORD", start = offset, end = offset)
+                                                    .firstOrNull()?.let { annotation ->
+                                                        val clickedWord = annotation.item
+                                                        val copyText = """
+                                                            Act as a Lexicographer. From the provided URL, extract ONLY the definition and the specific example sentence that matches the context of the input sentence. Output the result in a clean Markdown blockquote. Do not provide any introductory text or conversational filler.
+                                                            
+                                                            URL: https://www.ldoceonline.com/dictionary/${clickedWord.lowercase()}
+                                                            Input: ${state.sentence.example}
+                                                        """.trimIndent()
+                                                        clipboardManager.setText(AnnotatedString(copyText))
+                                                        android.widget.Toast.makeText(context, "Copied: $clickedWord", android.widget.Toast.LENGTH_SHORT).show()
+                                                    }
+                                            }
+                                        }
                                     )
+                                    IconButton(
+                                        onClick = { isBlurred = !isBlurred },
+                                        modifier = Modifier.align(Alignment.TopEnd)
+                                    ) {
+                                        Icon(
+                                            if (isBlurred) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                            contentDescription = "Toggle Visibility",
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
+
+                                // --- TOEIC Corpus Metadata Badges ---
+                                val sentence = state.sentence
+                                val cat = sentence.category?.lowercase() ?: ""
+                                val catJp = sentence.categoryJp ?: ""
+                                val isPhrasal = cat == "phrasal_verb" || catJp.contains("句動詞")
+                                val isCollocIdiom = cat == "collocation_idiom" || catJp.contains("イディオム") || catJp.contains("コロケーション")
+                                val isWord = cat == "word" || catJp.contains("単語") || (!isPhrasal && !isCollocIdiom && (sentence.expression != null || cat.isNotBlank() || catJp.isNotBlank()))
+                                val hasCategory = isPhrasal || isCollocIdiom || isWord
+
+                                val hasMetadata = sentence.partLabel != null ||
+                                        sentence.importanceRank != null ||
+                                        sentence.testCount != null ||
+                                        sentence.totalCount != null ||
+                                        !sentence.appearedTests.isNullOrBlank() ||
+                                        hasCategory
+
+                                if (hasMetadata) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        thickness = 0.5.dp,
+                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                                    )
+                                    FlowRow(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        // 1. 言語区分バッジ (単語 / 句動詞 / イディオム・成句)
+                                        if (hasCategory) {
+                                            val (typeText, typeBg, typeColor) = when {
+                                                isPhrasal -> Triple("句動詞 (Phrasal Verb)", Color(0xFFE8F5E9), Color(0xFF1B5E20))
+                                                isCollocIdiom -> Triple("イディオム・成句", Color(0xFFFFF8E1), Color(0xFFE65100))
+                                                else -> Triple("単語 (Word)", Color(0xFFEDE7F6), Color(0xFF4A148C))
+                                            }
+                                            Surface(
+                                                shape = RoundedCornerShape(6.dp),
+                                                color = typeBg,
+                                                border = BorderStroke(1.dp, typeColor.copy(alpha = 0.6f))
+                                            ) {
+                                                Text(
+                                                    text = typeText,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = typeColor,
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                                )
+                                            }
+                                        }
+
+                                        // 2. 対象語彙・表現 (見出し語)
+                                        val expr = sentence.expression
+                                        if (!expr.isNullOrBlank()) {
+                                            Surface(
+                                                shape = RoundedCornerShape(6.dp),
+                                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                                border = BorderStroke(0.6.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
+                                            ) {
+                                                Text(
+                                                    text = expr,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                                )
+                                            }
+                                        }
+
+                                        // 3. Part Label
+                                        val partLabel = sentence.partLabel
+                                        if (!partLabel.isNullOrBlank()) {
+                                            Surface(
+                                                shape = RoundedCornerShape(6.dp),
+                                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
+                                            ) {
+                                                Text(
+                                                    text = partLabel,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    fontWeight = FontWeight.Medium,
+                                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                                )
+                                            }
+                                        }
+
+                                        // 4. Importance Rank
+                                        val rankRaw = sentence.importanceRank
+                                        if (!rankRaw.isNullOrBlank()) {
+                                            val isRankS = rankRaw.startsWith("S", ignoreCase = true)
+                                            val isRankA = rankRaw.startsWith("A", ignoreCase = true)
+                                            val isRankB = rankRaw.startsWith("B", ignoreCase = true)
+                                            val (rankBg, rankColor) = when {
+                                                isRankS -> Color(0xFFFFEBEE) to Color(0xFFC62828)
+                                                isRankA -> Color(0xFFFFF3E0) to Color(0xFFE65100)
+                                                isRankB -> Color(0xFFE3F2FD) to Color(0xFF1565C0)
+                                                else -> Color(0xFFF5F5F5) to Color(0xFF616161)
+                                            }
+                                            val rankLabel = if (rankRaw.contains(" ")) "Rank " + rankRaw.substringBefore(" ") else "Rank $rankRaw"
+                                            Surface(
+                                                shape = RoundedCornerShape(6.dp),
+                                                color = rankBg,
+                                                border = BorderStroke(0.8.dp, rankColor.copy(alpha = 0.5f))
+                                            ) {
+                                                Text(
+                                                    text = rankLabel,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = rankColor,
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                                )
+                                            }
+                                        }
+
+                                        // 5. 出現テスト数 & 総出現回数
+                                        val countParts = mutableListOf<String>()
+                                        val totalCount = sentence.totalCount
+                                        val testCount = sentence.testCount
+                                        if (totalCount != null) countParts.add("計${totalCount}回")
+                                        if (testCount != null) countParts.add("${testCount}模試")
+                                        if (countParts.isNotEmpty()) {
+                                            Surface(
+                                                shape = RoundedCornerShape(6.dp),
+                                                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f)
+                                            ) {
+                                                Text(
+                                                    text = "出現: " + countParts.joinToString(" / "),
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                                )
+                                            }
+                                        }
+
+                                        // 6. 出現模試一覧 (例: test1, test2)
+                                        val appeared = sentence.appearedTests
+                                        if (!appeared.isNullOrBlank()) {
+                                            Surface(
+                                                shape = RoundedCornerShape(6.dp),
+                                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                                                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant)
+                                            ) {
+                                                Text(
+                                                    text = appeared,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -459,19 +704,57 @@ fun PracticeScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        val canPrev = if (activeCategoryPages != null && activeCategoryPages.isNotEmpty()) {
+                            val idx = activeCategoryPages.indexOf(state.currentPage)
+                            idx > 0 || (idx < 0 && activeCategoryPages.any { it < state.currentPage })
+                        } else {
+                            state.currentPage > 1
+                        }
+
+                        val canNext = if (activeCategoryPages != null && activeCategoryPages.isNotEmpty()) {
+                            val idx = activeCategoryPages.indexOf(state.currentPage)
+                            (idx >= 0 && idx < activeCategoryPages.size - 1) || (idx < 0 && activeCategoryPages.any { it > state.currentPage })
+                        } else {
+                            state.currentPage < state.totalPages
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Button(
                                 onClick = { viewModel.prevSentence() },
-                                enabled = state.currentPage > 1
+                                enabled = canPrev
                             ) {
                                 Text("Previous")
                             }
+                            OutlinedButton(
+                                onClick = { showJumpDialog = true },
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text(pageIndicatorText)
+                            }
                             Button(
                                 onClick = { viewModel.nextSentence() },
-                                enabled = state.currentPage < state.totalPages
+                                enabled = canNext
                             ) {
                                 Text("Next")
                             }
+                        }
+
+                        if (showJumpDialog) {
+                            PageJumpDialog(
+                                currentPage = state.currentPage,
+                                totalPages = state.totalPages,
+                                categoryName = catLabel,
+                                categoryPages = activeCategoryPages,
+                                onDismiss = { showJumpDialog = false },
+                                onJump = { targetPage ->
+                                    showJumpDialog = false
+                                    viewModel.jumpToPage(targetPage)
+                                }
+                            )
                         }
 
                         if (isSuccess) {
@@ -566,4 +849,150 @@ fun AudioVolumeVisualizer(
             color = if (isListening) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
         )
     }
+}
+
+@Composable
+fun PageJumpDialog(
+    currentPage: Int,
+    totalPages: Int,
+    categoryName: String? = null,
+    categoryPages: List<Int>? = null,
+    onDismiss: () -> Unit,
+    onJump: (Int) -> Unit
+) {
+    val isCategoryMode = categoryPages != null && categoryPages.isNotEmpty()
+    val catTotal = categoryPages?.size ?: totalPages
+    val currentCatIndex = if (isCategoryMode) {
+        val idx = categoryPages!!.indexOf(currentPage)
+        if (idx >= 0) idx + 1 else 1
+    } else {
+        currentPage
+    }
+
+    var inputIndex by remember { mutableStateOf(currentCatIndex.toString()) }
+    var sliderValue by remember { mutableStateOf(currentCatIndex.toFloat()) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                if (isCategoryMode) "ページジャンプ ($categoryName)" else "ページジャンプ",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                val promptText = if (isCategoryMode) {
+                    "移動先の項目番号 (1 〜 $catTotal):"
+                } else {
+                    "移動先ページ番号 (1 〜 $totalPages):"
+                }
+                Text(
+                    text = promptText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                OutlinedTextField(
+                    value = inputIndex,
+                    onValueChange = { input ->
+                        val filtered = input.filter { it.isDigit() }
+                        inputIndex = filtered
+                        filtered.toIntOrNull()?.let { p ->
+                            sliderValue = p.coerceIn(1, catTotal).toFloat()
+                        }
+                    },
+                    label = { Text(if (isCategoryMode) "項目番号 (1〜$catTotal)" else "ページ番号") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                    supportingText = if (isCategoryMode) {
+                        val currentTypedIdx = inputIndex.toIntOrNull()?.coerceIn(1, catTotal) ?: currentCatIndex
+                        val originalPage = categoryPages!![currentTypedIdx - 1]
+                        { Text("→ 原本 P.$originalPage に移動します") }
+                    } else null
+                )
+
+                if (catTotal > 1) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                if (isCategoryMode) "1 (P.${categoryPages!!.first()})" else "Page 1",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                            Text(
+                                if (isCategoryMode) "$catTotal (P.${categoryPages!!.last()})" else "Page $totalPages",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                        }
+                        Slider(
+                            value = sliderValue,
+                            onValueChange = {
+                                sliderValue = it
+                                inputIndex = it.toInt().toString()
+                            },
+                            valueRange = 1f..catTotal.toFloat(),
+                            steps = if (catTotal in 2..50) catTotal - 2 else 0,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+
+                // クイックジャンプボタン
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            inputIndex = "1"
+                            sliderValue = 1f
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("最初 (1)")
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            inputIndex = catTotal.toString()
+                            sliderValue = catTotal.toFloat()
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("最後 ($catTotal)")
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val typed = inputIndex.toIntOrNull() ?: currentCatIndex
+                    val clamped = typed.coerceIn(1, catTotal)
+                    val targetPage = if (isCategoryMode) {
+                        categoryPages!![clamped - 1]
+                    } else {
+                        clamped
+                    }
+                    onJump(targetPage)
+                }
+            ) {
+                Text("ジャンプ")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("キャンセル")
+            }
+        }
+    )
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.model.CheckResult
 import com.example.myapplication.data.model.Sentence
 import com.example.myapplication.data.remote.SocketManager
+import com.example.myapplication.data.remote.CategoryIndexResponse
 import com.example.myapplication.domain.ToeicRepository
 import com.example.myapplication.data.pen.PenManager
 import kr.neolab.sdk.ink.structure.Dot
@@ -44,6 +45,28 @@ class PracticeViewModel @Inject constructor(
 
     private val _currentProgress = MutableStateFlow<Progress?>(null)
     val currentProgress = _currentProgress.asStateFlow()
+
+    private val _categoryIndex = MutableStateFlow<CategoryIndexResponse?>(null)
+    val categoryIndex = _categoryIndex.asStateFlow()
+
+    private val _selectedCategory = MutableStateFlow<String?>(null) // null = all, "word", "phrasal_verb", "collocation_idiom"
+    val selectedCategory = _selectedCategory.asStateFlow()
+
+    fun selectCategory(categoryKey: String?) {
+        if (_selectedCategory.value == categoryKey) return
+        _selectedCategory.value = categoryKey
+
+        val currentState = _uiState.value
+        if (currentState is PracticeUiState.Success && categoryKey != null) {
+            val catPages = _categoryIndex.value?.pages?.get(categoryKey) ?: emptyList()
+            if (catPages.isNotEmpty()) {
+                if (!catPages.contains(currentState.currentPage)) {
+                    val target = catPages.firstOrNull { it >= currentState.currentPage } ?: catPages.first()
+                    jumpToPage(target)
+                }
+            }
+        }
+    }
 
     fun clearError() { _errorMessage.value = null }
 
@@ -527,11 +550,20 @@ class PracticeViewModel @Inject constructor(
                     try { repository.getProgress(userId) }
                     catch (e: Exception) { null }
                 }
+                val categoryDeferred = async {
+                    try { repository.getCategoryIndex(collectionId) }
+                    catch (e: Exception) { null }
+                }
                 val response = repository.getFirstVocabulary(collectionId, userId)
                 
                 val progressRes = progressDeferred.await()
                 if (progressRes != null && progressRes.isSuccessful) {
                     _currentProgress.value = progressRes.body()?.progress?.get(collectionId)
+                }
+
+                val categoryRes = categoryDeferred.await()
+                if (categoryRes != null && categoryRes.isSuccessful) {
+                    _categoryIndex.value = categoryRes.body()
                 }
 
                 if (response.isSuccessful) {
@@ -542,6 +574,15 @@ class PracticeViewModel @Inject constructor(
                         val totalPages = body?.totalPages ?: 1
                         val currentPage = body?.currentPage ?: 1
                         _uiState.value = PracticeUiState.Success(docs[0], collectionId, currentPage, totalPages)
+
+                        val activeCat = _selectedCategory.value
+                        if (activeCat != null) {
+                            val catPages = _categoryIndex.value?.pages?.get(activeCat) ?: emptyList()
+                            if (catPages.isNotEmpty() && !catPages.contains(currentPage)) {
+                                val nearest = catPages.firstOrNull { it >= currentPage } ?: catPages.first()
+                                jumpToPage(nearest)
+                            }
+                        }
                     } else {
                         _uiState.value = PracticeUiState.Error("No sentences found")
                     }
@@ -680,31 +721,24 @@ class PracticeViewModel @Inject constructor(
     fun nextSentence() {
         val currentState = _uiState.value
         if (currentState is PracticeUiState.Success) {
-            if (currentState.currentPage >= currentState.totalPages) return
-            
-            viewModelScope.launch {
-                _uiState.value = PracticeUiState.Loading
-                try {
-                    val nextRawPage = currentState.currentPage + 1
-                    val response = repository.getVocabularyPage(currentState.collectionId, nextRawPage)
-                    if (response.isSuccessful) {
-                        val body = response.body()
-                        val docs = body?.docs ?: emptyList()
-                        if (docs.isNotEmpty()) {
-                            _uiState.value = PracticeUiState.Success(
-                                docs[0], 
-                                currentState.collectionId, 
-                                nextRawPage, 
-                                body?.totalPages ?: currentState.totalPages
-                            )
-                            _inputText.value = ""
-                            _checkResult.value = null
-                            _isSuccess.value = false
-                        }
-                    }
-                } catch (e: Exception) {
-                    _uiState.value = PracticeUiState.Error(e.message ?: "Unknown error")
+            val activeCat = _selectedCategory.value
+            val catPages = if (activeCat != null) _categoryIndex.value?.pages?.get(activeCat) else null
+
+            val targetPage = if (catPages != null && catPages.isNotEmpty()) {
+                val idx = catPages.indexOf(currentState.currentPage)
+                if (idx >= 0 && idx + 1 < catPages.size) {
+                    catPages[idx + 1]
+                } else if (idx < 0) {
+                    catPages.firstOrNull { it > currentState.currentPage }
+                } else {
+                    null
                 }
+            } else {
+                if (currentState.currentPage < currentState.totalPages) currentState.currentPage + 1 else null
+            }
+
+            if (targetPage != null) {
+                jumpToPage(targetPage)
             }
         }
     }
@@ -712,26 +746,52 @@ class PracticeViewModel @Inject constructor(
     fun prevSentence() {
         val currentState = _uiState.value
         if (currentState is PracticeUiState.Success) {
-            if (currentState.currentPage <= 1) return
+            val activeCat = _selectedCategory.value
+            val catPages = if (activeCat != null) _categoryIndex.value?.pages?.get(activeCat) else null
+
+            val targetPage = if (catPages != null && catPages.isNotEmpty()) {
+                val idx = catPages.indexOf(currentState.currentPage)
+                if (idx > 0) {
+                    catPages[idx - 1]
+                } else if (idx < 0) {
+                    catPages.lastOrNull { it < currentState.currentPage }
+                } else {
+                    null
+                }
+            } else {
+                if (currentState.currentPage > 1) currentState.currentPage - 1 else null
+            }
+
+            if (targetPage != null) {
+                jumpToPage(targetPage)
+            }
+        }
+    }
+
+    fun jumpToPage(targetPage: Int) {
+        val currentState = _uiState.value
+        if (currentState is PracticeUiState.Success) {
+            val page = targetPage.coerceIn(1, currentState.totalPages)
+            if (page == currentState.currentPage) return
 
             viewModelScope.launch {
                 _uiState.value = PracticeUiState.Loading
                 try {
-                    val prevRawPage = currentState.currentPage - 1
-                    val response = repository.getVocabularyPage(currentState.collectionId, prevRawPage)
+                    val response = repository.getVocabularyPage(currentState.collectionId, page)
                     if (response.isSuccessful) {
                         val body = response.body()
                         val docs = body?.docs ?: emptyList()
                         if (docs.isNotEmpty()) {
                             _uiState.value = PracticeUiState.Success(
-                                docs[0], 
-                                currentState.collectionId, 
-                                prevRawPage, 
+                                docs[0],
+                                currentState.collectionId,
+                                page,
                                 body?.totalPages ?: currentState.totalPages
                             )
                             _inputText.value = ""
                             _checkResult.value = null
                             _isSuccess.value = false
+                            clearDrawing()
                         }
                     }
                 } catch (e: Exception) {
