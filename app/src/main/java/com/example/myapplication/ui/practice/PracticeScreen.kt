@@ -167,9 +167,9 @@ fun PracticeScreen(
                         // Top Navigation Row: Page indicator (Left) and Copy (Right)
                         val clipboardManager = LocalClipboardManager.current
                         val catLabel = when (selectedCategory) {
-                            "word" -> "単語"
-                            "phrasal_verb" -> "句動詞"
-                            "collocation_idiom" -> "イディオム・成句"
+                            "word" -> "Word"
+                            "phrasal_verb" -> "Phrasal Verb"
+                            "collocation_idiom" -> "Collocation & Idiom"
                             else -> null
                         }
                         val activeCategoryPages = if (selectedCategory != null) {
@@ -182,9 +182,9 @@ fun PracticeScreen(
                         val activeCategoryTotal = activeCategoryPages?.size ?: 0
 
                         val pageIndicatorText = if (catLabel != null && activeCategoryTotal > 0) {
-                            "$catLabel ${activeCategoryIndex ?: "-"}/$activeCategoryTotal (P.${state.currentPage})"
+                            "$catLabel ${activeCategoryIndex ?: "-"}/$activeCategoryTotal (Page ${state.currentPage})"
                         } else {
-                            "Page ${state.currentPage} / ${state.totalPages}"
+                            "Page ${state.currentPage} of ${state.totalPages}"
                         }
 
                         Row(
@@ -273,27 +273,27 @@ fun PracticeScreen(
                             FilterChip(
                                 selected = selectedCategory == null,
                                 onClick = { viewModel.selectCategory(null) },
-                                label = { Text("すべて (${state.totalPages})", style = MaterialTheme.typography.labelSmall) }
+                                label = { Text("All (${state.totalPages})", style = MaterialTheme.typography.labelSmall) }
                             )
                             if (wordCount > 0) {
                                 FilterChip(
                                     selected = selectedCategory == "word",
                                     onClick = { viewModel.selectCategory(if (selectedCategory == "word") null else "word") },
-                                    label = { Text("単語 ($wordCount)", style = MaterialTheme.typography.labelSmall) }
+                                    label = { Text("Words ($wordCount)", style = MaterialTheme.typography.labelSmall) }
                                 )
                             }
                             if (phrasalCount > 0) {
                                 FilterChip(
                                     selected = selectedCategory == "phrasal_verb",
                                     onClick = { viewModel.selectCategory(if (selectedCategory == "phrasal_verb") null else "phrasal_verb") },
-                                    label = { Text("句動詞 ($phrasalCount)", style = MaterialTheme.typography.labelSmall) }
+                                    label = { Text("Phrasal Verbs ($phrasalCount)", style = MaterialTheme.typography.labelSmall) }
                                 )
                             }
                             if (collocCount > 0) {
                                 FilterChip(
                                     selected = selectedCategory == "collocation_idiom",
                                     onClick = { viewModel.selectCategory(if (selectedCategory == "collocation_idiom") null else "collocation_idiom") },
-                                    label = { Text("コロケーション・成句 ($collocCount)", style = MaterialTheme.typography.labelSmall) }
+                                    label = { Text("Collocations & Idioms ($collocCount)", style = MaterialTheme.typography.labelSmall) }
                                 )
                             }
                         }
@@ -422,9 +422,9 @@ fun PracticeScreen(
                                         // 1. 言語区分バッジ (単語 / 句動詞 / イディオム・成句)
                                         if (hasCategory) {
                                             val (typeText, typeBg, typeColor) = when {
-                                                isPhrasal -> Triple("句動詞 (Phrasal Verb)", Color(0xFFE8F5E9), Color(0xFF1B5E20))
-                                                isCollocIdiom -> Triple("イディオム・成句", Color(0xFFFFF8E1), Color(0xFFE65100))
-                                                else -> Triple("単語 (Word)", Color(0xFFEDE7F6), Color(0xFF4A148C))
+                                                isPhrasal -> Triple("Phrasal Verb", Color(0xFFE8F5E9), Color(0xFF1B5E20))
+                                                isCollocIdiom -> Triple("Collocation & Idiom", Color(0xFFFFF8E1), Color(0xFFE65100))
+                                                else -> Triple("Word", Color(0xFFEDE7F6), Color(0xFF4A148C))
                                             }
                                             Surface(
                                                 shape = RoundedCornerShape(6.dp),
@@ -441,7 +441,7 @@ fun PracticeScreen(
                                             }
                                         }
 
-                                        // 2. 対象語彙・表現 (見出し語)
+                                        // 2. Target expression / headword
                                         val expr = sentence.expression
                                         if (!expr.isNullOrBlank()) {
                                             Surface(
@@ -504,27 +504,28 @@ fun PracticeScreen(
                                             }
                                         }
 
-                                        // 5. 出現テスト数 & 総出現回数
+                                        // 5. Test count & Total occurrences
                                         val countParts = mutableListOf<String>()
                                         val totalCount = sentence.totalCount
                                         val testCount = sentence.testCount
-                                        if (totalCount != null) countParts.add("計${totalCount}回")
-                                        if (testCount != null) countParts.add("${testCount}模試")
+                                        if (totalCount != null) countParts.add("${totalCount}x total")
+                                        if (testCount != null) countParts.add("${testCount} tests")
                                         if (countParts.isNotEmpty()) {
                                             Surface(
                                                 shape = RoundedCornerShape(6.dp),
                                                 color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f)
                                             ) {
                                                 Text(
-                                                    text = "出現: " + countParts.joinToString(" / "),
+                                                    text = countParts.joinToString(" • "),
                                                     style = MaterialTheme.typography.labelSmall,
+                                                    fontWeight = FontWeight.Medium,
                                                     color = MaterialTheme.colorScheme.onSecondaryContainer,
                                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                                                 )
                                             }
                                         }
 
-                                        // 6. 出現模試一覧 (例: test1, test2)
+                                        // 6. Appeared tests list (e.g. test1, test2)
                                         val appeared = sentence.appearedTests
                                         if (!appeared.isNullOrBlank()) {
                                             Surface(
@@ -533,7 +534,7 @@ fun PracticeScreen(
                                                 border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant)
                                             ) {
                                                 Text(
-                                                    text = appeared,
+                                                    text = "Tests: $appeared",
                                                     style = MaterialTheme.typography.labelSmall,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
@@ -876,7 +877,7 @@ fun PageJumpDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                if (isCategoryMode) "ページジャンプ ($categoryName)" else "ページジャンプ",
+                if (isCategoryMode) "Jump to $categoryName" else "Jump to Page",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -887,9 +888,9 @@ fun PageJumpDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 val promptText = if (isCategoryMode) {
-                    "移動先の項目番号 (1 〜 $catTotal):"
+                    "Select item number (1 to $catTotal):"
                 } else {
-                    "移動先ページ番号 (1 〜 $totalPages):"
+                    "Enter page number (1 to $totalPages):"
                 }
                 Text(
                     text = promptText,
@@ -906,14 +907,14 @@ fun PageJumpDialog(
                             sliderValue = p.coerceIn(1, catTotal).toFloat()
                         }
                     },
-                    label = { Text(if (isCategoryMode) "項目番号 (1〜$catTotal)" else "ページ番号") },
+                    label = { Text(if (isCategoryMode) "Item Number (1 - $catTotal)" else "Page Number") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
                     supportingText = if (isCategoryMode) {
                         val currentTypedIdx = inputIndex.toIntOrNull()?.coerceIn(1, catTotal) ?: currentCatIndex
                         val originalPage = categoryPages!![currentTypedIdx - 1]
-                        { Text("→ 原本 P.$originalPage に移動します") }
+                        { Text("→ Jumps to Page $originalPage") }
                     } else null
                 )
 
@@ -947,7 +948,7 @@ fun PageJumpDialog(
                     }
                 }
 
-                // クイックジャンプボタン
+                // Quick jump buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -959,7 +960,7 @@ fun PageJumpDialog(
                         },
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("最初 (1)")
+                        Text("First (1)")
                     }
                     OutlinedButton(
                         onClick = {
@@ -968,7 +969,7 @@ fun PageJumpDialog(
                         },
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("最後 ($catTotal)")
+                        Text(if (isCategoryMode) "Last ($catTotal)" else "Last ($totalPages)")
                     }
                 }
             }
@@ -986,12 +987,12 @@ fun PageJumpDialog(
                     onJump(targetPage)
                 }
             ) {
-                Text("ジャンプ")
+                Text("Jump")
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("キャンセル")
+                Text("Cancel")
             }
         }
     )
