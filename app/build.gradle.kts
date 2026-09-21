@@ -84,8 +84,11 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
 
-    // ML Kit Digital Ink Recognition
+    // ML Kit Digital Ink Recognition (16KB aligned)
     implementation(libs.mlkit.digital.ink)
+
+    // AndroidX Graphics Path (16KB aligned)
+    implementation(libs.androidx.graphics.path)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

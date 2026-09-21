@@ -19,7 +19,8 @@ hilt = "2.52"
 composeBom = "2024.10.01"
 nav-compose = "2.8.3"
 firebaseBom = "33.5.1"
-mlkitDigitalInk = "18.1.0"
+mlkitDigitalInk = "19.0.0"
+graphicsPath = "1.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -63,6 +64,7 @@ firebaseBom = { group = "com.google.firebase", name = "firebase-bom", version.re
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth-ktx" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore-ktx" }
 mlkit-digital-ink = { group = "com.google.mlkit", name = "digital-ink-recognition", version.ref = "mlkitDigitalInk" }
+androidx-graphics-path = { group = "androidx.graphics", name = "graphics-path", version.ref = "graphicsPath" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
