@@ -59,6 +59,12 @@ interface ToeicApiService {
         @Body request: TTSRequest
     ): Response<ResponseBody>
 
+    @Streaming
+    @POST("/tts/stream")
+    suspend fun getTTSStream(
+        @Body request: TTSStreamRequest
+    ): Response<ResponseBody>
+
     @Multipart
     @POST("/stt")
     suspend fun transcribeAudio(
@@ -122,6 +128,12 @@ data class ProgressUpdateResponse(
 data class TTSRequest(
     @SerializedName("text") val text: String,
     @SerializedName("voice") val voice: String = "en-US-Standard-C"
+)
+
+data class TTSStreamRequest(
+    @SerializedName("text") val text: String,
+    @SerializedName("voice") val voice: String = "am_onyx",
+    @SerializedName("format") val format: String = "pcm"
 )
 
 data class ChartDataResponse(

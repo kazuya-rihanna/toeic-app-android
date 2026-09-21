@@ -40,6 +40,9 @@ class ToeicRepository @Inject constructor(
 
     suspend fun getTTS(text: String): Response<ResponseBody> = apiService.getTTS(TTSRequest(text))
 
+    suspend fun getTTSStream(text: String): Response<ResponseBody> = 
+        apiService.getTTSStream(com.example.myapplication.data.remote.TTSStreamRequest(text = text, voice = "am_onyx", format = "pcm"))
+
     suspend fun transcribeAudio(file: java.io.File): Response<SttResponse> {
         val requestFile = okhttp3.RequestBody.create("audio/wav".toMediaType(), file)
         val body = okhttp3.MultipartBody.Part.createFormData("audio", file.name, requestFile)
