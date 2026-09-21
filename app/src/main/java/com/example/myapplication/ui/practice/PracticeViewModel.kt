@@ -200,6 +200,16 @@ class PracticeViewModel @Inject constructor(
                     }
                 }
             }
+            viewModelScope.launch {
+                _uiState.collect { state ->
+                    if (state is PracticeUiState.Success) {
+                        val text = state.sentence.example
+                        if (!text.isNullOrBlank()) {
+                            ttsManager.preloadText(text)
+                        }
+                    }
+                }
+            }
         } catch (e: Throwable) {
             android.util.Log.e("PracticeViewModel", "Crash in PracticeViewModel init", e)
         }
@@ -822,6 +832,9 @@ class PracticeViewModel @Inject constructor(
             val page = targetPage.coerceIn(1, currentState.totalPages)
             if (page == currentState.currentPage) return
 
+            ttsManager.stop()
+            _isTtsPlaying.value = false
+
             viewModelScope.launch {
                 _uiState.value = PracticeUiState.Loading
                 try {
@@ -851,6 +864,7 @@ class PracticeViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
+        ttsManager.release()
         socketManager.disconnect()
     }
 }
