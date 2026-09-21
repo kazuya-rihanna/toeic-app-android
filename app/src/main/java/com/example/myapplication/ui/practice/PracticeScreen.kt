@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.ContentCopy
@@ -72,7 +71,6 @@ fun PracticeScreen(
     val categoryIndex by viewModel.categoryIndex.collectAsState()
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     val isTtsPlaying by viewModel.isTtsPlaying.collectAsState()
-    val isTtsStreaming by viewModel.isTtsStreaming.collectAsState()
 
     var isBlurred by remember { mutableStateOf(true) }
     var showJumpDialog by remember { mutableStateOf(false) }
@@ -701,27 +699,14 @@ fun PracticeScreen(
                                 }
                             }
 
-                            // 1. 通常再生ボタン（既存）
                             IconButton(
                                 onClick = { viewModel.playTTS() },
-                                enabled = !isTtsPlaying && !isTtsStreaming
+                                enabled = !isTtsPlaying
                             ) {
                                 Icon(
                                     Icons.Default.PlayArrow,
-                                    contentDescription = "TTS (Normal)",
+                                    contentDescription = "TTS",
                                     tint = if (isTtsPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-
-                            // 2. ストリーミング再生ボタン（新規・リアルタイム象徴アイコン）
-                            IconButton(
-                                onClick = { viewModel.playTTSStream() },
-                                enabled = !isTtsPlaying && !isTtsStreaming
-                            ) {
-                                Icon(
-                                    Icons.Default.Bolt,
-                                    contentDescription = "TTS (Streaming)",
-                                    tint = if (isTtsStreaming) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
                                 )
                             }
                         }

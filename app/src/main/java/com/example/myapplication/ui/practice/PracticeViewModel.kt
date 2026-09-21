@@ -118,8 +118,6 @@ class PracticeViewModel @Inject constructor(
     private val _isTtsPlaying = MutableStateFlow(false)
     val isTtsPlaying = _isTtsPlaying.asStateFlow()
 
-    private val _isTtsStreaming = MutableStateFlow(false)
-    val isTtsStreaming = _isTtsStreaming.asStateFlow()
 
     private var lastSubmittedDrawingBytes: ByteArray? = null
     private var lastOcrRawResponse: String? = null
@@ -514,7 +512,7 @@ class PracticeViewModel @Inject constructor(
     }
 
     fun playTTS() {
-        if (_isTtsPlaying.value || _isTtsStreaming.value) return
+        if (_isTtsPlaying.value) return
 
         val currentState = _uiState.value
         if (currentState is PracticeUiState.Success) {
@@ -524,22 +522,6 @@ class PracticeViewModel @Inject constructor(
                     ttsManager.playText(currentState.sentence.example)
                 } finally {
                     _isTtsPlaying.value = false
-                }
-            }
-        }
-    }
-
-    fun playTTSStream() {
-        if (_isTtsPlaying.value || _isTtsStreaming.value) return
-
-        val currentState = _uiState.value
-        if (currentState is PracticeUiState.Success) {
-            viewModelScope.launch {
-                _isTtsStreaming.value = true
-                try {
-                    ttsManager.playTextStream(currentState.sentence.example)
-                } finally {
-                    _isTtsStreaming.value = false
                 }
             }
         }
