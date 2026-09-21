@@ -640,7 +640,7 @@ fun PracticeScreen(
                             FilterChip(
                                 selected = ocrMode == OcrMode.DIGITAL_INK,
                                 onClick = { viewModel.setOcrMode(OcrMode.DIGITAL_INK) },
-                                label = { Text("⚡ Digital Ink (端末)") },
+                                label = { Text("⚡ Digital Ink + AI") },
                                 leadingIcon = if (ocrMode == OcrMode.DIGITAL_INK) {
                                     { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
                                 } else null

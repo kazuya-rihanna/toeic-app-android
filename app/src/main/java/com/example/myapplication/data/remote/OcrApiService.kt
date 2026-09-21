@@ -1,7 +1,9 @@
 package com.example.myapplication.data.remote
 
+import com.google.gson.annotations.SerializedName
 import okhttp3.MultipartBody
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
@@ -12,9 +14,24 @@ interface OcrApiService {
     suspend fun uploadDrawing(
         @Part file: MultipartBody.Part
     ): Response<OcrResponse>
+
+    @POST("/api/refine-text")
+    suspend fun refineText(
+        @Body request: RefineTextRequest
+    ): Response<RefineTextResponse>
 }
 
 data class OcrResponse(
     val text: String,
     val status: String? = null
 )
+
+data class RefineTextRequest(
+    @SerializedName("raw_text") val rawText: String,
+    @SerializedName("context") val context: String
+)
+
+data class RefineTextResponse(
+    @SerializedName("text") val text: String
+)
+

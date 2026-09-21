@@ -80,6 +80,20 @@ fun ScoreScreen(
 }
 
 val categoryDisplayNames = mapOf(
+    // === TOEIC 実戦マスター ===
+    "toeic_exam_part_1_questions" to "Exam Part 1 (Questions)",
+    "toeic_exam_part_2_questions" to "Exam Part 2 (Questions)",
+    "toeic_exam_part_3_talks" to "Exam Part 3 (Conversations)",
+    "toeic_exam_part_3_questions" to "Exam Part 3 (Questions)",
+    "toeic_exam_part_4_talks" to "Exam Part 4 (Talks)",
+    "toeic_exam_part_4_questions" to "Exam Part 4 (Questions)",
+    "toeic_exam_part_5_questions" to "Exam Part 5 (Incomplete Sentences)",
+    "toeic_exam_part_6_passage" to "Exam Part 6 (Passages)",
+    "toeic_exam_part_6_choices" to "Exam Part 6 (Choices)",
+    "toeic_exam_part_7_passage" to "Exam Part 7 (Reading Passages)",
+    "toeic_exam_part_7_questions" to "Exam Part 7 (Questions)",
+
+    // === 既存教材 ===
     "nakamura_vocabulary_1_part_1" to "Nakamura Vocab 1 (Part 1)",
     "nakamura_vocabulary_1_part_2_3" to "Nakamura Vocab 1 (Part 2-3)",
     "nakamura_vocabulary_1_part_4" to "Nakamura Vocab 1 (Part 4)",

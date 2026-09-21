@@ -21,6 +21,21 @@ class ToeicRepository @Inject constructor(
         return ocrApiService.uploadDrawing(body)
     }
 
+    suspend fun refineText(rawText: String, context: String): String {
+        return try {
+            val response = ocrApiService.refineText(RefineTextRequest(rawText = rawText, context = context))
+            if (response.isSuccessful && response.body() != null) {
+                val refined = response.body()!!.text.trim()
+                if (refined.isNotEmpty()) refined else rawText
+            } else {
+                rawText
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("ToeicRepository", "refineText fallback to rawText: ${e.message}")
+            rawText
+        }
+    }
+
     suspend fun getCategoryIndex(collection: String) = apiService.getCategoryIndex(collection)
     suspend fun getVocabularyPage(collection: String, page: Int) = apiService.getVocabularyPage(collection, page)
     suspend fun getFirstVocabulary(collection: String, userId: String) = apiService.getFirstVocabulary(collection, userId)

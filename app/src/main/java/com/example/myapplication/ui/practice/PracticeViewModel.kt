@@ -427,14 +427,23 @@ class PracticeViewModel @Inject constructor(
             val mode = _ocrMode.value
             try {
                 if (mode == OcrMode.DIGITAL_INK) {
-                    val resultText = digitalInkManager.recognizeStrokes(currentStrokes, orientation)
+                    val rawText = digitalInkManager.recognizeStrokes(currentStrokes, orientation)
+                    val currentState = _uiState.value
+                    val contextText = if (currentState is PracticeUiState.Success) {
+                        currentState.sentence.example ?: ""
+                    } else ""
+
+                    val refinedText = if (rawText.isNotBlank()) {
+                        repository.refineText(rawText, contextText)
+                    } else ""
+
                     val elapsed = System.currentTimeMillis() - startTime
                     _lastOcrDurationMs.value = elapsed
                     _lastOcrMethod.value = OcrMode.DIGITAL_INK
-                    android.util.Log.d("PracticeViewModel", "⚡ Digital Ink OCR completed in ${elapsed}ms: '$resultText'")
+                    android.util.Log.d("PracticeViewModel", "⚡ Digital Ink + AI completed in ${elapsed}ms: '$rawText' -> '$refinedText'")
 
-                    _inputText.value = resultText
-                    evaluateInput(resultText, "livescribe")
+                    _inputText.value = refinedText
+                    evaluateInput(refinedText, "livescribe")
                     clearDrawing()
                 } else {
                     // Cloud Gemini OCR
