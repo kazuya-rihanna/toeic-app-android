@@ -123,11 +123,18 @@ class TtsManager @Inject constructor(
                     audioTrack = track
                     track.play()
 
+                    val tStart = System.currentTimeMillis()
+                    var firstChunkLogged = false
                     val inputStream = body.byteStream()
                     val buffer = ByteArray(2048)
                     var read: Int
                     try {
                         while (inputStream.read(buffer).also { read = it } != -1) {
+                            if (!firstChunkLogged) {
+                                firstChunkLogged = true
+                                val elapsed = System.currentTimeMillis() - tStart
+                                android.util.Log.d("TtsManager", "⚡ AudioTrack started playback after ${elapsed}ms!")
+                            }
                             track.write(buffer, 0, read)
                         }
                     } finally {
