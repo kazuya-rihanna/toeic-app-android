@@ -428,13 +428,8 @@ class PracticeViewModel @Inject constructor(
             try {
                 if (mode == OcrMode.DIGITAL_INK) {
                     val rawText = digitalInkManager.recognizeStrokes(currentStrokes, orientation)
-                    val currentState = _uiState.value
-                    val contextText = if (currentState is PracticeUiState.Success) {
-                        currentState.sentence.example ?: ""
-                    } else ""
-
                     val refinedText = if (rawText.isNotBlank()) {
-                        repository.refineText(rawText, contextText)
+                        repository.refineText(rawText)
                     } else ""
 
                     val elapsed = System.currentTimeMillis() - startTime

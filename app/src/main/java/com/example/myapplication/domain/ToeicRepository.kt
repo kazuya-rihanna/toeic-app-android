@@ -21,7 +21,7 @@ class ToeicRepository @Inject constructor(
         return ocrApiService.uploadDrawing(body)
     }
 
-    suspend fun refineText(rawText: String, context: String): String {
+    suspend fun refineText(rawText: String, context: String = ""): String {
         return try {
             val response = ocrApiService.refineText(RefineTextRequest(rawText = rawText, context = context))
             if (response.isSuccessful && response.body() != null) {
