@@ -84,6 +84,9 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
 
+    // ML Kit Digital Ink Recognition
+    implementation(libs.mlkit.digital.ink)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

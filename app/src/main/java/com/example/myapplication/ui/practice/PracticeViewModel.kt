@@ -18,6 +18,12 @@ import kotlinx.coroutines.async
 import com.example.myapplication.data.model.Progress
 import javax.inject.Inject
 import android.media.AudioDeviceInfo
+import com.example.myapplication.data.ocr.DigitalInkManager
+
+enum class OcrMode {
+    DIGITAL_INK, // On-device Google ML Kit (ultra low latency)
+    GEMINI       // Cloud Run Gemini 3.5 Flash Lite
+}
 
 @HiltViewModel
 class PracticeViewModel @Inject constructor(
@@ -26,7 +32,8 @@ class PracticeViewModel @Inject constructor(
     private val sttManager: SpeechToTextManager,
     private val ttsManager: TtsManager,
     private val penManager: PenManager,
-    private val recorderManager: AudioRecorderManager
+    private val recorderManager: AudioRecorderManager,
+    private val digitalInkManager: DigitalInkManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<PracticeUiState>(PracticeUiState.Loading)
@@ -118,6 +125,22 @@ class PracticeViewModel @Inject constructor(
     private val _isTtsPlaying = MutableStateFlow(false)
     val isTtsPlaying = _isTtsPlaying.asStateFlow()
 
+    private val _ocrMode = MutableStateFlow(OcrMode.DIGITAL_INK)
+    val ocrMode = _ocrMode.asStateFlow()
+
+    private val _lastOcrDurationMs = MutableStateFlow<Long?>(null)
+    val lastOcrDurationMs = _lastOcrDurationMs.asStateFlow()
+
+    private val _lastOcrMethod = MutableStateFlow<OcrMode?>(null)
+    val lastOcrMethod = _lastOcrMethod.asStateFlow()
+
+    fun toggleOcrMode() {
+        _ocrMode.value = if (_ocrMode.value == OcrMode.DIGITAL_INK) OcrMode.GEMINI else OcrMode.DIGITAL_INK
+    }
+
+    fun setOcrMode(mode: OcrMode) {
+        _ocrMode.value = mode
+    }
 
     private var lastSubmittedDrawingBytes: ByteArray? = null
     private var lastOcrRawResponse: String? = null
@@ -400,28 +423,48 @@ class PracticeViewModel @Inject constructor(
 
         viewModelScope.launch {
             _isSubmitting.value = true
+            val startTime = System.currentTimeMillis()
+            val mode = _ocrMode.value
             try {
-                val bitmap = createBitmapFromStrokes(currentStrokes, orientation = orientation)
-                val stream = java.io.ByteArrayOutputStream()
-                bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, stream)
-                val byteArray = stream.toByteArray()
-                
-                val body = byteArray.toRequestBody("image/png".toMediaType())
-                
-                val response = repository.uploadDrawing(body)
-                if (response.isSuccessful && response.body() != null) {
-                    val resultText = response.body()!!.text
-                    lastSubmittedDrawingBytes = byteArray
-                    val rawText = response.body()!!.text
-                    val rawStatus = response.body()!!.status ?: ""
-                    lastOcrRawResponse = "{\"text\":\"${rawText.replace("\"", "\\\"")}\",\"status\":\"${rawStatus.replace("\"", "\\\"")}\"}"
+                if (mode == OcrMode.DIGITAL_INK) {
+                    val resultText = digitalInkManager.recognizeStrokes(currentStrokes, orientation)
+                    val elapsed = System.currentTimeMillis() - startTime
+                    _lastOcrDurationMs.value = elapsed
+                    _lastOcrMethod.value = OcrMode.DIGITAL_INK
+                    android.util.Log.d("PracticeViewModel", "⚡ Digital Ink OCR completed in ${elapsed}ms: '$resultText'")
+
                     _inputText.value = resultText
                     evaluateInput(resultText, "livescribe")
                     clearDrawing()
                 } else {
-                    val errorMsg = response.errorBody()?.string() ?: response.message()
-                    android.util.Log.e("PracticeViewModel", "OCR failed: ${response.code()} - $errorMsg")
-                    _errorMessage.value = "OCR Failed (${response.code()}): Please try again"
+                    // Cloud Gemini OCR
+                    val bitmap = createBitmapFromStrokes(currentStrokes, orientation = orientation)
+                    val stream = java.io.ByteArrayOutputStream()
+                    bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, stream)
+                    val byteArray = stream.toByteArray()
+                    
+                    val body = byteArray.toRequestBody("image/png".toMediaType())
+                    
+                    val response = repository.uploadDrawing(body)
+                    val elapsed = System.currentTimeMillis() - startTime
+                    _lastOcrDurationMs.value = elapsed
+                    _lastOcrMethod.value = OcrMode.GEMINI
+                    android.util.Log.d("PracticeViewModel", "☁️ Gemini Cloud OCR completed in ${elapsed}ms")
+
+                    if (response.isSuccessful && response.body() != null) {
+                        val resultText = response.body()!!.text
+                        lastSubmittedDrawingBytes = byteArray
+                        val rawText = response.body()!!.text
+                        val rawStatus = response.body()!!.status ?: ""
+                        lastOcrRawResponse = "{\"text\":\"${rawText.replace("\"", "\\\"")}\",\"status\":\"${rawStatus.replace("\"", "\\\"")}\"}"
+                        _inputText.value = resultText
+                        evaluateInput(resultText, "livescribe")
+                        clearDrawing()
+                    } else {
+                        val errorMsg = response.errorBody()?.string() ?: response.message()
+                        android.util.Log.e("PracticeViewModel", "OCR failed: ${response.code()} - $errorMsg")
+                        _errorMessage.value = "OCR Failed (${response.code()}): Please try again"
+                    }
                 }
             } catch (e: Exception) {
                 android.util.Log.e("PracticeViewModel", "Error in handleSubmitDrawing", e)

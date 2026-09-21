@@ -71,6 +71,9 @@ fun PracticeScreen(
     val categoryIndex by viewModel.categoryIndex.collectAsState()
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     val isTtsPlaying by viewModel.isTtsPlaying.collectAsState()
+    val ocrMode by viewModel.ocrMode.collectAsState()
+    val lastOcrDurationMs by viewModel.lastOcrDurationMs.collectAsState()
+    val lastOcrMethod by viewModel.lastOcrMethod.collectAsState()
 
     var isBlurred by remember { mutableStateOf(true) }
     var showJumpDialog by remember { mutableStateOf(false) }
@@ -599,13 +602,14 @@ fun PracticeScreen(
                             modifier = Modifier
                                 .padding(vertical = 4.dp)
                                 .horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Button(
                                 onClick = { viewModel.handleSubmitDrawing() },
                                 enabled = strokes.isNotEmpty() && !isSubmitting
                             ) {
-                                Text(if (isSubmitting) "Submitting..." else "Submit Drawing")
+                                Text(if (isSubmitting) "Recognizing..." else "Submit Drawing")
                             }
                             OutlinedButton(
                                 onClick = { viewModel.clearDrawing() },
@@ -624,8 +628,55 @@ fun PracticeScreen(
                             }
                         }
 
-                        // Removed Debug Row 2
-                        
+                        // OCR Engine Mode & Latency Benchmark Row
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            FilterChip(
+                                selected = ocrMode == OcrMode.DIGITAL_INK,
+                                onClick = { viewModel.setOcrMode(OcrMode.DIGITAL_INK) },
+                                label = { Text("⚡ Digital Ink (端末)") },
+                                leadingIcon = if (ocrMode == OcrMode.DIGITAL_INK) {
+                                    { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                                } else null
+                            )
+                            FilterChip(
+                                selected = ocrMode == OcrMode.GEMINI,
+                                onClick = { viewModel.setOcrMode(OcrMode.GEMINI) },
+                                label = { Text("☁️ Gemini (クラウド)") },
+                                leadingIcon = if (ocrMode == OcrMode.GEMINI) {
+                                    { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                                } else null
+                            )
+
+                            if (lastOcrDurationMs != null) {
+                                val seconds = lastOcrDurationMs!! / 1000.0
+                                val isFast = lastOcrMethod == OcrMode.DIGITAL_INK
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = if (isFast) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer,
+                                    border = BorderStroke(1.dp, if (isFast) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline)
+                                ) {
+                                    Text(
+                                        text = if (isFast) {
+                                            String.format(java.util.Locale.US, "⚡ %.2fs (%dms)", seconds, lastOcrDurationMs)
+                                        } else {
+                                            String.format(java.util.Locale.US, "☁️ %.2fs (%dms)", seconds, lastOcrDurationMs)
+                                        },
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isFast) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    )
+                                }
+                            }
+                        }
+
                         Spacer(modifier = Modifier.height(16.dp))
 
                         TextField(
