@@ -21,6 +21,8 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.RotateRight
+import androidx.compose.material.icons.filled.Translate
+import androidx.compose.animation.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
@@ -74,6 +76,9 @@ fun PracticeScreen(
     val ocrMode by viewModel.ocrMode.collectAsState()
     val lastOcrDurationMs by viewModel.lastOcrDurationMs.collectAsState()
     val lastOcrMethod by viewModel.lastOcrMethod.collectAsState()
+    val translationText by viewModel.translationText.collectAsState()
+    val isTranslating by viewModel.isTranslating.collectAsState()
+    val isTranslationVisible by viewModel.isTranslationVisible.collectAsState()
 
     var isBlurred by remember { mutableStateOf(true) }
     var showJumpDialog by remember { mutableStateOf(false) }
@@ -382,15 +387,74 @@ fun PracticeScreen(
                                             }
                                         }
                                     )
-                                    IconButton(
-                                        onClick = { isBlurred = !isBlurred },
-                                        modifier = Modifier.align(Alignment.TopEnd)
+                                    Row(
+                                        modifier = Modifier.align(Alignment.TopEnd),
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Icon(
-                                            if (isBlurred) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                            contentDescription = "Toggle Visibility",
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
+                                        IconButton(
+                                            onClick = { viewModel.toggleTranslation() }
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Translate,
+                                                contentDescription = "Toggle Translation",
+                                                tint = if (isTranslationVisible) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                                            )
+                                        }
+                                        IconButton(
+                                            onClick = { isBlurred = !isBlurred }
+                                        ) {
+                                            Icon(
+                                                if (isBlurred) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                                contentDescription = "Toggle Visibility",
+                                                tint = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                    }
+                                }
+
+                                AnimatedVisibility(
+                                    visible = isTranslationVisible,
+                                    enter = expandVertically() + fadeIn(),
+                                    exit = shrinkVertically() + fadeOut()
+                                ) {
+                                    Surface(
+                                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+                                        shape = RoundedCornerShape(8.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Translate,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                            if (isTranslating) {
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.size(16.dp),
+                                                    strokeWidth = 2.dp,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                                Text(
+                                                    text = "Gemini 翻訳中...",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            } else if (!translationText.isNullOrBlank()) {
+                                                Text(
+                                                    text = translationText!!,
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    fontWeight = FontWeight.Medium,
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                            }
+                                        }
                                     }
                                 }
 
@@ -758,6 +822,16 @@ fun PracticeScreen(
                                     Icons.Default.PlayArrow,
                                     contentDescription = "TTS",
                                     tint = if (isTtsPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+
+                            IconButton(
+                                onClick = { viewModel.toggleTranslation() }
+                            ) {
+                                Icon(
+                                    Icons.Default.Translate,
+                                    contentDescription = "Translate",
+                                    tint = if (isTranslationVisible) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                                 )
                             }
                         }

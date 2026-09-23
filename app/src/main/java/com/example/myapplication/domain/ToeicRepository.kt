@@ -36,6 +36,21 @@ class ToeicRepository @Inject constructor(
         }
     }
 
+    suspend fun translateText(text: String, targetLang: String = "ja"): String? {
+        return try {
+            val response = ocrApiService.translateText(com.example.myapplication.data.remote.TranslateRequest(text = text, targetLang = targetLang))
+            if (response.isSuccessful && response.body() != null) {
+                val translated = response.body()!!.translatedText.trim()
+                if (translated.isNotEmpty()) translated else null
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("ToeicRepository", "translateText error: ${e.message}")
+            null
+        }
+    }
+
     suspend fun getCategoryIndex(collection: String) = apiService.getCategoryIndex(collection)
     suspend fun getVocabularyPage(collection: String, page: Int) = apiService.getVocabularyPage(collection, page)
     suspend fun getFirstVocabulary(collection: String, userId: String) = apiService.getFirstVocabulary(collection, userId)

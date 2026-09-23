@@ -128,6 +128,15 @@ class PracticeViewModel @Inject constructor(
     private val _ocrMode = MutableStateFlow(OcrMode.DIGITAL_INK)
     val ocrMode = _ocrMode.asStateFlow()
 
+    private val _translationText = MutableStateFlow<String?>(null)
+    val translationText = _translationText.asStateFlow()
+
+    private val _isTranslating = MutableStateFlow(false)
+    val isTranslating = _isTranslating.asStateFlow()
+
+    private val _isTranslationVisible = MutableStateFlow(false)
+    val isTranslationVisible = _isTranslationVisible.asStateFlow()
+
     private val _lastOcrDurationMs = MutableStateFlow<Long?>(null)
     val lastOcrDurationMs = _lastOcrDurationMs.asStateFlow()
 
@@ -584,6 +593,35 @@ class PracticeViewModel @Inject constructor(
         }
     }
 
+    fun toggleTranslation() {
+        if (_isTranslationVisible.value) {
+            _isTranslationVisible.value = false
+            return
+        }
+
+        val currentState = _uiState.value
+        if (currentState is PracticeUiState.Success) {
+            val sentenceText = currentState.sentence.example
+            if (sentenceText.isBlank()) return
+
+            _isTranslationVisible.value = true
+            if (_translationText.value == null) {
+                viewModelScope.launch {
+                    _isTranslating.value = true
+                    try {
+                        val result = repository.translateText(sentenceText)
+                        _translationText.value = result ?: "翻訳を取得できませんでした"
+                    } catch (e: Exception) {
+                        android.util.Log.e("PracticeViewModel", "Translation failed", e)
+                        _translationText.value = "翻訳エラーが発生しました"
+                    } finally {
+                        _isTranslating.value = false
+                    }
+                }
+            }
+        }
+    }
+
 /*
     fun connectPen() {
         val lastPen = penManager.getLastConnected()
@@ -834,6 +872,8 @@ class PracticeViewModel @Inject constructor(
 
             ttsManager.stop()
             _isTtsPlaying.value = false
+            _isTranslationVisible.value = false
+            _translationText.value = null
 
             viewModelScope.launch {
                 _uiState.value = PracticeUiState.Loading

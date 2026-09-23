@@ -19,6 +19,11 @@ interface OcrApiService {
     suspend fun refineText(
         @Body request: RefineTextRequest
     ): Response<RefineTextResponse>
+
+    @POST("/api/translate")
+    suspend fun translateText(
+        @Body request: TranslateRequest
+    ): Response<TranslateResponse>
 }
 
 data class OcrResponse(
@@ -33,5 +38,14 @@ data class RefineTextRequest(
 
 data class RefineTextResponse(
     @SerializedName("text") val text: String
+)
+
+data class TranslateRequest(
+    @SerializedName("text") val text: String,
+    @SerializedName("target_lang") val targetLang: String = "ja"
+)
+
+data class TranslateResponse(
+    @SerializedName("translated_text") val translatedText: String
 )
 
