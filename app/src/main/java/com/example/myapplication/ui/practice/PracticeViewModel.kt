@@ -119,7 +119,7 @@ class PracticeViewModel @Inject constructor(
     val message = penManager.message
     val penBattery = penManager.batteryLevel
     
-    private val _canvasOrientation = MutableStateFlow(1) // 0, 1, 2, 3
+    private val _canvasOrientation = MutableStateFlow(3) // 0, 1, 2, 3
     val canvasOrientation = _canvasOrientation.asStateFlow()
 
     private val _isTtsPlaying = MutableStateFlow(false)

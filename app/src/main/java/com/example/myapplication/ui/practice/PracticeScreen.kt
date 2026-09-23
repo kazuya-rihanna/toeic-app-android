@@ -62,6 +62,7 @@ import androidx.core.content.ContextCompat
 fun PracticeScreen(
     collectionId: String,
     onBack: () -> Unit,
+    onPairingClick: () -> Unit = {},
     viewModel: PracticeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -139,23 +140,31 @@ fun PracticeScreen(
                 },
                 actions = {
                     val statusColor = if (isPenConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                    Row(
-                        modifier = Modifier.padding(end = 8.dp),
-                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = if (isPenConnected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f) else MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f),
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .clickable { onPairingClick() }
                     ) {
-                        Icon(
-                            Icons.Default.Edit,
-                            contentDescription = "Pen Status",
-                            tint = statusColor,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        val batteryText = if (isPenConnected && penBattery != null) " (${penBattery}%)" else ""
-                        Text(
-                            text = if (isPenConnected) "Pen Linked$batteryText" else "Pen Offline",
-                            color = statusColor,
-                            style = MaterialTheme.typography.labelMedium
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Edit,
+                                contentDescription = "Pen Status",
+                                tint = statusColor,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            val batteryText = if (isPenConnected && penBattery != null) " (${penBattery}%)" else ""
+                            Text(
+                                text = if (isPenConnected) "Pen Linked$batteryText" else "Pen Offline",
+                                color = statusColor,
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
                     }
                 }
             )

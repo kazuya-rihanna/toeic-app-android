@@ -134,6 +134,11 @@ fun MainNavigation() {
                         if (practiceEntry.lifecycleIsResumed()) {
                             navController.popBackStack()
                         }
+                    },
+                    onPairingClick = {
+                        if (practiceEntry.lifecycleIsResumed()) {
+                            navController.navigate(Screen.Pairing.route)
+                        }
                     }
                 )
             }
