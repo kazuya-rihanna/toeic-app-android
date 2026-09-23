@@ -267,7 +267,7 @@ fun PracticeScreen(
                                 }
                             }
                             IconButton(onClick = {
-                                clipboardManager.setText(AnnotatedString(state.sentence.example))
+                                clipboardManager.setText(AnnotatedString(state.sentence.displayExample))
                             }) {
                                 Icon(
                                     Icons.Default.ContentCopy,
@@ -400,7 +400,7 @@ fun PracticeScreen(
                                         .padding(horizontal = 20.dp, vertical = 14.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    val sentenceText = if (isBlurred) "••••••••••••" else (state.sentence.example ?: "")
+                                    val sentenceText = if (isBlurred) "••••••••••••" else state.sentence.displayExample
                                     val annotatedString = androidx.compose.ui.text.buildAnnotatedString {
                                         append(sentenceText)
                                         if (!isBlurred) {
@@ -432,7 +432,7 @@ fun PracticeScreen(
                                                             Act as a Lexicographer. From the provided URL, extract ONLY the definition and the specific example sentence that matches the context of the input sentence. Output the result in a clean Markdown blockquote. Do not provide any introductory text or conversational filler.
                                                             
                                                             URL: https://www.ldoceonline.com/dictionary/${clickedWord.lowercase()}
-                                                            Input: ${state.sentence.example}
+                                                            Input: ${state.sentence.displayExample}
                                                         """.trimIndent()
                                                         clipboardManager.setText(AnnotatedString(copyText))
                                                         android.widget.Toast.makeText(context, "Copied: $clickedWord", android.widget.Toast.LENGTH_SHORT).show()

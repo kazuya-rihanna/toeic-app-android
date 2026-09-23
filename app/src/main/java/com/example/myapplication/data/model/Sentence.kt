@@ -30,7 +30,14 @@ data class Sentence(
     @SerializedName("channel_occurrences") val channelOccurrences: Int? = null,
     @SerializedName("cefr_level") val cefrLevel: String? = null,
     @SerializedName("formality") val formality: String? = null
-)
+) {
+    /**
+     * 表示・練習対象の本文テキスト。
+     * bestDictionaryExample が存在する場合は優先し、なければ従来の example を返す。
+     */
+    val displayExample: String
+        get() = bestDictionaryExample?.takeIf { it.isNotBlank() } ?: example
+}
 
 data class SpokenCorpusExample(
     @SerializedName("source_channel") val sourceChannel: String? = null,

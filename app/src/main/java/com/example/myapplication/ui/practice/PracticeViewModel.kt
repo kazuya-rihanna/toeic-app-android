@@ -212,8 +212,8 @@ class PracticeViewModel @Inject constructor(
             viewModelScope.launch {
                 _uiState.collect { state ->
                     if (state is PracticeUiState.Success) {
-                        val text = state.sentence.example
-                        if (!text.isNullOrBlank()) {
+                        val text = state.sentence.displayExample
+                        if (text.isNotBlank()) {
                             ttsManager.preloadText(text)
                         }
                     }
@@ -585,7 +585,7 @@ class PracticeViewModel @Inject constructor(
             viewModelScope.launch {
                 _isTtsPlaying.value = true
                 try {
-                    ttsManager.playText(currentState.sentence.example)
+                    ttsManager.playText(currentState.sentence.displayExample)
                 } finally {
                     _isTtsPlaying.value = false
                 }
@@ -601,7 +601,7 @@ class PracticeViewModel @Inject constructor(
 
         val currentState = _uiState.value
         if (currentState is PracticeUiState.Success) {
-            val sentenceText = currentState.sentence.example
+            val sentenceText = currentState.sentence.displayExample
             if (sentenceText.isBlank()) return
 
             _isTranslationVisible.value = true
@@ -709,7 +709,7 @@ class PracticeViewModel @Inject constructor(
                     "ignore_punctuation" to true,
                     "normalize_whitespace" to true
                 )
-                val correctText = currentState.sentence.example ?: ""
+                val correctText = currentState.sentence.displayExample
                 
                 android.util.Log.d("PracticeViewModel", "Evaluating input: method=$method, text=$text")
                 android.util.Log.d("PracticeViewModel", "Correct text: $correctText")
