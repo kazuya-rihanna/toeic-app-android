@@ -104,7 +104,10 @@ val categoryDisplayNames = mapOf(
     "gold_sentences" to "Gold Sentences",
     "gold_collocations" to "Gold Collocations",
     "toeic_official_vocabulary" to "TOEIC Official Vocabulary",
-    "black_phrases" to "Black Phrases"
+    "black_phrases" to "Black Phrases",
+
+    // === 実践・口語コーパス ===
+    "justin_waller_vocabulary" to "Justin Waller (Street Interviews)"
 )
 
 @Composable

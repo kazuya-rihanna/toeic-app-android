@@ -1,6 +1,8 @@
 package com.example.myapplication.ui.practice
 
 import android.os.Build
+import android.content.Intent
+import android.net.Uri
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,6 +24,9 @@ import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.RotateRight
 import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.animation.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -179,7 +184,7 @@ fun PracticeScreen(
                             "word" -> "Word"
                             "phrasal_verb" -> "Phrasal Verb"
                             "collocation_idiom" -> "Collocation & Idiom"
-                            else -> null
+                            else -> selectedCategory?.replace("_", " ")?.split(" ")?.joinToString(" ") { it.replaceFirstChar { c -> c.uppercase() } }
                         }
                         val activeCategoryPages = if (selectedCategory != null) {
                             categoryIndex?.pages?.get(selectedCategory) ?: emptyList()
@@ -267,43 +272,37 @@ fun PracticeScreen(
                         }
 
                         // Category Filter Chips
-                        val wordCount = categoryIndex?.counts?.get("word") ?: 0
-                        val phrasalCount = categoryIndex?.counts?.get("phrasal_verb") ?: 0
-                        val collocCount = categoryIndex?.counts?.get("collocation_idiom") ?: 0
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState())
-                                .padding(vertical = 4.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            FilterChip(
-                                selected = selectedCategory == null,
-                                onClick = { viewModel.selectCategory(null) },
-                                label = { Text("All (${state.totalPages})", style = MaterialTheme.typography.labelSmall) }
-                            )
-                            if (wordCount > 0) {
+                        val counts = categoryIndex?.counts ?: emptyMap()
+                        if (counts.isNotEmpty()) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .horizontalScroll(rememberScrollState())
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 FilterChip(
-                                    selected = selectedCategory == "word",
-                                    onClick = { viewModel.selectCategory(if (selectedCategory == "word") null else "word") },
-                                    label = { Text("Words ($wordCount)", style = MaterialTheme.typography.labelSmall) }
+                                    selected = selectedCategory == null,
+                                    onClick = { viewModel.selectCategory(null) },
+                                    label = { Text("All (${state.totalPages})", style = MaterialTheme.typography.labelSmall) }
                                 )
-                            }
-                            if (phrasalCount > 0) {
-                                FilterChip(
-                                    selected = selectedCategory == "phrasal_verb",
-                                    onClick = { viewModel.selectCategory(if (selectedCategory == "phrasal_verb") null else "phrasal_verb") },
-                                    label = { Text("Phrasal Verbs ($phrasalCount)", style = MaterialTheme.typography.labelSmall) }
-                                )
-                            }
-                            if (collocCount > 0) {
-                                FilterChip(
-                                    selected = selectedCategory == "collocation_idiom",
-                                    onClick = { viewModel.selectCategory(if (selectedCategory == "collocation_idiom") null else "collocation_idiom") },
-                                    label = { Text("Collocations & Idioms ($collocCount)", style = MaterialTheme.typography.labelSmall) }
-                                )
+                                counts.forEach { (catKey, count) ->
+                                    if (count > 0) {
+                                        val labelText = when (catKey) {
+                                            "word" -> "Words"
+                                            "phrasal_verb" -> "Phrasal Verbs"
+                                            "collocation_idiom" -> "Collocations & Idioms"
+                                            else -> catKey.replace("_", " ").split(" ")
+                                                .joinToString(" ") { it.replaceFirstChar { c -> c.uppercase() } }
+                                        }
+                                        FilterChip(
+                                            selected = selectedCategory == catKey,
+                                            onClick = { viewModel.selectCategory(if (selectedCategory == catKey) null else catKey) },
+                                            label = { Text("$labelText ($count)", style = MaterialTheme.typography.labelSmall) }
+                                        )
+                                    }
+                                }
                             }
                         }
 
@@ -482,8 +481,135 @@ fun PracticeScreen(
                                     }
                                 }
 
-                                // --- TOEIC Corpus Metadata Badges ---
                                 val sentence = state.sentence
+
+                                // 3. Selected Definition Area (英英定義)
+                                val def = sentence.selectedDefinition
+                                if (!def.isNullOrBlank()) {
+                                    Surface(
+                                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                                        shape = RoundedCornerShape(8.dp),
+                                        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                            verticalAlignment = Alignment.Top,
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            Icon(
+                                                Icons.Default.MenuBook,
+                                                contentDescription = "Definition",
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(16.dp).padding(top = 2.dp)
+                                            )
+                                            Column {
+                                                Text(
+                                                    text = "DEFINITION",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                                Text(
+                                                    text = def,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // 4. Spoken Corpus Quote & Video Link (街頭インタビュー生セリフ)
+                                val spoken = sentence.spokenCorpusExample
+                                if (spoken != null && (!spoken.speakerLine.isNullOrBlank() || !spoken.videoUrl.isNullOrBlank())) {
+                                    Surface(
+                                        color = Color(0xFFFFEBEE).copy(alpha = 0.6f),
+                                        shape = RoundedCornerShape(8.dp),
+                                        border = BorderStroke(0.8.dp, Color(0xFFE57373).copy(alpha = 0.4f)),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                                    ) {
+                                        Column(
+                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                                ) {
+                                                    Icon(
+                                                        Icons.Default.FormatQuote,
+                                                        contentDescription = "Spoken Line",
+                                                        tint = Color(0xFFC62828),
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                    Text(
+                                                        text = spoken.sourceChannel ?: "Spoken Corpus",
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = Color(0xFFC62828)
+                                                    )
+                                                }
+
+                                                if (!spoken.videoUrl.isNullOrBlank()) {
+                                                    FilledTonalButton(
+                                                        onClick = {
+                                                            try {
+                                                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(spoken.videoUrl))
+                                                                context.startActivity(intent)
+                                                            } catch (e: Exception) {
+                                                                android.widget.Toast.makeText(context, "Cannot open video link", android.widget.Toast.LENGTH_SHORT).show()
+                                                            }
+                                                        },
+                                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                                        modifier = Modifier.height(26.dp),
+                                                        colors = ButtonDefaults.filledTonalButtonColors(
+                                                            containerColor = Color(0xFFFFCDD2),
+                                                            contentColor = Color(0xFFB71C1C)
+                                                        )
+                                                    ) {
+                                                        Row(
+                                                            verticalAlignment = Alignment.CenterVertically,
+                                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                                        ) {
+                                                            Text("🎬 Watch", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                                                            Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(12.dp))
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (!spoken.speakerLine.isNullOrBlank()) {
+                                                Text(
+                                                    text = "“${spoken.speakerLine}”",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                            }
+                                            if (!spoken.videoTitle.isNullOrBlank()) {
+                                                Text(
+                                                    text = spoken.videoTitle,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // --- Corpus Metadata Badges ---
                                 val cat = sentence.category?.lowercase() ?: ""
                                 val catJp = sentence.categoryJp ?: ""
                                 val isPhrasal = cat == "phrasal_verb" || catJp.contains("句動詞")
@@ -491,11 +617,23 @@ fun PracticeScreen(
                                 val isWord = cat == "word" || catJp.contains("単語") || (!isPhrasal && !isCollocIdiom && (sentence.expression != null || cat.isNotBlank() || catJp.isNotBlank()))
                                 val hasCategory = isPhrasal || isCollocIdiom || isWord
 
-                                val hasMetadata = sentence.partLabel != null ||
+                                val posLabel = sentence.pos ?: sentence.partLabel
+                                val cefr = sentence.cefrLevel
+                                val formality = sentence.formality
+                                val channelOcc = sentence.channelOccurrences
+                                val coca = sentence.cocaRank
+                                val ipa = sentence.ipa
+
+                                val hasMetadata = !posLabel.isNullOrBlank() ||
                                         sentence.importanceRank != null ||
                                         sentence.testCount != null ||
                                         sentence.totalCount != null ||
                                         !sentence.appearedTests.isNullOrBlank() ||
+                                        !cefr.isNullOrBlank() ||
+                                        !formality.isNullOrBlank() ||
+                                        channelOcc != null ||
+                                        coca != null ||
+                                        !ipa.isNullOrBlank() ||
                                         hasCategory
 
                                 if (hasMetadata) {
@@ -551,15 +689,30 @@ fun PracticeScreen(
                                             }
                                         }
 
-                                        // 3. Part Label
-                                        val partLabel = sentence.partLabel
-                                        if (!partLabel.isNullOrBlank()) {
+                                        // 3. IPA (Pronunciation)
+                                        if (!ipa.isNullOrBlank()) {
+                                            Surface(
+                                                shape = RoundedCornerShape(6.dp),
+                                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                                            ) {
+                                                Text(
+                                                    text = "/$ipa/",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                                )
+                                            }
+                                        }
+
+                                        // 4. POS / Part Label
+                                        if (!posLabel.isNullOrBlank()) {
                                             Surface(
                                                 shape = RoundedCornerShape(6.dp),
                                                 color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
                                             ) {
                                                 Text(
-                                                    text = partLabel,
+                                                    text = posLabel,
                                                     style = MaterialTheme.typography.labelSmall,
                                                     fontWeight = FontWeight.Medium,
                                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -568,7 +721,43 @@ fun PracticeScreen(
                                             }
                                         }
 
-                                        // 4. Importance Rank
+                                        // 5. CEFR Level (e.g. B1, C1)
+                                        if (!cefr.isNullOrBlank()) {
+                                            Surface(
+                                                shape = RoundedCornerShape(6.dp),
+                                                color = Color(0xFFEDE7F6),
+                                                border = BorderStroke(0.8.dp, Color(0xFF7E57C2).copy(alpha = 0.6f))
+                                            ) {
+                                                Text(
+                                                    text = "CEFR $cefr",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color(0xFF4527A0),
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                                )
+                                            }
+                                        }
+
+                                        // 6. Formality (e.g. Casual-Neutral)
+                                        if (!formality.isNullOrBlank()) {
+                                            val formattedFormality = formality.split("-")
+                                                .joinToString("-") { part -> part.replaceFirstChar { it.uppercase() } }
+                                            Surface(
+                                                shape = RoundedCornerShape(6.dp),
+                                                color = Color(0xFFE0F2F1),
+                                                border = BorderStroke(0.8.dp, Color(0xFF26A69A).copy(alpha = 0.6f))
+                                            ) {
+                                                Text(
+                                                    text = formattedFormality,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    fontWeight = FontWeight.Medium,
+                                                    color = Color(0xFF004D40),
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                                )
+                                            }
+                                        }
+
+                                        // 7. Importance Rank (TOEIC)
                                         val rankRaw = sentence.importanceRank
                                         if (!rankRaw.isNullOrBlank()) {
                                             val isRankS = rankRaw.startsWith("S", ignoreCase = true)
@@ -596,7 +785,26 @@ fun PracticeScreen(
                                             }
                                         }
 
-                                        // 5. Test count & Total occurrences
+                                        // 8. Corpus frequency (Channel occurrences & COCA Rank)
+                                        val corpusFreqParts = mutableListOf<String>()
+                                        if (channelOcc != null) corpusFreqParts.add("${channelOcc}x channel")
+                                        if (coca != null) corpusFreqParts.add("COCA #$coca")
+                                        if (corpusFreqParts.isNotEmpty()) {
+                                            Surface(
+                                                shape = RoundedCornerShape(6.dp),
+                                                color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.7f)
+                                            ) {
+                                                Text(
+                                                    text = corpusFreqParts.joinToString(" • "),
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    fontWeight = FontWeight.Medium,
+                                                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                                )
+                                            }
+                                        }
+
+                                        // 9. Test count & Total occurrences (TOEIC)
                                         val countParts = mutableListOf<String>()
                                         val totalCount = sentence.totalCount
                                         val testCount = sentence.testCount
@@ -617,7 +825,7 @@ fun PracticeScreen(
                                             }
                                         }
 
-                                        // 6. Appeared tests list (e.g. test1, test2)
+                                        // 10. Appeared tests list (e.g. test1, test2)
                                         val appeared = sentence.appearedTests
                                         if (!appeared.isNullOrBlank()) {
                                             Surface(
