@@ -226,10 +226,9 @@ fun PairingScreen(
             if (!isConnected) {
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Deduplicated Pen List (BONDED prioritized)
+                // Deduplicated Pen List (unique by pen name)
                 val displayPens = remember(foundPens) {
-                    foundPens.sortedByDescending { it.scanRecordHex == "BONDED" }
-                        .distinctBy { it.name.trim().lowercase() }
+                    foundPens.distinctBy { it.name.trim().lowercase() }
                 }
 
                 androidx.compose.foundation.lazy.LazyColumn(
@@ -243,7 +242,7 @@ fun PairingScreen(
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 2.dp)
+                                .padding(vertical = 4.dp)
                                 .clickable(enabled = !isConnected) {
                                     viewModel.connect(pen.address, pen.sppAddress)
                                 },
@@ -251,12 +250,9 @@ fun PairingScreen(
                                 containerColor = if (pen.isGenuine) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                             )
                         ) {
-                            Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(text = pen.name, style = MaterialTheme.typography.titleSmall)
-                                    if (pen.scanRecordHex == "BONDED") {
-                                        Text("PAIRED (System)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
-                                    }
                                 }
                             }
                         }

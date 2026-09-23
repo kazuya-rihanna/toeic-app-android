@@ -128,30 +128,30 @@ class BleScanner @Inject constructor(
                 
                 val hex = bytes.take(16).joinToString("") { "%02X ".format(it) }
                 
-                // Existing entry? Match by LE address, SPP address, or exact Pen Name
+                // DEDUPLICATION: R1 pens regenerate Static Random MAC addresses on reboot!
+                // Match by exact Device Name OR by Address / SPP Address
                 val existingIndex = currentList.indexOfFirst { existing ->
+                    (deviceName != "Unknown" && existing.name.equals(deviceName, ignoreCase = true)) ||
                     existing.address.equals(address, ignoreCase = true) ||
                     existing.sppAddress.equals(sppAddress, ignoreCase = true) ||
                     existing.address.equals(sppAddress, ignoreCase = true) ||
-                    existing.sppAddress.equals(address, ignoreCase = true) ||
-                    (deviceName != "Unknown" && existing.name != "Unknown" && existing.name.equals(deviceName, ignoreCase = true))
+                    existing.sppAddress.equals(address, ignoreCase = true)
                 }
 
+                val freshPen = DiscoveredPen(
+                    name = if (deviceName != "Unknown") deviceName else "NeoSmartpen",
+                    address = address, // Latest live LE address
+                    sppAddress = sppAddress, // Latest live SPP address
+                    rssi = result.rssi,
+                    scanRecordHex = hex,
+                    isGenuine = isGenuine
+                )
+
                 if (existingIndex != -1) {
-                    val existing = currentList[existingIndex]
-                    val isBonded = (existing.scanRecordHex == "BONDED") || (hex == "BONDED")
-                    
-                    currentList[existingIndex] = existing.copy(
-                        rssi = result.rssi,
-                        name = if (deviceName != "Unknown" && (existing.name == "Unknown" || !isBonded)) deviceName else existing.name,
-                        scanRecordHex = if (isBonded) "BONDED" else hex,
-                        // Update with live LE address, but preserve bonded SPP address if available
-                        address = address,
-                        sppAddress = if (isBonded) existing.sppAddress else sppAddress,
-                        isGenuine = existing.isGenuine || isGenuine
-                    )
+                    // Always overwrite with the latest live scan so reboots do NOT duplicate records
+                    currentList[existingIndex] = freshPen
                 } else {
-                    currentList.add(DiscoveredPen(deviceName, address, sppAddress, result.rssi, hex, isGenuine))
+                    currentList.add(freshPen)
                 }
                 _foundPens.value = currentList
             }
@@ -184,20 +184,28 @@ class BleScanner @Inject constructor(
                     
                     val currentList = _foundPens.value.toMutableList()
                     val existingIndex = currentList.indexOfFirst { existing ->
+                        (name != "Unknown Classic" && existing.name.equals(name, ignoreCase = true)) ||
                         existing.address.equals(address, ignoreCase = true) ||
-                        existing.sppAddress.equals(address, ignoreCase = true) ||
-                        (name != "Unknown Classic" && existing.name != "Unknown" && existing.name.equals(name, ignoreCase = true))
+                        existing.sppAddress.equals(address, ignoreCase = true)
                     }
-                    if (existingIndex == -1) {
-                        val isGenuine = address.uppercase().startsWith("9C:7B:D2") || 
-                                       address.uppercase().startsWith("00:07:80")
-                        currentList.add(DiscoveredPen(name, address, address, -1, "CLASSIC", isGenuine))
-                        _foundPens.value = currentList
+                    val isGenuine = address.uppercase().startsWith("9C:7B:D2") || 
+                                   address.uppercase().startsWith("00:07:80")
+                    val classicPen = DiscoveredPen(name, address, address, -1, "CLASSIC", isGenuine)
+                    if (existingIndex != -1) {
+                        // If already discovered via BLE, keep the live BLE address; otherwise update
+                        if (currentList[existingIndex].scanRecordHex == "CLASSIC") {
+                            currentList[existingIndex] = classicPen
+                        }
+                    } else {
+                        currentList.add(classicPen)
                     }
+                    _foundPens.value = currentList
                 }
             }
         }
     }
+
+    private val bondedSppCache = mutableMapOf<String, String>()
 
     fun checkBondedDevices() {
         try {
@@ -205,28 +213,17 @@ class BleScanner @Inject constructor(
             val adapter = bluetoothManager?.adapter
             val bondedDevices = adapter?.bondedDevices ?: emptySet()
             
-            val currentList = _foundPens.value.toMutableList()
             bondedDevices.forEach { device ->
                 val name = device.name ?: "Bonded Device"
                 val addr = device.address.uppercase()
                 val isGenuine = addr.startsWith("9C:7B:D2") || addr.startsWith("00:07:80")
                 
                 if (name.contains("Neo", ignoreCase = true) || isGenuine) {
-                    val existingIndex = currentList.indexOfFirst { existing ->
-                        existing.address.equals(addr, ignoreCase = true) ||
-                        existing.sppAddress.equals(addr, ignoreCase = true) ||
-                        (name != "Bonded Device" && existing.name != "Unknown" && existing.name.equals(name, ignoreCase = true))
-                    }
-                    
-                    val updated = DiscoveredPen(name, addr, addr, -1, "BONDED", isGenuine)
-                    if (existingIndex >= 0) {
-                        currentList[existingIndex] = updated
-                    } else {
-                        currentList.add(updated)
-                    }
+                    bondedSppCache[name.uppercase()] = addr
                 }
             }
-            _foundPens.value = currentList
+            // Intentionally do NOT add to _foundPens directly.
+            // This prevents duplicate stale "PAIRED (System)" records from showing up.
         } catch (e: SecurityException) {
             android.util.Log.e("BleScanner", "SecurityException: checkBondedDevices requires BLUETOOTH_CONNECT", e)
         }
