@@ -45,19 +45,22 @@ class AudioRecorderManager @Inject constructor(
     private val _selectedMic = MutableStateFlow<MicrophoneInfo>(defaultMic)
     val selectedMic = _selectedMic.asStateFlow()
 
+    private val _bluetoothAudioStatus = MutableStateFlow(BluetoothAudioStatus())
+    val bluetoothAudioStatus = _bluetoothAudioStatus.asStateFlow()
+
     private val audioDeviceCallback = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         object : android.media.AudioDeviceCallback() {
             override fun onAudioDevicesAdded(addedDevices: Array<out AudioDeviceInfo>?) {
-                updateAvailableMics()
+                updateConnectedAudioDevices()
             }
             override fun onAudioDevicesRemoved(removedDevices: Array<out AudioDeviceInfo>?) {
-                updateAvailableMics()
+                updateConnectedAudioDevices()
             }
         }
     } else null
 
     init {
-        updateAvailableMics()
+        updateConnectedAudioDevices()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && audioDeviceCallback != null) {
             audioManager.registerAudioDeviceCallback(audioDeviceCallback, null)
         }
@@ -102,6 +105,40 @@ class AudioRecorderManager @Inject constructor(
             }
         } else {
             _availableMics.value = listOf(defaultMic)
+        }
+    }
+
+    fun updateConnectedAudioDevices() {
+        updateAvailableMics()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            try {
+                val outputs = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
+                val btOutput = outputs.firstOrNull { device ->
+                    device.type == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP ||
+                    device.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO ||
+                    device.type == AudioDeviceInfo.TYPE_BLE_HEADSET ||
+                    device.type == AudioDeviceInfo.TYPE_BLE_SPEAKER ||
+                    (Build.VERSION.SDK_INT >= 31 && device.type == AudioDeviceInfo.TYPE_BLE_BROADCAST)
+                }
+
+                if (btOutput != null) {
+                    val rawName = btOutput.productName?.toString()?.takeIf { it.isNotBlank() } ?: "Bluetooth Audio"
+                    val isBtr = rawName.contains("BTR11", ignoreCase = true) || rawName.contains("FIIO", ignoreCase = true)
+                    _bluetoothAudioStatus.value = BluetoothAudioStatus(
+                        isConnected = true,
+                        deviceName = rawName,
+                        isBtr11 = isBtr
+                    )
+                } else {
+                    _bluetoothAudioStatus.value = BluetoothAudioStatus(
+                        isConnected = false,
+                        deviceName = null,
+                        isBtr11 = false
+                    )
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("AudioRecorderManager", "Error checking audio devices", e)
+            }
         }
     }
 
@@ -438,6 +475,12 @@ data class MicrophoneInfo(
     val id: Int,
     val name: String,
     val type: Int
+)
+
+data class BluetoothAudioStatus(
+    val isConnected: Boolean = false,
+    val deviceName: String? = null,
+    val isBtr11: Boolean = false
 )
 
 

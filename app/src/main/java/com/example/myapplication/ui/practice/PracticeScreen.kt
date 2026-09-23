@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.foundation.shape.CircleShape
@@ -100,6 +101,7 @@ fun PracticeScreen(
     val micVolume by viewModel.micVolume.collectAsState()
     val isPenScanning by viewModel.isPenScanning.collectAsState()
     val penConnectionStatus by viewModel.penConnectionStatus.collectAsState()
+    val btAudioStatus by viewModel.bluetoothAudioStatus.collectAsState()
 
     var isBlurred by remember { mutableStateOf(true) }
     var showJumpDialog by remember { mutableStateOf(false) }
@@ -200,13 +202,87 @@ fun PracticeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Practice: $collectionId") },
+                title = { 
+                    Text(
+                        "Practice: $collectionId",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
+                    // --- Option A: Bluetooth Audio (BTR11) Pill Badge ---
+                    val btConnected = btAudioStatus.isConnected
+                    val isBtr11 = btAudioStatus.isBtr11
+                    val btDeviceName = btAudioStatus.deviceName ?: "Bluetooth Audio"
+
+                    val audioStatusColor = if (btConnected) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                    }
+
+                    val audioContainerColor = if (btConnected) {
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                    }
+
+                    val audioLabel = when {
+                        isBtr11 -> "BTR11 Linked"
+                        btConnected -> {
+                            val shortName = if (btDeviceName.length > 10) btDeviceName.take(8) + "..." else btDeviceName
+                            "$shortName Linked"
+                        }
+                        else -> "Audio Off"
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = audioContainerColor,
+                        modifier = Modifier
+                            .padding(end = 6.dp)
+                            .clickable {
+                                if (btConnected) {
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "Connected: $btDeviceName (Active Audio Output)",
+                                        android.widget.Toast.LENGTH_SHORT
+                                    ).show()
+                                } else {
+                                    try {
+                                        context.startActivity(Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS))
+                                    } catch (e: Exception) {
+                                        android.widget.Toast.makeText(context, "Please open Bluetooth Settings", android.widget.Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Headphones,
+                                contentDescription = "Bluetooth Audio Status",
+                                tint = audioStatusColor,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Text(
+                                text = audioLabel,
+                                color = audioStatusColor,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+
+                    // --- Smart Pen Pill Badge ---
                     val statusColor = if (isPenConnected) {
                         MaterialTheme.colorScheme.primary
                     } else if (isPenScanning) {

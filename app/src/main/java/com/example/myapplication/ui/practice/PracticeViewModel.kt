@@ -141,6 +141,8 @@ class PracticeViewModel @Inject constructor(
     private val _penConnectionStatus = MutableStateFlow<String?>(null)
     val penConnectionStatus = _penConnectionStatus.asStateFlow()
 
+    val bluetoothAudioStatus = recorderManager.bluetoothAudioStatus
+
     private val _ocrMode = MutableStateFlow(OcrMode.GEMINI)
     val ocrMode = _ocrMode.asStateFlow()
 
