@@ -125,7 +125,7 @@ class PracticeViewModel @Inject constructor(
     private val _isTtsPlaying = MutableStateFlow(false)
     val isTtsPlaying = _isTtsPlaying.asStateFlow()
 
-    private val _ocrMode = MutableStateFlow(OcrMode.DIGITAL_INK)
+    private val _ocrMode = MutableStateFlow(OcrMode.GEMINI)
     val ocrMode = _ocrMode.asStateFlow()
 
     private val _translationText = MutableStateFlow<String?>(null)

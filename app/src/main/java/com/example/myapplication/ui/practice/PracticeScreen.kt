@@ -90,6 +90,7 @@ fun PracticeScreen(
     val spokenTranslationText by viewModel.spokenTranslationText.collectAsState()
     val isSpokenTranslating by viewModel.isSpokenTranslating.collectAsState()
     val isSpokenTranslationVisible by viewModel.isSpokenTranslationVisible.collectAsState()
+    val micVolume by viewModel.micVolume.collectAsState()
 
     var isBlurred by remember { mutableStateOf(true) }
     var showJumpDialog by remember { mutableStateOf(false) }
@@ -121,6 +122,27 @@ fun PracticeScreen(
         
         if (recordGranted && bluetoothGranted) {
             viewModel.handleWhisperToggle()
+        }
+    }
+
+    val triggerMic: () -> Unit = {
+        val recordPermission = Manifest.permission.RECORD_AUDIO
+        val btPermission = if (Build.VERSION.SDK_INT >= 31) Manifest.permission.BLUETOOTH_CONNECT else null
+        
+        val permissionsToRequest = mutableListOf<String>()
+        
+        if (ContextCompat.checkSelfPermission(context, recordPermission) != PackageManager.PERMISSION_GRANTED) {
+            permissionsToRequest.add(recordPermission)
+        }
+        
+        if (btPermission != null && ContextCompat.checkSelfPermission(context, btPermission) != PackageManager.PERMISSION_GRANTED) {
+            permissionsToRequest.add(btPermission)
+        }
+
+        if (permissionsToRequest.isEmpty()) {
+            viewModel.handleWhisperToggle()
+        } else {
+            launcher.launch(permissionsToRequest.toTypedArray())
         }
     }
 
@@ -352,11 +374,42 @@ fun PracticeScreen(
                                         if (clearedLive) Icon(Icons.Default.EditNote, contentDescription = "Cleared Sync", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.tertiary)
                                     }
 
-                                    // Right: Action buttons (Copy + Translate + Visibility)
+                                    // Right: Action buttons (TTS Play + Mic Record + Copy + Translate + Visibility)
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                                     ) {
+                                        // 1. Play TTS
+                                        IconButton(
+                                            onClick = { viewModel.playTTS() },
+                                            enabled = !isTtsPlaying,
+                                            modifier = Modifier.size(36.dp)
+                                        ) {
+                                            Icon(
+                                                Icons.Default.PlayArrow,
+                                                contentDescription = "Play TTS",
+                                                tint = if (isTtsPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.size(22.dp)
+                                            )
+                                        }
+
+                                        // 2. Mic Record
+                                        FilledTonalIconButton(
+                                            onClick = triggerMic,
+                                            modifier = Modifier.size(36.dp),
+                                            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                                containerColor = if (isListening) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                                                contentColor = if (isListening) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Mic,
+                                                contentDescription = "Record Speech",
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+
+                                        // 3. Copy Sentence
                                         IconButton(
                                             onClick = {
                                                 clipboardManager.setText(AnnotatedString(state.sentence.displayExample))
@@ -371,6 +424,8 @@ fun PracticeScreen(
                                                 modifier = Modifier.size(18.dp)
                                             )
                                         }
+
+                                        // 4. Translate Sentence
                                         FilledTonalIconButton(
                                             onClick = { viewModel.toggleTranslation() },
                                             modifier = Modifier.size(36.dp),
@@ -385,6 +440,8 @@ fun PracticeScreen(
                                                 modifier = Modifier.size(18.dp)
                                             )
                                         }
+
+                                        // 5. Visibility Toggle
                                         IconButton(
                                             onClick = { isBlurred = !isBlurred },
                                             modifier = Modifier.size(36.dp)
@@ -446,6 +503,21 @@ fun PracticeScreen(
                                             }
                                         }
                                     )
+                                }
+
+                                if (isListening) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = 8.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        AudioVolumeVisualizer(
+                                            volume = micVolume,
+                                            isListening = true,
+                                            modifier = Modifier.width(180.dp)
+                                        )
+                                    }
                                 }
 
                                 AnimatedVisibility(
@@ -1105,8 +1177,6 @@ fun PracticeScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        val micVolume by viewModel.micVolume.collectAsState()
-
                         // Sensitivity Gauge (Always visible and centered, not hidden inside scrollable Row)
                         Box(
                             modifier = Modifier
@@ -1139,26 +1209,7 @@ fun PracticeScreen(
                                 color = if (isListening) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
                                 shape = MaterialTheme.shapes.medium
                             ) {
-                                IconButton(onClick = {
-                                    val recordPermission = Manifest.permission.RECORD_AUDIO
-                                    val btPermission = if (Build.VERSION.SDK_INT >= 31) Manifest.permission.BLUETOOTH_CONNECT else null
-                                    
-                                    val permissionsToRequest = mutableListOf<String>()
-                                    
-                                    if (ContextCompat.checkSelfPermission(context, recordPermission) != PackageManager.PERMISSION_GRANTED) {
-                                        permissionsToRequest.add(recordPermission)
-                                    }
-                                    
-                                    if (btPermission != null && ContextCompat.checkSelfPermission(context, btPermission) != PackageManager.PERMISSION_GRANTED) {
-                                        permissionsToRequest.add(btPermission)
-                                    }
-
-                                    if (permissionsToRequest.isEmpty()) {
-                                        viewModel.handleWhisperToggle()
-                                    } else {
-                                        launcher.launch(permissionsToRequest.toTypedArray())
-                                    }
-                                }) {
+                                IconButton(onClick = triggerMic) {
                                     Icon(
                                         Icons.Default.Mic, 
                                         contentDescription = "Mic",
