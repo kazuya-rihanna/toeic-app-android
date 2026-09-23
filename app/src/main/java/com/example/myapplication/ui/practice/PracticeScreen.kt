@@ -266,6 +266,7 @@ fun PracticeScreen(
                             }
                             IconButton(onClick = {
                                 clipboardManager.setText(AnnotatedString(state.sentence.displayExample))
+                                android.widget.Toast.makeText(context, "Copied sentence", android.widget.Toast.LENGTH_SHORT).show()
                             }) {
                                 Icon(
                                     Icons.Default.ContentCopy,
@@ -358,11 +359,25 @@ fun PracticeScreen(
                                         if (clearedLive) Icon(Icons.Default.EditNote, contentDescription = "Cleared Sync", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.tertiary)
                                     }
 
-                                    // Right: Action buttons (Translate + Visibility)
+                                    // Right: Action buttons (Copy + Translate + Visibility)
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                                     ) {
+                                        IconButton(
+                                            onClick = {
+                                                clipboardManager.setText(AnnotatedString(state.sentence.displayExample))
+                                                android.widget.Toast.makeText(context, "Copied sentence", android.widget.Toast.LENGTH_SHORT).show()
+                                            },
+                                            modifier = Modifier.size(36.dp)
+                                        ) {
+                                            Icon(
+                                                Icons.Default.ContentCopy,
+                                                contentDescription = "Copy Sentence",
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
                                         FilledTonalIconButton(
                                             onClick = { viewModel.toggleTranslation() },
                                             modifier = Modifier.size(36.dp),
@@ -565,12 +580,27 @@ fun PracticeScreen(
                                                     )
                                                 }
 
-                                                // Right: Action buttons (Translate + Watch on YouTube)
+                                                // Right: Action buttons (Copy + Translate + Watch on YouTube)
                                                 Row(
                                                     verticalAlignment = Alignment.CenterVertically,
                                                     horizontalArrangement = Arrangement.spacedBy(2.dp)
                                                 ) {
                                                     if (!spoken.speakerLine.isNullOrBlank()) {
+                                                        IconButton(
+                                                            onClick = {
+                                                                clipboardManager.setText(AnnotatedString(spoken.speakerLine))
+                                                                android.widget.Toast.makeText(context, "Copied spoken line", android.widget.Toast.LENGTH_SHORT).show()
+                                                            },
+                                                            modifier = Modifier.size(28.dp)
+                                                        ) {
+                                                            Icon(
+                                                                Icons.Default.ContentCopy,
+                                                                contentDescription = "Copy Spoken Line",
+                                                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                                                modifier = Modifier.size(16.dp)
+                                                            )
+                                                        }
+
                                                         IconButton(
                                                             onClick = { viewModel.toggleSpokenTranslation() },
                                                             modifier = Modifier.size(28.dp)
