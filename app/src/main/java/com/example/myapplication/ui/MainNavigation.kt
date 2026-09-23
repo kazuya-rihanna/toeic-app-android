@@ -166,9 +166,7 @@ fun MainNavigation() {
             composable(Screen.Pairing.route) { pairingEntry ->
                 PairingScreen(
                     onBack = {
-                        if (pairingEntry.lifecycleIsResumed()) {
-                            navController.popBackStack()
-                        }
+                        navController.popBackStack()
                     }
                 )
             }

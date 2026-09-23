@@ -27,6 +27,11 @@ import android.content.pm.PackageManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.LinkOff
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PairingScreen(
@@ -41,11 +46,39 @@ fun PairingScreen(
     val foundPens by viewModel.foundPens.collectAsState(initial = emptyList())
     val pendingConfirmPen by viewModel.pendingConfirmPen.collectAsState()
     val hasDeclined by viewModel.hasDeclinedCurrentSearch.collectAsState()
+    val batteryLevel by viewModel.batteryLevel.collectAsState()
+
+    val context = LocalContext.current
+
+    // Android hardware / gesture back button handling
+    BackHandler {
+        viewModel.stopScan()
+        onBack()
+    }
+
+    // Stop scanning when leaving the screen
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.stopScan()
+        }
+    }
+
+    // Remember whether the pen was already connected when opening this screen
+    val wasAlreadyConnected = remember { isConnected }
+
+    // Auto-return ONLY if pen transitions from disconnected -> connected while on this screen
+    LaunchedEffect(isConnected) {
+        if (isConnected && !wasAlreadyConnected) {
+            val appContext = context.applicationContext
+            android.widget.Toast.makeText(appContext, "NeoSmartpen Connected!", android.widget.Toast.LENGTH_SHORT).show()
+            viewModel.stopScan()
+            onBack()
+        }
+    }
 
     // Discovery Monitor for Dialog Popup
     LaunchedEffect(foundPens.size, isAutoConnecting) {
         if (isAutoConnecting && foundPens.isNotEmpty() && pendingConfirmPen == null && !hasDeclined) {
-            // Pick the first pen found and ask for confirmation
             val firstPen = foundPens.firstOrNull { 
                 val n = it.name.uppercase()
                 n.startsWith("NWP-") || n.contains("NEOSMARTPEN") || n.contains("SMARTPEN")
@@ -59,14 +92,11 @@ fun PairingScreen(
     val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         arrayOf(
             Manifest.permission.BLUETOOTH_SCAN,
-            Manifest.permission.BLUETOOTH_CONNECT,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            Manifest.permission.BLUETOOTH_CONNECT
         )
     } else {
         arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
     }
-
-    val context = LocalContext.current
 
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -76,33 +106,16 @@ fun PairingScreen(
         }
     }
 
-    // 自動スキャン開始 (画面に入った瞬間に探し始める)
+    // 自動スキャン開始 (未接続時のみ画面に入った瞬間に探し始める)
     LaunchedEffect(Unit) {
-        val allGranted = permissions.all {
-            ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
-        }
-        if (allGranted) {
-            viewModel.startDiscovery()
-        } else {
-            launcher.launch(permissions)
-        }
-    }
-
-    var hasNavigatedBack by remember { mutableStateOf(false) }
-    
-    val safeBack = {
-        if (!hasNavigatedBack) {
-            hasNavigatedBack = true
-            onBack()
-        }
-    }
-
-    LaunchedEffect(isConnected) {
-        if (isConnected && !hasNavigatedBack) {
-            val appContext = context.applicationContext
-            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                android.widget.Toast.makeText(appContext, "NeoSmartpen Connected!", android.widget.Toast.LENGTH_SHORT).show()
-                safeBack() // Auto-return instantly to prevent manual button race conditions
+        if (!isConnected) {
+            val allGranted = permissions.all {
+                ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+            }
+            if (allGranted) {
+                viewModel.startDiscovery()
+            } else {
+                launcher.launch(permissions)
             }
         }
     }
@@ -111,26 +124,32 @@ fun PairingScreen(
         viewModel.startDiscovery()
     }
 
+    val handleBack: () -> Unit = {
+        viewModel.stopScan()
+        onBack()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Connect Pen") },
+                title = { Text(if (isConnected) "Pen Settings" else "Connect Pen") },
                 navigationIcon = {
-                    IconButton(onClick = { safeBack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = handleBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
-                    // Update Icon (Manual Discovery) - Now with same logic and guard as central button
-                    IconButton(
-                        onClick = { onPairClicked() },
-                        enabled = !isAutoConnecting
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "Refresh",
-                            tint = if (isAutoConnecting) Color.Gray else MaterialTheme.colorScheme.onSurface
-                        )
+                    if (!isConnected) {
+                        IconButton(
+                            onClick = { onPairClicked() },
+                            enabled = !isAutoConnecting
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "Refresh",
+                                tint = if (isAutoConnecting) Color.Gray else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
                 }
             )
@@ -143,14 +162,66 @@ fun PairingScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(16.dp))
-            
-            Text(
-                text = "Hold power for 3s until LED flashes BLUE.",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 24.dp)
-            )
+
+            if (isConnected) {
+                // Connected Pen Status Card
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "Pen Connected",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        if (batteryLevel != null) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Battery: $batteryLevel%",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedButton(
+                            onClick = { viewModel.disconnect() },
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error
+                            )
+                        ) {
+                            Icon(Icons.Default.LinkOff, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Disconnect Pen")
+                        }
+                    }
+                }
+            } else {
+                Text(
+                    text = "Hold power for 3s until LED flashes BLUE.",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
+            }
             
             Spacer(modifier = Modifier.height(16.dp))
             

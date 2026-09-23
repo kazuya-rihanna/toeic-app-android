@@ -26,6 +26,7 @@ class PairingViewModel @Inject constructor(
     val scanStatus = bleScanner.status
     val totalDevicesFound = bleScanner.totalUniqueDevices
     val penEvents = penManager.penEvents
+    val batteryLevel = penManager.batteryLevel
     
     private val _isAutoConnecting = MutableStateFlow(false)
     val isAutoConnecting = _isAutoConnecting.asStateFlow()
