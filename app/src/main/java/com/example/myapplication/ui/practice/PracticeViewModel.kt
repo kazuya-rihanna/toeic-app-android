@@ -137,6 +137,15 @@ class PracticeViewModel @Inject constructor(
     private val _isTranslationVisible = MutableStateFlow(false)
     val isTranslationVisible = _isTranslationVisible.asStateFlow()
 
+    private val _spokenTranslationText = MutableStateFlow<String?>(null)
+    val spokenTranslationText = _spokenTranslationText.asStateFlow()
+
+    private val _isSpokenTranslating = MutableStateFlow(false)
+    val isSpokenTranslating = _isSpokenTranslating.asStateFlow()
+
+    private val _isSpokenTranslationVisible = MutableStateFlow(false)
+    val isSpokenTranslationVisible = _isSpokenTranslationVisible.asStateFlow()
+
     private val _lastOcrDurationMs = MutableStateFlow<Long?>(null)
     val lastOcrDurationMs = _lastOcrDurationMs.asStateFlow()
 
@@ -622,6 +631,35 @@ class PracticeViewModel @Inject constructor(
         }
     }
 
+    fun toggleSpokenTranslation() {
+        if (_isSpokenTranslationVisible.value) {
+            _isSpokenTranslationVisible.value = false
+            return
+        }
+
+        val currentState = _uiState.value
+        if (currentState is PracticeUiState.Success) {
+            val speakerLine = currentState.sentence.spokenCorpusExample?.speakerLine
+            if (speakerLine.isNullOrBlank()) return
+
+            _isSpokenTranslationVisible.value = true
+            if (_spokenTranslationText.value == null) {
+                viewModelScope.launch {
+                    _isSpokenTranslating.value = true
+                    try {
+                        val result = repository.translateText(speakerLine)
+                        _spokenTranslationText.value = result ?: "翻訳を取得できませんでした"
+                    } catch (e: Exception) {
+                        android.util.Log.e("PracticeViewModel", "Spoken translation failed", e)
+                        _spokenTranslationText.value = "翻訳エラーが発生しました"
+                    } finally {
+                        _isSpokenTranslating.value = false
+                    }
+                }
+            }
+        }
+    }
+
 /*
     fun connectPen() {
         val lastPen = penManager.getLastConnected()
@@ -874,6 +912,8 @@ class PracticeViewModel @Inject constructor(
             _isTtsPlaying.value = false
             _isTranslationVisible.value = false
             _translationText.value = null
+            _isSpokenTranslationVisible.value = false
+            _spokenTranslationText.value = null
 
             viewModelScope.launch {
                 _uiState.value = PracticeUiState.Loading

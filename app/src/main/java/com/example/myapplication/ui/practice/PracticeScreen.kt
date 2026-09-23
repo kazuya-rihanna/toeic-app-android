@@ -86,6 +86,9 @@ fun PracticeScreen(
     val translationText by viewModel.translationText.collectAsState()
     val isTranslating by viewModel.isTranslating.collectAsState()
     val isTranslationVisible by viewModel.isTranslationVisible.collectAsState()
+    val spokenTranslationText by viewModel.spokenTranslationText.collectAsState()
+    val isSpokenTranslating by viewModel.isSpokenTranslating.collectAsState()
+    val isSpokenTranslationVisible by viewModel.isSpokenTranslationVisible.collectAsState()
 
     var isBlurred by remember { mutableStateOf(true) }
     var showJumpDialog by remember { mutableStateOf(false) }
@@ -540,21 +543,74 @@ fun PracticeScreen(
                                             verticalArrangement = Arrangement.spacedBy(6.dp)
                                         ) {
                                             Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Icon(
-                                                    Icons.Default.FormatQuote,
-                                                    contentDescription = "Spoken Line",
-                                                    tint = Color(0xFFC62828),
-                                                    modifier = Modifier.size(16.dp)
-                                                )
-                                                Text(
-                                                    text = spoken.sourceChannel ?: "Spoken Corpus",
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = Color(0xFFC62828)
-                                                )
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                                ) {
+                                                    Icon(
+                                                        Icons.Default.FormatQuote,
+                                                        contentDescription = "Spoken Line",
+                                                        tint = Color(0xFFC62828),
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                    Text(
+                                                        text = spoken.sourceChannel ?: "Spoken Corpus",
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = Color(0xFFC62828)
+                                                    )
+                                                }
+
+                                                // Right: Action buttons (Translate + Watch on YouTube)
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                                ) {
+                                                    if (!spoken.speakerLine.isNullOrBlank()) {
+                                                        IconButton(
+                                                            onClick = { viewModel.toggleSpokenTranslation() },
+                                                            modifier = Modifier.size(28.dp)
+                                                        ) {
+                                                            Icon(
+                                                                Icons.Default.Translate,
+                                                                contentDescription = "Translate Spoken Line",
+                                                                tint = if (isSpokenTranslationVisible) Color(0xFFC62828) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                                                modifier = Modifier.size(16.dp)
+                                                            )
+                                                        }
+                                                    }
+
+                                                    if (!spoken.videoUrl.isNullOrBlank()) {
+                                                        IconButton(
+                                                            onClick = {
+                                                                try {
+                                                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(spoken.videoUrl)).apply {
+                                                                        setPackage("com.google.android.youtube")
+                                                                    }
+                                                                    context.startActivity(intent)
+                                                                } catch (e: Exception) {
+                                                                    try {
+                                                                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(spoken.videoUrl)))
+                                                                    } catch (e2: Exception) {
+                                                                        android.widget.Toast.makeText(context, "動画リンクを開けませんでした", android.widget.Toast.LENGTH_SHORT).show()
+                                                                    }
+                                                                }
+                                                            },
+                                                            modifier = Modifier.size(28.dp)
+                                                        ) {
+                                                            Icon(
+                                                                Icons.Default.OpenInNew,
+                                                                contentDescription = "Watch on YouTube",
+                                                                tint = Color(0xFFC62828),
+                                                                modifier = Modifier.size(16.dp)
+                                                            )
+                                                        }
+                                                    }
+                                                }
                                             }
 
                                             if (!spoken.speakerLine.isNullOrBlank()) {
@@ -564,7 +620,54 @@ fun PracticeScreen(
                                                     fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
                                                     color = MaterialTheme.colorScheme.onSurface
                                                 )
+
+                                                AnimatedVisibility(
+                                                    visible = isSpokenTranslationVisible,
+                                                    enter = expandVertically() + fadeIn(),
+                                                    exit = shrinkVertically() + fadeOut()
+                                                ) {
+                                                    Surface(
+                                                        color = Color(0xFFFFEBEE).copy(alpha = 0.95f),
+                                                        shape = RoundedCornerShape(6.dp),
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(top = 2.dp)
+                                                    ) {
+                                                        Row(
+                                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                                            verticalAlignment = Alignment.CenterVertically,
+                                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                                        ) {
+                                                            Icon(
+                                                                Icons.Default.Translate,
+                                                                contentDescription = null,
+                                                                tint = Color(0xFFC62828),
+                                                                modifier = Modifier.size(14.dp)
+                                                            )
+                                                            if (isSpokenTranslating) {
+                                                                CircularProgressIndicator(
+                                                                    modifier = Modifier.size(14.dp),
+                                                                    strokeWidth = 2.dp,
+                                                                    color = Color(0xFFC62828)
+                                                                )
+                                                                Text(
+                                                                    text = "Gemini 翻訳中...",
+                                                                    style = MaterialTheme.typography.bodySmall,
+                                                                    color = Color(0xFFC62828)
+                                                                )
+                                                            } else if (!spokenTranslationText.isNullOrBlank()) {
+                                                                Text(
+                                                                    text = spokenTranslationText!!,
+                                                                    style = MaterialTheme.typography.bodyMedium,
+                                                                    fontWeight = FontWeight.Medium,
+                                                                    color = Color(0xFFB71C1C)
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                             }
+
                                             if (!spoken.videoTitle.isNullOrBlank()) {
                                                 Text(
                                                     text = spoken.videoTitle,
@@ -573,40 +676,6 @@ fun PracticeScreen(
                                                     maxLines = 1,
                                                     overflow = TextOverflow.Ellipsis
                                                 )
-                                            }
-
-                                            if (!spoken.videoUrl.isNullOrBlank()) {
-                                                Spacer(modifier = Modifier.height(4.dp))
-                                                FilledTonalButton(
-                                                    onClick = {
-                                                        try {
-                                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(spoken.videoUrl)).apply {
-                                                                setPackage("com.google.android.youtube")
-                                                            }
-                                                            context.startActivity(intent)
-                                                        } catch (e: Exception) {
-                                                            try {
-                                                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(spoken.videoUrl)))
-                                                            } catch (e2: Exception) {
-                                                                android.widget.Toast.makeText(context, "動画リンクを開けませんでした", android.widget.Toast.LENGTH_SHORT).show()
-                                                            }
-                                                        }
-                                                    },
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    shape = RoundedCornerShape(8.dp),
-                                                    colors = ButtonDefaults.filledTonalButtonColors(
-                                                        containerColor = Color(0xFFFFEBEE),
-                                                        contentColor = Color(0xFFC62828)
-                                                    )
-                                                ) {
-                                                    Row(
-                                                        verticalAlignment = Alignment.CenterVertically,
-                                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                                    ) {
-                                                        Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
-                                                        Text("🎬 YouTube で動画を視聴する ↗", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                                                    }
-                                                }
                                             }
                                         }
                                     }
@@ -1083,16 +1152,6 @@ fun PracticeScreen(
                                     Icons.Default.PlayArrow,
                                     contentDescription = "TTS",
                                     tint = if (isTtsPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-
-                            IconButton(
-                                onClick = { viewModel.toggleTranslation() }
-                            ) {
-                                Icon(
-                                    Icons.Default.Translate,
-                                    contentDescription = "Translate",
-                                    tint = if (isTranslationVisible) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                                 )
                             }
                         }
