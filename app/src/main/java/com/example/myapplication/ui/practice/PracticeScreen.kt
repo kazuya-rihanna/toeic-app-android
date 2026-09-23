@@ -648,7 +648,7 @@ fun PracticeScreen(
                                                     color = MaterialTheme.colorScheme.primary
                                                 )
                                                 Text(
-                                                    text = "Gemini 翻訳中...",
+                                                    text = "Translating with Gemini...",
                                                     style = MaterialTheme.typography.bodyMedium,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
@@ -789,7 +789,7 @@ fun PracticeScreen(
                                                                     try {
                                                                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(spoken.videoUrl)))
                                                                     } catch (e2: Exception) {
-                                                                        android.widget.Toast.makeText(context, "動画リンクを開けませんでした", android.widget.Toast.LENGTH_SHORT).show()
+                                                                        android.widget.Toast.makeText(context, "Could not open video link", android.widget.Toast.LENGTH_SHORT).show()
                                                                     }
                                                                 }
                                                             },
@@ -844,7 +844,7 @@ fun PracticeScreen(
                                                                     color = Color(0xFFC62828)
                                                                 )
                                                                 Text(
-                                                                    text = "Gemini 翻訳中...",
+                                                                    text = "Translating with Gemini...",
                                                                     style = MaterialTheme.typography.bodySmall,
                                                                     color = Color(0xFFC62828)
                                                                 )
@@ -892,7 +892,7 @@ fun PracticeScreen(
                                                 modifier = Modifier.size(16.dp)
                                             )
                                             Text(
-                                                text = "このページには動画例がありません（Page 2 など次のページをお試しください）",
+                                                text = "No video example available for this page (try another page, e.g. Page 2)",
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -1235,7 +1235,7 @@ fun PracticeScreen(
                             FilterChip(
                                 selected = ocrMode == OcrMode.GEMINI,
                                 onClick = { viewModel.setOcrMode(OcrMode.GEMINI) },
-                                label = { Text("☁️ Gemini (クラウド)") },
+                                label = { Text("☁️ Gemini (Cloud)") },
                                 leadingIcon = if (ocrMode == OcrMode.GEMINI) {
                                     { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
                                 } else null
@@ -1690,7 +1690,7 @@ fun SubmitProgressDialog(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Text(
-                    text = "手書き文字を認識中...",
+                    text = "Recognizing handwriting...",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -1700,9 +1700,9 @@ fun SubmitProgressDialog(
 
                 Text(
                     text = if (ocrMode == OcrMode.GEMINI) {
-                        "☁️ Gemini クラウド AI で文字起こし・解析中..."
+                        "☁️ Transcribing & analyzing with Gemini Cloud AI..."
                     } else {
-                        "⚡ Digital Ink + AI で高速判定中..."
+                        "⚡ Analyzing with Digital Ink + AI..."
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1763,7 +1763,7 @@ fun SuccessCelebrationDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "🎉 正解です！ (CORRECT)",
+                    text = "🎉 CORRECT!",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color(0xFF2E7D32)
@@ -1791,7 +1791,7 @@ fun SuccessCelebrationDialog(
                         if (recognizedText.isNotBlank()) {
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "あなたの回答: \"$recognizedText\"",
+                                text = "Your Answer: \"$recognizedText\"",
                                 style = MaterialTheme.typography.bodySmall,
                                 fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
                                 color = Color(0xFF2E7D32)
@@ -1809,7 +1809,7 @@ fun SuccessCelebrationDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "⏳ 数秒後に自動で次の問題へ進みます",
+                        text = "⏳ Auto-advancing to next question...",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.outline
                     )
@@ -1829,7 +1829,7 @@ fun SuccessCelebrationDialog(
                         .height(48.dp)
                 ) {
                     Text(
-                        text = "次の問題へ ➔",
+                        text = "Next Question ➔",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -1843,7 +1843,7 @@ fun SuccessCelebrationDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "このページにとどまる（閉じる）",
+                        text = "Stay on this page (Dismiss)",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.outline
                     )

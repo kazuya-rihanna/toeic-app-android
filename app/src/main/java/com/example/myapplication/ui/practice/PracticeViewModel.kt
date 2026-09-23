@@ -465,7 +465,7 @@ class PracticeViewModel @Inject constructor(
         val orientation = _canvasOrientation.value
         if (_isSubmitting.value) return
         if (currentStrokes.isEmpty()) {
-            _errorMessage.value = "手書き文字がありません。ノートに書いてから送信してください。"
+            _errorMessage.value = "No handwriting detected. Please write on your notebook before submitting."
             return
         }
 
@@ -639,10 +639,10 @@ class PracticeViewModel @Inject constructor(
                     _isTranslating.value = true
                     try {
                         val result = repository.translateText(sentenceText)
-                        _translationText.value = result ?: "翻訳を取得できませんでした"
+                        _translationText.value = result ?: "Could not retrieve translation."
                     } catch (e: Exception) {
                         android.util.Log.e("PracticeViewModel", "Translation failed", e)
-                        _translationText.value = "翻訳エラーが発生しました"
+                        _translationText.value = "Translation error occurred."
                     } finally {
                         _isTranslating.value = false
                     }
@@ -668,10 +668,10 @@ class PracticeViewModel @Inject constructor(
                     _isSpokenTranslating.value = true
                     try {
                         val result = repository.translateText(speakerLine)
-                        _spokenTranslationText.value = result ?: "翻訳を取得できませんでした"
+                        _spokenTranslationText.value = result ?: "Could not retrieve translation."
                     } catch (e: Exception) {
                         android.util.Log.e("PracticeViewModel", "Spoken translation failed", e)
-                        _spokenTranslationText.value = "翻訳エラーが発生しました"
+                        _spokenTranslationText.value = "Translation error occurred."
                     } finally {
                         _isSpokenTranslating.value = false
                     }
