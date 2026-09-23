@@ -8,6 +8,8 @@ import com.example.myapplication.data.remote.SocketManager
 import com.example.myapplication.data.remote.CategoryIndexResponse
 import com.example.myapplication.domain.ToeicRepository
 import com.example.myapplication.data.pen.PenManager
+import com.example.myapplication.data.pen.BleScanner
+import com.example.myapplication.data.pen.DiscoveredPen
 import kr.neolab.sdk.ink.structure.Dot
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -32,6 +34,7 @@ class PracticeViewModel @Inject constructor(
     private val sttManager: SpeechToTextManager,
     private val ttsManager: TtsManager,
     private val penManager: PenManager,
+    private val bleScanner: BleScanner,
     private val recorderManager: AudioRecorderManager,
     private val digitalInkManager: DigitalInkManager
 ) : ViewModel() {
@@ -124,6 +127,12 @@ class PracticeViewModel @Inject constructor(
 
     private val _isTtsPlaying = MutableStateFlow(false)
     val isTtsPlaying = _isTtsPlaying.asStateFlow()
+
+    private val _isPenScanning = MutableStateFlow(false)
+    val isPenScanning = _isPenScanning.asStateFlow()
+
+    private val _penConnectionStatus = MutableStateFlow<String?>(null)
+    val penConnectionStatus = _penConnectionStatus.asStateFlow()
 
     private val _ocrMode = MutableStateFlow(OcrMode.GEMINI)
     val ocrMode = _ocrMode.asStateFlow()
@@ -942,8 +951,86 @@ class PracticeViewModel @Inject constructor(
         }
     }
 
+    private var autoPenConnectJob: kotlinx.coroutines.Job? = null
+
+    fun autoScanAndConnectPen() {
+        if (isPenConnected.value || _isPenScanning.value) return
+
+        autoPenConnectJob?.cancel()
+        autoPenConnectJob = viewModelScope.launch {
+            _isPenScanning.value = true
+            _penConnectionStatus.value = "Scanning for pen..."
+            try {
+                val lastConnected = penManager.getLastConnected()
+
+                bleScanner.checkBondedDevices()
+                bleScanner.startScan()
+                bleScanner.startClassicDiscovery()
+
+                val targetPen = kotlinx.coroutines.withTimeoutOrNull(12000L) {
+                    bleScanner.foundPens
+                        .filter { it.isNotEmpty() }
+                        .mapNotNull { pens ->
+                            if (lastConnected != null) {
+                                val lastMatch = pens.find {
+                                    it.address.equals(lastConnected.second, ignoreCase = true) ||
+                                    it.sppAddress.equals(lastConnected.first, ignoreCase = true)
+                                }
+                                if (lastMatch != null) return@mapNotNull lastMatch
+                            }
+                            val smartPen = pens.find {
+                                val n = it.name.uppercase()
+                                n.startsWith("NWP-") || n.contains("NEOSMARTPEN") || n.contains("SMARTPEN")
+                            }
+                            if (smartPen != null) return@mapNotNull smartPen
+
+                            pens.firstOrNull { it.isGenuine } ?: pens.firstOrNull()
+                        }
+                        .first()
+                }
+
+                bleScanner.stopScan()
+
+                if (targetPen != null) {
+                    _penConnectionStatus.value = "Lock-on: ${targetPen.name}. Connecting..."
+                    kotlinx.coroutines.delay(400)
+                    penManager.connect(targetPen.sppAddress, targetPen.address)
+
+                    val connected = kotlinx.coroutines.withTimeoutOrNull(8000L) {
+                        penManager.isConnected.filter { it }.first()
+                    }
+                    if (connected == true) {
+                        _penConnectionStatus.value = "Connected to ${targetPen.name}!"
+                    } else {
+                        _penConnectionStatus.value = "Connection timed out"
+                    }
+                } else {
+                    _penConnectionStatus.value = "No pen found nearby"
+                }
+            } catch (e: Exception) {
+                _penConnectionStatus.value = "Error: ${e.message}"
+            } finally {
+                bleScanner.stopScan()
+                _isPenScanning.value = false
+                kotlinx.coroutines.delay(3500L)
+                _penConnectionStatus.value = null
+                autoPenConnectJob = null
+            }
+        }
+    }
+
+    fun cancelPenScan() {
+        autoPenConnectJob?.cancel()
+        autoPenConnectJob = null
+        bleScanner.stopScan()
+        _isPenScanning.value = false
+        _penConnectionStatus.value = null
+    }
+
     override fun onCleared() {
         super.onCleared()
+        autoPenConnectJob?.cancel()
+        bleScanner.stopScan()
         ttsManager.release()
         socketManager.disconnect()
     }

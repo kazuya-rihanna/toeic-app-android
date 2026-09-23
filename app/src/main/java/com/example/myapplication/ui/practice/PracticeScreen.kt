@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -91,6 +92,8 @@ fun PracticeScreen(
     val isSpokenTranslating by viewModel.isSpokenTranslating.collectAsState()
     val isSpokenTranslationVisible by viewModel.isSpokenTranslationVisible.collectAsState()
     val micVolume by viewModel.micVolume.collectAsState()
+    val isPenScanning by viewModel.isPenScanning.collectAsState()
+    val penConnectionStatus by viewModel.penConnectionStatus.collectAsState()
 
     var isBlurred by remember { mutableStateOf(true) }
     var showJumpDialog by remember { mutableStateOf(false) }
@@ -109,6 +112,12 @@ fun PracticeScreen(
             } catch (e: Exception) {
                 // Ignore audio errors
             }
+        }
+    }
+
+    LaunchedEffect(penConnectionStatus) {
+        penConnectionStatus?.let {
+            android.widget.Toast.makeText(context, it, android.widget.Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -146,6 +155,37 @@ fun PracticeScreen(
         }
     }
 
+    val penPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        arrayOf(
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+    } else {
+        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
+
+    val penPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { perms ->
+        if (perms.values.all { it }) {
+            viewModel.autoScanAndConnectPen()
+        } else {
+            android.widget.Toast.makeText(context, "Bluetooth & Location permissions required for pen scanning", android.widget.Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val triggerAutoConnect: () -> Unit = {
+        val missing = penPermissions.filter {
+            ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
+        }
+        if (missing.isEmpty()) {
+            viewModel.autoScanAndConnectPen()
+        } else {
+            penPermissionLauncher.launch(missing.toTypedArray())
+        }
+    }
+
     LaunchedEffect(collectionId) {
         // Using the user's Firebase UID for synchronization with web
         viewModel.loadSentences(collectionId, "VnocHGzzyhNUbkx2YVw9qi1GtFe2") 
@@ -162,6 +202,52 @@ fun PracticeScreen(
                 },
                 actions = {
                     val statusColor = if (isPenConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+
+                    if (!isPenConnected) {
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = if (isPenScanning) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f),
+                            modifier = Modifier
+                                .padding(end = 6.dp)
+                                .clickable {
+                                    if (isPenScanning) viewModel.cancelPenScan() else triggerAutoConnect()
+                                }
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                if (isPenScanning) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(14.dp),
+                                        strokeWidth = 2.dp,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(
+                                        text = "Scanning...",
+                                        color = MaterialTheme.colorScheme.primary,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                } else {
+                                    Icon(
+                                        Icons.Default.Bolt,
+                                        contentDescription = "Auto Connect Pen",
+                                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Text(
+                                        text = "Auto Link",
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                     Surface(
                         shape = RoundedCornerShape(8.dp),
                         color = if (isPenConnected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f) else MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f),
@@ -239,54 +325,94 @@ fun PracticeScreen(
 
                         Row(
                             modifier = Modifier.fillMaxWidth(), 
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Surface(
-                                shape = RoundedCornerShape(8.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-                                modifier = Modifier.clickable { showJumpDialog = true }
+                            // Left: Page indicator & OCR Dataset badge
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                                    modifier = Modifier.clickable { showJumpDialog = true }
                                 ) {
-                                    Text(
-                                        text = pageIndicatorText,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    Icon(
-                                        Icons.Default.ArrowDropDown,
-                                        contentDescription = "Jump Page",
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(16.dp)
-                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Text(
+                                            text = pageIndicatorText,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Medium,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        Icon(
+                                            Icons.Default.ArrowDropDown,
+                                            contentDescription = "Jump Page",
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+                                if (state.sentence.hasOcrDataset == true) {
+                                    Row(
+                                        modifier = Modifier
+                                            .background(
+                                                color = MaterialTheme.colorScheme.primaryContainer,
+                                                shape = RoundedCornerShape(12.dp)
+                                            )
+                                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            modifier = Modifier.size(12.dp)
+                                        )
+                                        Text(
+                                            text = "OCR Dataset",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                    }
                                 }
                             }
-                            if (state.sentence.hasOcrDataset == true) {
-                                Row(
-                                    modifier = Modifier
-                                        .background(
-                                            color = MaterialTheme.colorScheme.primaryContainer,
-                                            shape = RoundedCornerShape(12.dp)
-                                        )
-                                        .padding(horizontal = 8.dp, vertical = 2.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+
+                            // Right: Play TTS & Record Mic buttons
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                IconButton(
+                                    onClick = { viewModel.playTTS() },
+                                    enabled = !isTtsPlaying,
+                                    modifier = Modifier.size(36.dp)
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        modifier = Modifier.size(12.dp)
+                                        Icons.Default.PlayArrow,
+                                        contentDescription = "Play TTS",
+                                        tint = if (isTtsPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(24.dp)
                                     )
-                                    Text(
-                                        text = "OCR Dataset",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                }
+
+                                FilledTonalIconButton(
+                                    onClick = triggerMic,
+                                    modifier = Modifier.size(36.dp),
+                                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                        containerColor = if (isListening) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                                        contentColor = if (isListening) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                ) {
+                                    Icon(
+                                        Icons.Default.Mic,
+                                        contentDescription = "Record Speech",
+                                        modifier = Modifier.size(18.dp)
                                     )
                                 }
                             }
@@ -374,42 +500,12 @@ fun PracticeScreen(
                                         if (clearedLive) Icon(Icons.Default.EditNote, contentDescription = "Cleared Sync", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.tertiary)
                                     }
 
-                                    // Right: Action buttons (TTS Play + Mic Record + Copy + Translate + Visibility)
+                                    // Right: Action buttons (Copy + Translate + Visibility)
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                                     ) {
-                                        // 1. Play TTS
-                                        IconButton(
-                                            onClick = { viewModel.playTTS() },
-                                            enabled = !isTtsPlaying,
-                                            modifier = Modifier.size(36.dp)
-                                        ) {
-                                            Icon(
-                                                Icons.Default.PlayArrow,
-                                                contentDescription = "Play TTS",
-                                                tint = if (isTtsPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                                modifier = Modifier.size(22.dp)
-                                            )
-                                        }
-
-                                        // 2. Mic Record
-                                        FilledTonalIconButton(
-                                            onClick = triggerMic,
-                                            modifier = Modifier.size(36.dp),
-                                            colors = IconButtonDefaults.filledTonalIconButtonColors(
-                                                containerColor = if (isListening) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
-                                                contentColor = if (isListening) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        ) {
-                                            Icon(
-                                                Icons.Default.Mic,
-                                                contentDescription = "Record Speech",
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                        }
-
-                                        // 3. Copy Sentence
+                                        // 1. Copy Sentence
                                         IconButton(
                                             onClick = {
                                                 clipboardManager.setText(AnnotatedString(state.sentence.displayExample))
