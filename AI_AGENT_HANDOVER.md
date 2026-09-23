@@ -212,9 +212,13 @@ YouTube 街頭インタビューに基づく実践的な口語コーパス（`ju
    - `cocaRank`: COCA コーパス頻度順位
    - `channelOccurrences`: チャンネル内での出現頻度
    - `ipa`: 発音記号
-3. **UI 表示仕様 (`PracticeScreen.kt`)**:
-   - ディクテーション練習・TTS・採点・Gemini翻訳は共通の `example` フィールドを使用。
-   - 英英定義文（DEFINITION）および街頭生セリフ引用・YouTube視聴ボタン（`🎬 Watch ↗`）をカード内に表示。
-   - メタデータ領域に `CEFR B1`, `Casual-Neutral`, `309x channel • COCA #397` バッジを動的に表示。
+3. **UI 表示および学習ロジック (`PracticeScreen.kt`, `PracticeViewModel.kt`)**:
+   - **メイン本文 (`displayExample`)**:
+     - `bestDictionaryExample`（Merriam-Webster 等の辞書標準例文）が存在する場合はそれを本文に優先採用。
+     - ディクテーション練習・手書き判定・タイピング採点・TTS 読み上げ・Gemini 和訳もすべてこの標準例文を対象に実行。
+   - **街頭インタビュー動画カード (`spokenCorpusExample`)**:
+     - ネイティブのリアルな生セリフ（`speakerLine`）と YouTube 埋め込みプレイヤー（アプリ内再生）を配置。
+     - 「標準英語でのディクテーション練習」と「動画でのリアルな生口語の体感」を重複なく両立。
+   - 英英定義文（DEFINITION）および `CEFR B1`, `Casual-Neutral`, `309x channel • COCA #397` バッジをカード内に表示。
 
 
