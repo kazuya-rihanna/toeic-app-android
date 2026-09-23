@@ -196,3 +196,25 @@ TOEIC ディクテーション学習アプリのTTS再生アルゴリズムと�
 
 ※ Image to text (手書き文字起こし) は現在検証中のため、確定次第追記予定。
 
+---
+
+## 8. 実践口語コーパス（Justin Waller Street Interviews）対応仕様
+
+YouTube 街頭インタビューに基づく実践的な口語コーパス（`justin_waller_vocabulary`）の連携仕様です。
+
+1. **コレクション名 / 教材ID**:
+   - `justin_waller_vocabulary`（`HomeScreen.kt` および `ScoreScreen.kt` で登録済み）
+2. **データモデル (`Sentence.kt`)**:
+   - `selectedDefinition`: 英英辞書の定義文
+   - `spokenCorpusExample`: YouTube 街頭インタビューの生セリフ引用情報（`speakerLine`, `videoTitle`, `videoUrl`, `sourceChannel`）
+   - `cefrLevel`: CEFR 英語運用能力レベル（例: `"B1"`）
+   - `formality`: フォーマリティ（例: `"casual-neutral"`）
+   - `cocaRank`: COCA コーパス頻度順位
+   - `channelOccurrences`: チャンネル内での出現頻度
+   - `ipa`: 発音記号
+3. **UI 表示仕様 (`PracticeScreen.kt`)**:
+   - ディクテーション練習・TTS・採点・Gemini翻訳は共通の `example` フィールドを使用。
+   - 英英定義文（DEFINITION）および街頭生セリフ引用・YouTube視聴ボタン（`🎬 Watch ↗`）をカード内に表示。
+   - メタデータ領域に `CEFR B1`, `Casual-Neutral`, `309x channel • COCA #397` バッジを動的に表示。
+
+
