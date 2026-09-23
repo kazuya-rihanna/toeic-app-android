@@ -3,9 +3,6 @@ package com.example.myapplication.ui.practice
 import android.os.Build
 import android.content.Intent
 import android.net.Uri
-import android.webkit.WebChromeClient
-import android.webkit.WebView
-import android.webkit.WebViewClient
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,8 +10,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ArrowBack
@@ -580,10 +575,38 @@ fun PracticeScreen(
                                                 )
                                             }
 
-                                            // アプリ内 YouTube インライン再生
                                             if (!spoken.videoUrl.isNullOrBlank()) {
-                                                Spacer(modifier = Modifier.height(2.dp))
-                                                YouTubeInlinePlayer(videoUrl = spoken.videoUrl)
+                                                Spacer(modifier = Modifier.height(4.dp))
+                                                FilledTonalButton(
+                                                    onClick = {
+                                                        try {
+                                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(spoken.videoUrl)).apply {
+                                                                setPackage("com.google.android.youtube")
+                                                            }
+                                                            context.startActivity(intent)
+                                                        } catch (e: Exception) {
+                                                            try {
+                                                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(spoken.videoUrl)))
+                                                            } catch (e2: Exception) {
+                                                                android.widget.Toast.makeText(context, "動画リンクを開けませんでした", android.widget.Toast.LENGTH_SHORT).show()
+                                                            }
+                                                        }
+                                                    },
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    shape = RoundedCornerShape(8.dp),
+                                                    colors = ButtonDefaults.filledTonalButtonColors(
+                                                        containerColor = Color(0xFFFFEBEE),
+                                                        contentColor = Color(0xFFC62828)
+                                                    )
+                                                ) {
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                                    ) {
+                                                        Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+                                                        Text("🎬 YouTube で動画を視聴する ↗", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -1383,148 +1406,5 @@ fun PageJumpDialog(
             }
         }
     )
-}
-
-/**
- * YouTube の URL から 11 桁の videoId を抽出する
- */
-fun extractYouTubeVideoId(url: String?): String? {
-    if (url.isNullOrBlank()) return null
-    val pattern = "(?:watch\\?v=|youtu\\.be/|embed/)([a-zA-Z0-9_-]{11})".toRegex()
-    return pattern.find(url)?.groupValues?.get(1)
-}
-
-/**
- * YouTube 動画をアプリ画面内で直接インライン再生するコンポーザブル
- */
-@Composable
-fun YouTubeInlinePlayer(
-    videoUrl: String,
-    modifier: Modifier = Modifier
-) {
-    val videoId = remember(videoUrl) { extractYouTubeVideoId(videoUrl) }
-    if (videoId == null) return
-
-    val context = LocalContext.current
-    var isPlayerVisible by remember(videoId) { mutableStateOf(false) }
-
-    Column(modifier = modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            FilledTonalButton(
-                onClick = { isPlayerVisible = !isPlayerVisible },
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.filledTonalButtonColors(
-                    containerColor = if (isPlayerVisible) MaterialTheme.colorScheme.surfaceVariant else Color(0xFFFFEBEE),
-                    contentColor = if (isPlayerVisible) MaterialTheme.colorScheme.onSurfaceVariant else Color(0xFFC62828)
-                )
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Icon(
-                        if (isPlayerVisible) Icons.Default.Close else Icons.Default.PlayArrow,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Text(
-                        if (isPlayerVisible) "動画プレイヤーを閉じる" else "🎬 アプリ内で再生",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-
-            OutlinedButton(
-                onClick = {
-                    try {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(videoUrl)).apply {
-                            setPackage("com.google.android.youtube")
-                        }
-                        context.startActivity(intent)
-                    } catch (e: Exception) {
-                        try {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(videoUrl)))
-                        } catch (e2: Exception) {
-                            android.widget.Toast.makeText(context, "動画リンクを開けませんでした", android.widget.Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                },
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = Color(0xFFC62828)
-                ),
-                border = BorderStroke(1.dp, Color(0xFFE57373).copy(alpha = 0.5f))
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text("YouTubeアプリ", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold)
-                    Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(14.dp))
-                }
-            }
-        }
-
-        if (isPlayerVisible) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
-                    .clip(RoundedCornerShape(8.dp)),
-                color = Color.Black
-            ) {
-                AndroidView(
-                    modifier = Modifier.fillMaxSize(),
-                    factory = { ctx ->
-                        WebView(ctx).apply {
-                            settings.javaScriptEnabled = true
-                            settings.domStorageEnabled = true
-                            settings.databaseEnabled = true
-                            settings.mediaPlaybackRequiresUserGesture = false
-                            // WebView 固有の '; wv' トークンを消去して通常の Chrome モバイルとして振る舞わせる（YouTube ブロック対策）
-                            settings.userAgentString = settings.userAgentString.replace("; wv", "")
-
-                            // サードパーティ Cookie 許可
-                            android.webkit.CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
-
-                            webChromeClient = WebChromeClient()
-                            webViewClient = WebViewClient()
-
-                            val embedHtml = """
-                                <!DOCTYPE html>
-                                <html>
-                                <head>
-                                    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-                                    <style>
-                                        * { margin: 0; padding: 0; }
-                                        body { background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-                                        iframe { width: 100%; height: 100%; border: 0; }
-                                    </style>
-                                </head>
-                                <body>
-                                    <iframe 
-                                        src="https://www.youtube.com/embed/$videoId?playsinline=1&enablejsapi=1&rel=0&autoplay=1" 
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                        allowfullscreen>
-                                    </iframe>
-                                </body>
-                                </html>
-                            """.trimIndent()
-
-                            // BaseURL を https://www.google.com にして正規 Web サイトからの埋め込みとして認識させる
-                            loadDataWithBaseURL("https://www.google.com", embedHtml, "text/html", "utf-8", null)
-                        }
-                    }
-                )
-            }
-        }
-    }
 }
 
