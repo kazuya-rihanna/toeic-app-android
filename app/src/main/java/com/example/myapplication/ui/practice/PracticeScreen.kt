@@ -35,6 +35,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -102,9 +108,15 @@ fun PracticeScreen(
 
 
     val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
     
     LaunchedEffect(isSuccess) {
         if (isSuccess) {
+            try {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            } catch (e: Exception) {
+                // Ignore haptic errors
+            }
             try {
                 val mediaPlayer = android.media.MediaPlayer.create(context, com.example.myapplication.R.raw.apple_pay)
                 mediaPlayer?.setOnCompletionListener { it.release() }
@@ -468,7 +480,8 @@ fun PracticeScreen(
                         // Sentence Card Centered
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                            border = if (isSuccess) BorderStroke(2.5.dp, Color(0xFF4CAF50)) else null
                         ) {
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 // 1. Top Control Bar (Cleared indicators on left, Action buttons on right)
@@ -1386,8 +1399,22 @@ fun PracticeScreen(
                             )
                         }
 
+                        if (isSubmitting) {
+                            SubmitProgressDialog(ocrMode = ocrMode)
+                        }
+
                         if (isSuccess) {
-                            Text("Correct!", color = MaterialTheme.colorScheme.primary)
+                            SuccessCelebrationDialog(
+                                correctSentence = state.sentence.displayExample,
+                                recognizedText = inputText,
+                                onNext = {
+                                    viewModel.dismissSuccess()
+                                    viewModel.nextSentence()
+                                },
+                                onDismiss = {
+                                    viewModel.dismissSuccess()
+                                }
+                            )
                         }
                         checkResult?.let { result ->
                             Spacer(modifier = Modifier.height(16.dp))
@@ -1625,4 +1652,205 @@ fun PageJumpDialog(
         }
     )
 }
+
+@Composable
+fun SubmitProgressDialog(
+    ocrMode: OcrMode
+) {
+    Dialog(
+        onDismissRequest = { /* Non-dismissible while processing */ },
+        properties = DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false
+        )
+    ) {
+        Card(
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+            modifier = Modifier
+                .fillMaxWidth(0.88f)
+                .wrapContentHeight()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(28.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(54.dp),
+                    strokeWidth = 4.dp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = "手書き文字を認識中...",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = if (ocrMode == OcrMode.GEMINI) {
+                        "☁️ Gemini クラウド AI で文字起こし・解析中..."
+                    } else {
+                        "⚡ Digital Ink + AI で高速判定中..."
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SuccessCelebrationDialog(
+    correctSentence: String,
+    recognizedText: String,
+    onNext: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
+        )
+    ) {
+        Card(
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+            modifier = Modifier
+                .fillMaxWidth(0.94f)
+                .wrapContentHeight()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Large Celebratory Badge
+                Surface(
+                    shape = CircleShape,
+                    color = Color(0xFFE8F5E9),
+                    border = BorderStroke(2.5.dp, Color(0xFF4CAF50)),
+                    modifier = Modifier.size(76.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = "Correct",
+                            tint = Color(0xFF2E7D32),
+                            modifier = Modifier.size(52.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "🎉 正解です！ (CORRECT)",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFF2E7D32)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Answer details card
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp)
+                    ) {
+                        Text(
+                            text = correctSentence,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        if (recognizedText.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "あなたの回答: \"$recognizedText\"",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                color = Color(0xFF2E7D32)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Auto-advance indicator
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "⏳ 数秒後に自動で次の問題へ進みます",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Primary Next Button
+                Button(
+                    onClick = onNext,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF2E7D32)
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                ) {
+                    Text(
+                        text = "次の問題へ ➔",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "このページにとどまる（閉じる）",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                }
+            }
+        }
+    }
+}
+
 

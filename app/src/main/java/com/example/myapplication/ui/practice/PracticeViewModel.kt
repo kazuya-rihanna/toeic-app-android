@@ -98,6 +98,13 @@ class PracticeViewModel @Inject constructor(
 
     private val _isSuccess = MutableStateFlow(false)
     val isSuccess = _isSuccess.asStateFlow()
+    private var autoAdvanceJob: kotlinx.coroutines.Job? = null
+
+    fun dismissSuccess() {
+        autoAdvanceJob?.cancel()
+        autoAdvanceJob = null
+        _isSuccess.value = false
+    }
 
     val isPenConnected = combine(
         socketManager.isOcrConnected,
@@ -456,7 +463,11 @@ class PracticeViewModel @Inject constructor(
     fun handleSubmitDrawing() {
         val currentStrokes = _strokes.value
         val orientation = _canvasOrientation.value
-        if (currentStrokes.isEmpty() || _isSubmitting.value) return
+        if (_isSubmitting.value) return
+        if (currentStrokes.isEmpty()) {
+            _errorMessage.value = "手書き文字がありません。ノートに書いてから送信してください。"
+            return
+        }
 
         viewModelScope.launch {
             _isSubmitting.value = true
@@ -835,9 +846,11 @@ class PracticeViewModel @Inject constructor(
                         }
 
                         // Auto-advance to next sentence after a delay so user can see result
-                        viewModelScope.launch {
+                        autoAdvanceJob?.cancel()
+                        autoAdvanceJob = viewModelScope.launch {
                             kotlinx.coroutines.delay(3500)
                             if (_isSuccess.value) { // Check if we are still on the same success state
+                                _isSuccess.value = false
                                 nextSentence()
                             }
                         }
@@ -912,6 +925,8 @@ class PracticeViewModel @Inject constructor(
     }
 
     fun jumpToPage(targetPage: Int) {
+        autoAdvanceJob?.cancel()
+        autoAdvanceJob = null
         val currentState = _uiState.value
         if (currentState is PracticeUiState.Success) {
             val page = targetPage.coerceIn(1, currentState.totalPages)
