@@ -3,6 +3,9 @@ package com.example.myapplication.ui.practice
 import android.os.Build
 import android.content.Intent
 import android.net.Uri
+import android.webkit.WebChromeClient
+import android.webkit.WebView
+import android.webkit.WebViewClient
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,6 +13,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ArrowBack
@@ -27,6 +32,8 @@ import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.animation.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -522,7 +529,7 @@ fun PracticeScreen(
                                     }
                                 }
 
-                                // 4. Spoken Corpus Quote & Video Link (街頭インタビュー生セリフ)
+                                // 4. Spoken Corpus Quote & Video Player (街頭インタビュー生セリフ & 動画再生)
                                 val spoken = sentence.spokenCorpusExample
                                 if (spoken != null && (!spoken.speakerLine.isNullOrBlank() || !spoken.videoUrl.isNullOrBlank())) {
                                     Surface(
@@ -535,7 +542,7 @@ fun PracticeScreen(
                                     ) {
                                         Column(
                                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                                            verticalArrangement = Arrangement.spacedBy(6.dp)
                                         ) {
                                             Row(
                                                 modifier = Modifier.fillMaxWidth(),
@@ -561,7 +568,7 @@ fun PracticeScreen(
                                                 }
 
                                                 if (!spoken.videoUrl.isNullOrBlank()) {
-                                                    FilledTonalButton(
+                                                    IconButton(
                                                         onClick = {
                                                             try {
                                                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(spoken.videoUrl))
@@ -570,20 +577,14 @@ fun PracticeScreen(
                                                                 android.widget.Toast.makeText(context, "Cannot open video link", android.widget.Toast.LENGTH_SHORT).show()
                                                             }
                                                         },
-                                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-                                                        modifier = Modifier.height(26.dp),
-                                                        colors = ButtonDefaults.filledTonalButtonColors(
-                                                            containerColor = Color(0xFFFFCDD2),
-                                                            contentColor = Color(0xFFB71C1C)
-                                                        )
+                                                        modifier = Modifier.size(28.dp)
                                                     ) {
-                                                        Row(
-                                                            verticalAlignment = Alignment.CenterVertically,
-                                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                                        ) {
-                                                            Text("🎬 Watch", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
-                                                            Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(12.dp))
-                                                        }
+                                                        Icon(
+                                                            Icons.Default.OpenInNew,
+                                                            contentDescription = "Open in YouTube App",
+                                                            tint = Color(0xFFB71C1C),
+                                                            modifier = Modifier.size(16.dp)
+                                                        )
                                                     }
                                                 }
                                             }
@@ -605,6 +606,38 @@ fun PracticeScreen(
                                                     overflow = TextOverflow.Ellipsis
                                                 )
                                             }
+
+                                            // アプリ内 YouTube インライン再生
+                                            if (!spoken.videoUrl.isNullOrBlank()) {
+                                                Spacer(modifier = Modifier.height(2.dp))
+                                                YouTubeInlinePlayer(videoUrl = spoken.videoUrl)
+                                            }
+                                        }
+                                    }
+                                } else if (collectionId == "justin_waller_vocabulary") {
+                                    Surface(
+                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                                        shape = RoundedCornerShape(8.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Info,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                            Text(
+                                                text = "このページには動画例がありません（Page 2 など次のページをお試しください）",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
                                         }
                                     }
                                 }
@@ -1378,3 +1411,108 @@ fun PageJumpDialog(
         }
     )
 }
+
+/**
+ * YouTube の URL から 11 桁の videoId を抽出する
+ */
+fun extractYouTubeVideoId(url: String?): String? {
+    if (url.isNullOrBlank()) return null
+    val pattern = "(?:watch\\?v=|youtu\\.be/|embed/)([a-zA-Z0-9_-]{11})".toRegex()
+    return pattern.find(url)?.groupValues?.get(1)
+}
+
+/**
+ * YouTube 動画をアプリ画面内で直接インライン再生するコンポーザブル
+ */
+@Composable
+fun YouTubeInlinePlayer(
+    videoUrl: String,
+    modifier: Modifier = Modifier
+) {
+    val videoId = remember(videoUrl) { extractYouTubeVideoId(videoUrl) }
+    if (videoId == null) return
+
+    var isPlayerVisible by remember(videoId) { mutableStateOf(false) }
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        if (!isPlayerVisible) {
+            FilledTonalButton(
+                onClick = { isPlayerVisible = true },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = Color(0xFFFFEBEE),
+                    contentColor = Color(0xFFC62828)
+                )
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Text("🎬 アプリ内で動画を再生する", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                }
+            }
+        } else {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(16f / 9f)
+                    .clip(RoundedCornerShape(8.dp)),
+                color = Color.Black
+            ) {
+                AndroidView(
+                    modifier = Modifier.fillMaxSize(),
+                    factory = { ctx ->
+                        WebView(ctx).apply {
+                            settings.javaScriptEnabled = true
+                            settings.domStorageEnabled = true
+                            settings.mediaPlaybackRequiresUserGesture = false
+                            webChromeClient = WebChromeClient()
+                            webViewClient = WebViewClient()
+                            val embedHtml = """
+                                <!DOCTYPE html>
+                                <html>
+                                <head>
+                                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                    <style>
+                                        body { margin: 0; padding: 0; background-color: #000; display: flex; justify-content: center; align-items: center; height: 100vh; }
+                                        iframe { width: 100%; height: 100%; border: none; }
+                                    </style>
+                                </head>
+                                <body>
+                                    <iframe 
+                                        src="https://www.youtube.com/embed/$videoId?autoplay=1&playsinline=1&rel=0" 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                        allowfullscreen>
+                                    </iframe>
+                                </body>
+                                </html>
+                            """.trimIndent()
+                            loadDataWithBaseURL("https://www.youtube.com", embedHtml, "text/html", "utf-8", null)
+                        }
+                    }
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(
+                    onClick = { isPlayerVisible = false },
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(14.dp))
+                        Text("動画を閉じる", style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+            }
+        }
+    }
+}
+
