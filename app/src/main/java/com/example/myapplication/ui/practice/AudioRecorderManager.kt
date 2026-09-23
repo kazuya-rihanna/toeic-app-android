@@ -1,6 +1,11 @@
 package com.example.myapplication.ui.practice
 
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.media.AudioDeviceInfo
 import android.media.AudioFormat
 import android.media.AudioManager
@@ -9,6 +14,7 @@ import android.media.MediaRecorder
 import android.media.audiofx.AutomaticGainControl
 import android.media.audiofx.NoiseSuppressor
 import android.os.Build
+import androidx.core.content.ContextCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,10 +65,45 @@ class AudioRecorderManager @Inject constructor(
         }
     } else null
 
+    private val batteryReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val action = intent?.action ?: return
+            if (action == "android.bluetooth.device.action.BATTERY_LEVEL_CHANGED") {
+                val level = intent.getIntExtra("android.bluetooth.device.extra.BATTERY_LEVEL", -1)
+                if (level in 0..100) {
+                    val current = _bluetoothAudioStatus.value
+                    if (current.isConnected) {
+                        _bluetoothAudioStatus.value = current.copy(batteryLevel = level)
+                    }
+                } else {
+                    updateConnectedAudioDevices()
+                }
+            } else if (action == BluetoothDevice.ACTION_ACL_CONNECTED ||
+                action == BluetoothDevice.ACTION_ACL_DISCONNECTED
+            ) {
+                updateConnectedAudioDevices()
+            }
+        }
+    }
+
     init {
         updateConnectedAudioDevices()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && audioDeviceCallback != null) {
             audioManager.registerAudioDeviceCallback(audioDeviceCallback, null)
+        }
+        try {
+            val filter = IntentFilter().apply {
+                addAction("android.bluetooth.device.action.BATTERY_LEVEL_CHANGED")
+                addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
+                addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.registerReceiver(batteryReceiver, filter, Context.RECEIVER_EXPORTED)
+            } else {
+                context.registerReceiver(batteryReceiver, filter)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("AudioRecorderManager", "Failed to register battery receiver", e)
         }
     }
 
@@ -124,22 +165,89 @@ class AudioRecorderManager @Inject constructor(
                 if (btOutput != null) {
                     val rawName = btOutput.productName?.toString()?.takeIf { it.isNotBlank() } ?: "Bluetooth Audio"
                     val isBtr = rawName.contains("BTR11", ignoreCase = true) || rawName.contains("FIIO", ignoreCase = true)
+                    val battery = getBluetoothDeviceBattery(btOutput) ?: _bluetoothAudioStatus.value.batteryLevel
                     _bluetoothAudioStatus.value = BluetoothAudioStatus(
                         isConnected = true,
                         deviceName = rawName,
-                        isBtr11 = isBtr
+                        isBtr11 = isBtr,
+                        batteryLevel = battery
                     )
                 } else {
                     _bluetoothAudioStatus.value = BluetoothAudioStatus(
                         isConnected = false,
                         deviceName = null,
-                        isBtr11 = false
+                        isBtr11 = false,
+                        batteryLevel = null
                     )
                 }
             } catch (e: Exception) {
                 android.util.Log.e("AudioRecorderManager", "Error checking audio devices", e)
             }
         }
+    }
+
+    private fun getBluetoothDeviceBattery(btOutput: AudioDeviceInfo?): Int? {
+        try {
+            val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+            val adapter = bluetoothManager?.adapter ?: return null
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        android.Manifest.permission.BLUETOOTH_CONNECT
+                    ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+                ) {
+                    return null
+                }
+            }
+
+            val bondedDevices = try {
+                adapter.bondedDevices
+            } catch (e: SecurityException) {
+                null
+            } ?: return null
+
+            var targetDevice: BluetoothDevice? = null
+
+            // 1. Try matching by MAC address if available (API 28+)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && btOutput != null) {
+                val address = try { btOutput.address } catch (e: Exception) { null }
+                if (!address.isNullOrBlank() && address != "00:00:00:00:00:00") {
+                    targetDevice = bondedDevices.firstOrNull { it.address.equals(address, ignoreCase = true) }
+                }
+            }
+
+            // 2. Try matching by productName
+            if (targetDevice == null && btOutput != null) {
+                val prodName = btOutput.productName?.toString()?.trim()
+                if (!prodName.isNullOrBlank()) {
+                    targetDevice = bondedDevices.firstOrNull { device ->
+                        val name = try { device.name } catch (e: SecurityException) { null }
+                        name != null && (name.equals(prodName, ignoreCase = true) ||
+                                prodName.contains(name, ignoreCase = true) ||
+                                name.contains(prodName, ignoreCase = true))
+                    }
+                }
+            }
+
+            // 3. Fallback: match any device with BTR11 or FIIO
+            if (targetDevice == null) {
+                targetDevice = bondedDevices.firstOrNull { device ->
+                    val name = try { device.name } catch (e: SecurityException) { null }
+                    name != null && (name.contains("BTR11", ignoreCase = true) || name.contains("FIIO", ignoreCase = true))
+                }
+            }
+
+            if (targetDevice != null) {
+                val method = targetDevice.javaClass.getMethod("getBatteryLevel")
+                val level = method.invoke(targetDevice) as? Int
+                if (level != null && level in 0..100) {
+                    return level
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.d("AudioRecorderManager", "Unable to get Bluetooth battery: ${e.message}")
+        }
+        return null
     }
 
 
@@ -480,7 +588,8 @@ data class MicrophoneInfo(
 data class BluetoothAudioStatus(
     val isConnected: Boolean = false,
     val deviceName: String? = null,
-    val isBtr11: Boolean = false
+    val isBtr11: Boolean = false,
+    val batteryLevel: Int? = null
 )
 
 

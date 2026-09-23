@@ -219,6 +219,7 @@ fun PracticeScreen(
                     val btConnected = btAudioStatus.isConnected
                     val isBtr11 = btAudioStatus.isBtr11
                     val btDeviceName = btAudioStatus.deviceName ?: "Bluetooth Audio"
+                    val btBattery = btAudioStatus.batteryLevel
 
                     val audioStatusColor = if (btConnected) {
                         MaterialTheme.colorScheme.primary
@@ -232,11 +233,13 @@ fun PracticeScreen(
                         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
                     }
 
+                    val btBatteryText = if (btConnected && btBattery != null && btBattery in 0..100) " ($btBattery%)" else ""
+
                     val audioLabel = when {
-                        isBtr11 -> "BTR11 Linked"
+                        isBtr11 -> "BTR11 Linked$btBatteryText"
                         btConnected -> {
                             val shortName = if (btDeviceName.length > 10) btDeviceName.take(8) + "..." else btDeviceName
-                            "$shortName Linked"
+                            "$shortName Linked$btBatteryText"
                         }
                         else -> "Audio Off"
                     }
@@ -248,9 +251,10 @@ fun PracticeScreen(
                             .padding(end = 6.dp)
                             .clickable {
                                 if (btConnected) {
+                                    val batteryToast = if (btBattery != null && btBattery in 0..100) "\n• Battery: $btBattery%" else ""
                                     android.widget.Toast.makeText(
                                         context,
-                                        "Connected: $btDeviceName (Active Audio Output)",
+                                        "Connected: $btDeviceName (Active Audio Output)$batteryToast",
                                         android.widget.Toast.LENGTH_SHORT
                                     ).show()
                                 } else {
