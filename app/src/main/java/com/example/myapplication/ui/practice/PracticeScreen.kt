@@ -545,48 +545,21 @@ fun PracticeScreen(
                                             verticalArrangement = Arrangement.spacedBy(6.dp)
                                         ) {
                                             Row(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                horizontalArrangement = Arrangement.SpaceBetween,
-                                                verticalAlignment = Alignment.CenterVertically
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
                                             ) {
-                                                Row(
-                                                    verticalAlignment = Alignment.CenterVertically,
-                                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                                ) {
-                                                    Icon(
-                                                        Icons.Default.FormatQuote,
-                                                        contentDescription = "Spoken Line",
-                                                        tint = Color(0xFFC62828),
-                                                        modifier = Modifier.size(16.dp)
-                                                    )
-                                                    Text(
-                                                        text = spoken.sourceChannel ?: "Spoken Corpus",
-                                                        style = MaterialTheme.typography.labelSmall,
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = Color(0xFFC62828)
-                                                    )
-                                                }
-
-                                                if (!spoken.videoUrl.isNullOrBlank()) {
-                                                    IconButton(
-                                                        onClick = {
-                                                            try {
-                                                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(spoken.videoUrl))
-                                                                context.startActivity(intent)
-                                                            } catch (e: Exception) {
-                                                                android.widget.Toast.makeText(context, "Cannot open video link", android.widget.Toast.LENGTH_SHORT).show()
-                                                            }
-                                                        },
-                                                        modifier = Modifier.size(28.dp)
-                                                    ) {
-                                                        Icon(
-                                                            Icons.Default.OpenInNew,
-                                                            contentDescription = "Open in YouTube App",
-                                                            tint = Color(0xFFB71C1C),
-                                                            modifier = Modifier.size(16.dp)
-                                                        )
-                                                    }
-                                                }
+                                                Icon(
+                                                    Icons.Default.FormatQuote,
+                                                    contentDescription = "Spoken Line",
+                                                    tint = Color(0xFFC62828),
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                                Text(
+                                                    text = spoken.sourceChannel ?: "Spoken Corpus",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color(0xFFC62828)
+                                                )
                                             }
 
                                             if (!spoken.speakerLine.isNullOrBlank()) {
@@ -1432,28 +1405,74 @@ fun YouTubeInlinePlayer(
     val videoId = remember(videoUrl) { extractYouTubeVideoId(videoUrl) }
     if (videoId == null) return
 
+    val context = LocalContext.current
     var isPlayerVisible by remember(videoId) { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxWidth()) {
-        if (!isPlayerVisible) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             FilledTonalButton(
-                onClick = { isPlayerVisible = true },
-                modifier = Modifier.fillMaxWidth(),
+                onClick = { isPlayerVisible = !isPlayerVisible },
+                modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.filledTonalButtonColors(
-                    containerColor = Color(0xFFFFEBEE),
-                    contentColor = Color(0xFFC62828)
+                    containerColor = if (isPlayerVisible) MaterialTheme.colorScheme.surfaceVariant else Color(0xFFFFEBEE),
+                    contentColor = if (isPlayerVisible) MaterialTheme.colorScheme.onSurfaceVariant else Color(0xFFC62828)
                 )
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Text("🎬 アプリ内で動画を再生する", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                    Icon(
+                        if (isPlayerVisible) Icons.Default.Close else Icons.Default.PlayArrow,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        if (isPlayerVisible) "動画プレイヤーを閉じる" else "🎬 アプリ内で再生",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
-        } else {
+
+            OutlinedButton(
+                onClick = {
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(videoUrl)).apply {
+                            setPackage("com.google.android.youtube")
+                        }
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        try {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(videoUrl)))
+                        } catch (e2: Exception) {
+                            android.widget.Toast.makeText(context, "動画リンクを開けませんでした", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                },
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = Color(0xFFC62828)
+                ),
+                border = BorderStroke(1.dp, Color(0xFFE57373).copy(alpha = 0.5f))
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text("YouTubeアプリ", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold)
+                    Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(14.dp))
+                }
+            }
+        }
+
+        if (isPlayerVisible) {
+            Spacer(modifier = Modifier.height(8.dp))
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1467,50 +1486,43 @@ fun YouTubeInlinePlayer(
                         WebView(ctx).apply {
                             settings.javaScriptEnabled = true
                             settings.domStorageEnabled = true
+                            settings.databaseEnabled = true
                             settings.mediaPlaybackRequiresUserGesture = false
+                            // WebView 固有の '; wv' トークンを消去して通常の Chrome モバイルとして振る舞わせる（YouTube ブロック対策）
+                            settings.userAgentString = settings.userAgentString.replace("; wv", "")
+
+                            // サードパーティ Cookie 許可
+                            android.webkit.CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
+
                             webChromeClient = WebChromeClient()
                             webViewClient = WebViewClient()
+
                             val embedHtml = """
                                 <!DOCTYPE html>
                                 <html>
                                 <head>
-                                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
                                     <style>
-                                        body { margin: 0; padding: 0; background-color: #000; display: flex; justify-content: center; align-items: center; height: 100vh; }
-                                        iframe { width: 100%; height: 100%; border: none; }
+                                        * { margin: 0; padding: 0; }
+                                        body { background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+                                        iframe { width: 100%; height: 100%; border: 0; }
                                     </style>
                                 </head>
                                 <body>
                                     <iframe 
-                                        src="https://www.youtube.com/embed/$videoId?autoplay=1&playsinline=1&rel=0" 
+                                        src="https://www.youtube.com/embed/$videoId?playsinline=1&enablejsapi=1&rel=0&autoplay=1" 
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                                         allowfullscreen>
                                     </iframe>
                                 </body>
                                 </html>
                             """.trimIndent()
-                            loadDataWithBaseURL("https://www.youtube.com", embedHtml, "text/html", "utf-8", null)
+
+                            // BaseURL を https://www.google.com にして正規 Web サイトからの埋め込みとして認識させる
+                            loadDataWithBaseURL("https://www.google.com", embedHtml, "text/html", "utf-8", null)
                         }
                     }
                 )
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                TextButton(
-                    onClick = { isPlayerVisible = false },
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(14.dp))
-                        Text("動画を閉じる", style = MaterialTheme.typography.labelSmall)
-                    }
-                }
             }
         }
     }
