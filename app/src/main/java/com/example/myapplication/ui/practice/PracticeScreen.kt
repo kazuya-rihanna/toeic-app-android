@@ -336,17 +336,64 @@ fun PracticeScreen(
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                         ) {
                             Column(modifier = Modifier.fillMaxWidth()) {
-                                Box(modifier = Modifier.padding(top = 28.dp, bottom = 20.dp, start = 16.dp, end = 16.dp).fillMaxWidth()) {
-                                    
+                                // 1. Top Control Bar (Cleared indicators on left, Action buttons on right)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 4.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Left: Cleared status icons
                                     Row(
-                                        modifier = Modifier.align(Alignment.TopStart).offset(y = (-12).dp),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        if (clearedTyping) Icon(Icons.Default.Keyboard, contentDescription = "Cleared Typing", modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
-                                        if (clearedStt) Icon(Icons.Default.Mic, contentDescription = "Cleared Dictation", modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.secondary)
-                                        if (clearedLive) Icon(Icons.Default.EditNote, contentDescription = "Cleared Sync", modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.tertiary)
+                                        if (clearedTyping) Icon(Icons.Default.Keyboard, contentDescription = "Cleared Typing", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
+                                        if (clearedStt) Icon(Icons.Default.Mic, contentDescription = "Cleared Dictation", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.secondary)
+                                        if (clearedLive) Icon(Icons.Default.EditNote, contentDescription = "Cleared Sync", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.tertiary)
                                     }
 
+                                    // Right: Action buttons (Translate + Visibility)
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        FilledTonalIconButton(
+                                            onClick = { viewModel.toggleTranslation() },
+                                            modifier = Modifier.size(36.dp),
+                                            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                                containerColor = if (isTranslationVisible) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                                                contentColor = if (isTranslationVisible) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Translate,
+                                                contentDescription = "Toggle Translation",
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                        IconButton(
+                                            onClick = { isBlurred = !isBlurred },
+                                            modifier = Modifier.size(36.dp)
+                                        ) {
+                                            Icon(
+                                                if (isBlurred) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                                contentDescription = "Toggle Visibility",
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    }
+                                }
+
+                                // 2. Sentence Text Area (Full width, zero overlap with any buttons)
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 20.dp, vertical = 14.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
                                     val sentenceText = if (isBlurred) "••••••••••••" else (state.sentence.example ?: "")
                                     val annotatedString = androidx.compose.ui.text.buildAnnotatedString {
                                         append(sentenceText)
@@ -369,7 +416,7 @@ fun PracticeScreen(
                                             textAlign = TextAlign.Center,
                                             color = androidx.compose.material3.LocalContentColor.current
                                         ),
-                                        modifier = Modifier.align(Alignment.Center).padding(horizontal = 40.dp),
+                                        modifier = Modifier.fillMaxWidth(),
                                         onClick = { offset ->
                                             if (!isBlurred) {
                                                 annotatedString.getStringAnnotations(tag = "WORD", start = offset, end = offset)
@@ -387,29 +434,6 @@ fun PracticeScreen(
                                             }
                                         }
                                     )
-                                    Row(
-                                        modifier = Modifier.align(Alignment.TopEnd),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        IconButton(
-                                            onClick = { viewModel.toggleTranslation() }
-                                        ) {
-                                            Icon(
-                                                Icons.Default.Translate,
-                                                contentDescription = "Toggle Translation",
-                                                tint = if (isTranslationVisible) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
-                                            )
-                                        }
-                                        IconButton(
-                                            onClick = { isBlurred = !isBlurred }
-                                        ) {
-                                            Icon(
-                                                if (isBlurred) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                                contentDescription = "Toggle Visibility",
-                                                tint = MaterialTheme.colorScheme.primary
-                                            )
-                                        }
-                                    }
                                 }
 
                                 AnimatedVisibility(
