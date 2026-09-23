@@ -124,33 +124,25 @@ fun PracticeScreen(
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val recordGranted = permissions[Manifest.permission.RECORD_AUDIO] ?: false
-        val bluetoothGranted = if (android.os.Build.VERSION.SDK_INT >= 31) {
-            permissions[Manifest.permission.BLUETOOTH_CONNECT] ?: false
-        } else true
+        val recordGranted = permissions[Manifest.permission.RECORD_AUDIO] == true ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
         
-        if (recordGranted && bluetoothGranted) {
+        if (recordGranted) {
             viewModel.handleWhisperToggle()
+        } else {
+            android.widget.Toast.makeText(context, "Microphone permission required for speech recognition", android.widget.Toast.LENGTH_SHORT).show()
         }
     }
 
     val triggerMic: () -> Unit = {
-        val recordPermission = Manifest.permission.RECORD_AUDIO
-        val btPermission = if (Build.VERSION.SDK_INT >= 31) Manifest.permission.BLUETOOTH_CONNECT else null
-        
-        val permissionsToRequest = mutableListOf<String>()
-        
-        if (ContextCompat.checkSelfPermission(context, recordPermission) != PackageManager.PERMISSION_GRANTED) {
-            permissionsToRequest.add(recordPermission)
-        }
-        
-        if (btPermission != null && ContextCompat.checkSelfPermission(context, btPermission) != PackageManager.PERMISSION_GRANTED) {
-            permissionsToRequest.add(btPermission)
-        }
-
-        if (permissionsToRequest.isEmpty()) {
+        val recordGranted = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        if (recordGranted) {
             viewModel.handleWhisperToggle()
         } else {
+            val permissionsToRequest = mutableListOf(Manifest.permission.RECORD_AUDIO)
+            if (Build.VERSION.SDK_INT >= 31 && ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                permissionsToRequest.add(Manifest.permission.BLUETOOTH_CONNECT)
+            }
             launcher.launch(permissionsToRequest.toTypedArray())
         }
     }
@@ -158,8 +150,7 @@ fun PracticeScreen(
     val penPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         arrayOf(
             Manifest.permission.BLUETOOTH_SCAN,
-            Manifest.permission.BLUETOOTH_CONNECT,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            Manifest.permission.BLUETOOTH_CONNECT
         )
     } else {
         arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -168,10 +159,13 @@ fun PracticeScreen(
     val penPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { perms ->
-        if (perms.values.all { it }) {
+        val allGranted = penPermissions.all {
+            perms[it] == true || ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+        }
+        if (allGranted) {
             viewModel.autoScanAndConnectPen()
         } else {
-            android.widget.Toast.makeText(context, "Bluetooth & Location permissions required for pen scanning", android.widget.Toast.LENGTH_SHORT).show()
+            android.widget.Toast.makeText(context, "Bluetooth permissions required for pen scanning", android.widget.Toast.LENGTH_SHORT).show()
         }
     }
 
