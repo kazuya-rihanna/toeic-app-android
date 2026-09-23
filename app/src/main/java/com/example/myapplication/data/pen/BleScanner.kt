@@ -128,19 +128,27 @@ class BleScanner @Inject constructor(
                 
                 val hex = bytes.take(16).joinToString("") { "%02X ".format(it) }
                 
-                // Existing entry? 
-                val existingIndex = currentList.indexOfFirst { it.address == address }
+                // Existing entry? Match by LE address, SPP address, or exact Pen Name
+                val existingIndex = currentList.indexOfFirst { existing ->
+                    existing.address.equals(address, ignoreCase = true) ||
+                    existing.sppAddress.equals(sppAddress, ignoreCase = true) ||
+                    existing.address.equals(sppAddress, ignoreCase = true) ||
+                    existing.sppAddress.equals(address, ignoreCase = true) ||
+                    (deviceName != "Unknown" && existing.name != "Unknown" && existing.name.equals(deviceName, ignoreCase = true))
+                }
+
                 if (existingIndex != -1) {
                     val existing = currentList[existingIndex]
-                    // Strict Priority: If existing is BONDED, keep BONDED and keep its address mapping
                     val isBonded = (existing.scanRecordHex == "BONDED") || (hex == "BONDED")
                     
                     currentList[existingIndex] = existing.copy(
                         rssi = result.rssi,
                         name = if (deviceName != "Unknown" && (existing.name == "Unknown" || !isBonded)) deviceName else existing.name,
                         scanRecordHex = if (isBonded) "BONDED" else hex,
-                        // NEVER let a live scan overwrite a BONDED sppAddress (= address)
-                        sppAddress = if (isBonded) existing.address else sppAddress 
+                        // Update with live LE address, but preserve bonded SPP address if available
+                        address = address,
+                        sppAddress = if (isBonded) existing.sppAddress else sppAddress,
+                        isGenuine = existing.isGenuine || isGenuine
                     )
                 } else {
                     currentList.add(DiscoveredPen(deviceName, address, sppAddress, result.rssi, hex, isGenuine))
@@ -174,11 +182,17 @@ class BleScanner @Inject constructor(
                     
                     android.util.Log.d("BleScanner", "Classic Match Found: $name ($address)")
                     
-                    val currentList = _foundPens.value
-                    if (currentList.none { p -> p.address == address }) {
+                    val currentList = _foundPens.value.toMutableList()
+                    val existingIndex = currentList.indexOfFirst { existing ->
+                        existing.address.equals(address, ignoreCase = true) ||
+                        existing.sppAddress.equals(address, ignoreCase = true) ||
+                        (name != "Unknown Classic" && existing.name != "Unknown" && existing.name.equals(name, ignoreCase = true))
+                    }
+                    if (existingIndex == -1) {
                         val isGenuine = address.uppercase().startsWith("9C:7B:D2") || 
                                        address.uppercase().startsWith("00:07:80")
-                        _foundPens.value = currentList + DiscoveredPen(name, address, address, -1, "CLASSIC", isGenuine)
+                        currentList.add(DiscoveredPen(name, address, address, -1, "CLASSIC", isGenuine))
+                        _foundPens.value = currentList
                     }
                 }
             }
@@ -198,7 +212,11 @@ class BleScanner @Inject constructor(
                 val isGenuine = addr.startsWith("9C:7B:D2") || addr.startsWith("00:07:80")
                 
                 if (name.contains("Neo", ignoreCase = true) || isGenuine) {
-                    val existingIndex = currentList.indexOfFirst { it.address == addr }
+                    val existingIndex = currentList.indexOfFirst { existing ->
+                        existing.address.equals(addr, ignoreCase = true) ||
+                        existing.sppAddress.equals(addr, ignoreCase = true) ||
+                        (name != "Bonded Device" && existing.name != "Unknown" && existing.name.equals(name, ignoreCase = true))
+                    }
                     
                     val updated = DiscoveredPen(name, addr, addr, -1, "BONDED", isGenuine)
                     if (existingIndex >= 0) {
