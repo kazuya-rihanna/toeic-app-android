@@ -195,76 +195,71 @@ fun PracticeScreen(
                     }
                 },
                 actions = {
-                    val statusColor = if (isPenConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                    val statusColor = if (isPenConnected) {
+                        MaterialTheme.colorScheme.primary
+                    } else if (isPenScanning) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.error
+                    }
 
-                    if (!isPenConnected) {
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = if (isPenScanning) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f),
-                            modifier = Modifier
-                                .padding(end = 6.dp)
-                                .clickable {
-                                    if (isPenScanning) viewModel.cancelPenScan() else triggerAutoConnect()
-                                }
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                if (isPenScanning) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(14.dp),
-                                        strokeWidth = 2.dp,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    Text(
-                                        text = "Scanning...",
-                                        color = MaterialTheme.colorScheme.primary,
-                                        style = MaterialTheme.typography.labelMedium,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                } else {
-                                    Icon(
-                                        Icons.Default.Bolt,
-                                        contentDescription = "Auto Connect Pen",
-                                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Text(
-                                        text = "Auto Link",
-                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                        style = MaterialTheme.typography.labelMedium,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                }
-                            }
-                        }
+                    val containerColor = if (isPenConnected) {
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                    } else if (isPenScanning) {
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                    } else {
+                        MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f)
+                    }
+
+                    val batteryText = if (isPenConnected) {
+                        if (penBattery != null) " (${penBattery}%)" else ""
+                    } else ""
+
+                    val buttonText = when {
+                        isPenConnected -> "Pen Linked$batteryText"
+                        isPenScanning -> "Connecting..."
+                        else -> "Pen Offline"
                     }
 
                     Surface(
                         shape = RoundedCornerShape(8.dp),
-                        color = if (isPenConnected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f) else MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f),
+                        color = containerColor,
                         modifier = Modifier
                             .padding(end = 8.dp)
-                            .clickable { onPairingClick() }
+                            .clickable {
+                                if (isPenConnected) {
+                                    onPairingClick()
+                                } else if (isPenScanning) {
+                                    viewModel.cancelPenScan()
+                                } else {
+                                    triggerAutoConnect()
+                                }
+                            }
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            Icon(
-                                Icons.Default.Edit,
-                                contentDescription = "Pen Status",
-                                tint = statusColor,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            val batteryText = if (isPenConnected && penBattery != null) " (${penBattery}%)" else ""
+                            if (isPenScanning) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(14.dp),
+                                    strokeWidth = 2.dp,
+                                    color = statusColor
+                                )
+                            } else {
+                                Icon(
+                                    Icons.Default.Edit,
+                                    contentDescription = "Pen Status",
+                                    tint = statusColor,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
                             Text(
-                                text = if (isPenConnected) "Pen Linked$batteryText" else "Pen Offline",
+                                text = buttonText,
                                 color = statusColor,
-                                style = MaterialTheme.typography.labelMedium
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Medium
                             )
                         }
                     }
