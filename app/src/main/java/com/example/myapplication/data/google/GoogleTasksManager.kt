@@ -105,9 +105,13 @@ class GoogleTasksManager @Inject constructor(
     private suspend fun getAccessToken(account: GoogleSignInAccount): String? = withContext(Dispatchers.IO) {
         try {
             val scopeStr = "oauth2:$TASKS_SCOPE"
-            GoogleAuthUtil.getToken(context, account.account!!, scopeStr)
+            val token = GoogleAuthUtil.getToken(context, account.account ?: android.accounts.Account(account.email ?: "", "com.google"), scopeStr)
+            prefs.edit().remove("last_token_error").apply()
+            token
         } catch (e: Exception) {
-            android.util.Log.e("GoogleTasksManager", "Failed to retrieve access token", e)
+            val err = "${e.javaClass.simpleName}: ${e.message}"
+            android.util.Log.e("GoogleTasksManager", "Failed to retrieve access token: $err", e)
+            prefs.edit().putString("last_token_error", err).apply()
             null
         }
     }
@@ -239,7 +243,9 @@ class GoogleTasksManager @Inject constructor(
             android.util.Log.d("GoogleTasksManager", "Successfully synced dictation task: $title (ID: $resultTaskId)")
             return@withContext Result.success(resultTaskId)
         } catch (e: Exception) {
-            android.util.Log.e("GoogleTasksManager", "Sync error", e)
+            val err = "${e.javaClass.simpleName}: ${e.message}"
+            android.util.Log.e("GoogleTasksManager", "Sync error: $err", e)
+            prefs.edit().putString("last_sync_error", err).apply()
             return@withContext Result.failure(e)
         } finally {
             _isSyncing.value = false

@@ -39,7 +39,8 @@ class PracticeViewModel @Inject constructor(
     private val recorderManager: AudioRecorderManager,
     private val digitalInkManager: DigitalInkManager,
     private val dictationLogManager: com.example.myapplication.data.dictation.DictationLogManager,
-    private val googleTasksManager: com.example.myapplication.data.google.GoogleTasksManager
+    private val googleTasksManager: com.example.myapplication.data.google.GoogleTasksManager,
+    private val googleCalendarManager: com.example.myapplication.data.google.GoogleCalendarManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<PracticeUiState>(PracticeUiState.Loading)
@@ -861,6 +862,7 @@ class PracticeViewModel @Inject constructor(
                             timeSec = answerTime
                         )
                         viewModelScope.launch {
+                            googleCalendarManager.syncTodayEvent(updatedSummary)
                             googleTasksManager.syncTodaySummary(updatedSummary)
                         }
 

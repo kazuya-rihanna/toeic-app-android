@@ -16,6 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val googleTasksManager: GoogleTasksManager,
+    private val googleCalendarManager: com.example.myapplication.data.google.GoogleCalendarManager,
     private val dictationLogManager: DictationLogManager
 ) : ViewModel() {
 
@@ -26,6 +27,9 @@ class SettingsViewModel @Inject constructor(
 
     private val _syncMessage = MutableStateFlow<String?>(null)
     val syncMessage = _syncMessage.asStateFlow()
+
+    private val _syncStatusDetail = MutableStateFlow<String?>(null)
+    val syncStatusDetail = _syncStatusDetail.asStateFlow()
 
     fun getTodaySummary() = dictationLogManager.getTodaySummary()
 
@@ -41,11 +45,13 @@ class SettingsViewModel @Inject constructor(
             if (account != null) {
                 googleTasksManager.onSignInSuccess(account)
                 _syncMessage.value = "Connected as ${account.email}"
+                _syncStatusDetail.value = "Connected to ${account.email}"
                 // Perform initial sync of today's summary if available
                 syncNow()
             }
         } catch (e: ApiException) {
             _syncMessage.value = "Google Sign-In failed: status code ${e.statusCode}"
+            _syncStatusDetail.value = "Sign-In error: ${e.statusCode}"
             android.util.Log.e("SettingsViewModel", "Sign-in error", e)
         }
     }
@@ -56,7 +62,8 @@ class SettingsViewModel @Inject constructor(
 
     fun disconnect() {
         googleTasksManager.disconnect()
-        _syncMessage.value = "Disconnected from Google Tasks"
+        _syncMessage.value = "Disconnected"
+        _syncStatusDetail.value = "Disconnected"
     }
 
     fun syncNow() {
@@ -64,13 +71,22 @@ class SettingsViewModel @Inject constructor(
             val summary = dictationLogManager.getTodaySummary()
             if (summary.count <= 0) {
                 _syncMessage.value = "No dictation items solved today yet"
+                _syncStatusDetail.value = "No items solved today yet"
                 return@launch
             }
-            val result = googleTasksManager.syncTodaySummary(summary)
-            if (result.isSuccess) {
-                _syncMessage.value = "Synced successfully to Google Tasks!"
+            val calResult = googleCalendarManager.syncTodayEvent(summary)
+            val tasksResult = googleTasksManager.syncTodaySummary(summary)
+
+            if (calResult.isSuccess || tasksResult.isSuccess) {
+                val calId = calResult.getOrNull()
+                val tasksId = tasksResult.getOrNull()
+                val msg = "Synced to Google Calendar (Event ID: $calId)"
+                _syncMessage.value = msg
+                _syncStatusDetail.value = "✅ $msg"
             } else {
-                _syncMessage.value = "Sync failed: ${result.exceptionOrNull()?.message}"
+                val err = calResult.exceptionOrNull()?.message ?: tasksResult.exceptionOrNull()?.message
+                _syncMessage.value = "Sync failed: $err"
+                _syncStatusDetail.value = "❌ Sync failed: $err"
             }
         }
     }

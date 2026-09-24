@@ -35,6 +35,7 @@ fun SettingsScreen(
     val isSyncing by viewModel.isSyncing.collectAsState()
     val lastSyncTime by viewModel.lastSyncTime.collectAsState()
     val syncMessage by viewModel.syncMessage.collectAsState()
+    val syncStatusDetail by viewModel.syncStatusDetail.collectAsState()
 
     val todaySummary = remember { viewModel.getTodaySummary() }
 
@@ -199,7 +200,15 @@ fun SettingsScreen(
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        if (syncStatusDetail != null) {
+                            Text(
+                                text = syncStatusDetail!!,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium,
+                                color = if (syncStatusDetail!!.startsWith("✅")) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
 
                         // Manual Sync Button
                         Button(
@@ -215,11 +224,11 @@ fun SettingsScreen(
                                     strokeWidth = 2.dp
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Syncing with Google Tasks...")
+                                Text("Syncing with Google Calendar...")
                             } else {
                                 Icon(Icons.Default.Sync, contentDescription = "Sync", modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Sync Today's Log Now")
+                                Text("Sync to Google Calendar Now")
                             }
                         }
                     } else {
