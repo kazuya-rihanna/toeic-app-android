@@ -90,6 +90,9 @@ dependencies {
     // AndroidX Graphics Path (16KB aligned)
     implementation(libs.androidx.graphics.path)
 
+    // Google Play Services Auth (OAuth / Google Sign-In)
+    implementation(libs.play.services.auth)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

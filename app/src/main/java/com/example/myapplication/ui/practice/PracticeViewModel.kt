@@ -37,7 +37,9 @@ class PracticeViewModel @Inject constructor(
     private val penManager: PenManager,
     private val bleScanner: BleScanner,
     private val recorderManager: AudioRecorderManager,
-    private val digitalInkManager: DigitalInkManager
+    private val digitalInkManager: DigitalInkManager,
+    private val dictationLogManager: com.example.myapplication.data.dictation.DictationLogManager,
+    private val googleTasksManager: com.example.myapplication.data.google.GoogleTasksManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<PracticeUiState>(PracticeUiState.Loading)
@@ -186,6 +188,17 @@ class PracticeViewModel @Inject constructor(
     val penConnectionStatus = _penConnectionStatus.asStateFlow()
 
     val bluetoothAudioStatus = recorderManager.bluetoothAudioStatus
+
+    val googleTasksEmail = googleTasksManager.connectedAccountEmail
+    val isGoogleTasksSyncing = googleTasksManager.isSyncing
+    val isGoogleTasksEnabled = googleTasksManager.isSyncEnabled
+    val googleTasksLastSyncTime = googleTasksManager.lastSyncTime
+
+    fun syncGoogleTasksNow() {
+        viewModelScope.launch {
+            googleTasksManager.syncTodaySummary()
+        }
+    }
 
     private val _ocrMode = MutableStateFlow(OcrMode.GEMINI)
     val ocrMode = _ocrMode.asStateFlow()
@@ -837,6 +850,19 @@ class PracticeViewModel @Inject constructor(
                         android.util.Log.d("PracticeViewModel", "Match confirmed! Updating progress...")
                         stopAnswerTimer()
                         _isSuccess.value = true
+
+                        // Record answer time & sync with Google Tasks
+                        val answerTime = _recordedAnswerTimeSec.value ?: 0f
+                        val sentenceExample = currentState.sentence.displayExample
+                        val pageNum = currentState.sentence.page ?: currentState.currentPage
+                        val updatedSummary = dictationLogManager.recordAnswer(
+                            page = pageNum,
+                            sentence = sentenceExample,
+                            timeSec = answerTime
+                        )
+                        viewModelScope.launch {
+                            googleTasksManager.syncTodaySummary(updatedSummary)
+                        }
 
                         // If it's correct and we have the last submitted drawing, save it to GCS
                         val drawingBytes = lastSubmittedDrawingBytes
