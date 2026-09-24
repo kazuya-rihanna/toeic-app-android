@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Headphones
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.foundation.shape.CircleShape
@@ -102,6 +103,9 @@ fun PracticeScreen(
     val isPenScanning by viewModel.isPenScanning.collectAsState()
     val penConnectionStatus by viewModel.penConnectionStatus.collectAsState()
     val btAudioStatus by viewModel.bluetoothAudioStatus.collectAsState()
+    val timerElapsedMs by viewModel.timerElapsedMs.collectAsState()
+    val isTimerRunning by viewModel.isTimerRunning.collectAsState()
+    val recordedAnswerTimeSec by viewModel.recordedAnswerTimeSec.collectAsState()
 
     var isBlurred by remember { mutableStateOf(true) }
     var showJumpDialog by remember { mutableStateOf(false) }
@@ -469,6 +473,47 @@ fun PracticeScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
+                                if (isTimerRunning || timerElapsedMs > 0L) {
+                                    val totalSec = timerElapsedMs / 1000
+                                    val minutes = totalSec / 60
+                                    val seconds = totalSec % 60
+                                    val timeFormatted = String.format("%02d:%02d", minutes, seconds)
+
+                                    Surface(
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = if (isTimerRunning) {
+                                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                                        } else {
+                                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                        },
+                                        border = BorderStroke(
+                                            1.dp,
+                                            if (isTimerRunning) MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                                            else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                                        ),
+                                        modifier = Modifier.padding(end = 2.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Timer,
+                                                contentDescription = "Stopwatch",
+                                                tint = if (isTimerRunning) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.size(14.dp)
+                                            )
+                                            Text(
+                                                text = timeFormatted,
+                                                style = MaterialTheme.typography.labelMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = if (isTimerRunning) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                }
+
                                 IconButton(
                                     onClick = { viewModel.playTTS() },
                                     enabled = !isTtsPlaying,
@@ -1487,6 +1532,7 @@ fun PracticeScreen(
                             SuccessCelebrationDialog(
                                 correctSentence = state.sentence.displayExample,
                                 recognizedText = inputText,
+                                answerTimeSec = recordedAnswerTimeSec,
                                 onNext = {
                                     viewModel.dismissSuccess()
                                     viewModel.nextSentence()
@@ -1797,6 +1843,7 @@ fun SubmitProgressDialog(
 fun SuccessCelebrationDialog(
     correctSentence: String,
     recognizedText: String,
+    answerTimeSec: Float? = null,
     onNext: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -1848,6 +1895,46 @@ fun SuccessCelebrationDialog(
                     fontWeight = FontWeight.ExtraBold,
                     color = Color(0xFF2E7D32)
                 )
+
+                if (answerTimeSec != null && answerTimeSec > 0f) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    val (speedBadge, badgeColor, containerColor) = when {
+                        answerTimeSec < 10.0f -> Triple("⚡ Lightning Fast!", Color(0xFF2E7D32), Color(0xFFE8F5E9))
+                        answerTimeSec < 20.0f -> Triple("🎯 Great Speed!", Color(0xFF1565C0), Color(0xFFE3F2FD))
+                        else -> Triple("💡 Steady & Accurate!", Color(0xFFE65100), Color(0xFFFFF3E0))
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = containerColor,
+                        border = BorderStroke(1.dp, badgeColor.copy(alpha = 0.5f))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Timer,
+                                contentDescription = "Answer Time",
+                                tint = badgeColor,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = "${answerTimeSec}s",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = badgeColor
+                            )
+                            Text(
+                                text = "• $speedBadge",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = badgeColor
+                            )
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(12.dp))
 

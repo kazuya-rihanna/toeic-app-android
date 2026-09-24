@@ -17,6 +17,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.async
+import kotlinx.coroutines.isActive
 import com.example.myapplication.data.model.Progress
 import javax.inject.Inject
 import android.media.AudioDeviceInfo
@@ -100,10 +101,53 @@ class PracticeViewModel @Inject constructor(
     val isSuccess = _isSuccess.asStateFlow()
     private var autoAdvanceJob: kotlinx.coroutines.Job? = null
 
+    private val _timerElapsedMs = MutableStateFlow(0L)
+    val timerElapsedMs = _timerElapsedMs.asStateFlow()
+
+    private val _isTimerRunning = MutableStateFlow(false)
+    val isTimerRunning = _isTimerRunning.asStateFlow()
+
+    private val _recordedAnswerTimeSec = MutableStateFlow<Float?>(null)
+    val recordedAnswerTimeSec = _recordedAnswerTimeSec.asStateFlow()
+
+    private var answerTimerJob: kotlinx.coroutines.Job? = null
+
+    fun startAnswerTimer() {
+        if (_isTimerRunning.value) return
+        _isTimerRunning.value = true
+        val startSystemTime = System.currentTimeMillis() - _timerElapsedMs.value
+        answerTimerJob?.cancel()
+        answerTimerJob = viewModelScope.launch {
+            while (coroutineContext.isActive && _isTimerRunning.value) {
+                kotlinx.coroutines.delay(100)
+                _timerElapsedMs.value = System.currentTimeMillis() - startSystemTime
+            }
+        }
+    }
+
+    fun stopAnswerTimer() {
+        if (_isTimerRunning.value) {
+            _isTimerRunning.value = false
+            answerTimerJob?.cancel()
+            answerTimerJob = null
+            val sec = _timerElapsedMs.value / 1000f
+            _recordedAnswerTimeSec.value = (Math.round(sec * 10f) / 10f)
+        }
+    }
+
+    fun resetAnswerTimer() {
+        _isTimerRunning.value = false
+        answerTimerJob?.cancel()
+        answerTimerJob = null
+        _timerElapsedMs.value = 0L
+        _recordedAnswerTimeSec.value = null
+    }
+
     fun dismissSuccess() {
         autoAdvanceJob?.cancel()
         autoAdvanceJob = null
         _isSuccess.value = false
+        resetAnswerTimer()
     }
 
     val isPenConnected = combine(
@@ -613,6 +657,7 @@ class PracticeViewModel @Inject constructor(
 
         val currentState = _uiState.value
         if (currentState is PracticeUiState.Success) {
+            startAnswerTimer()
             viewModelScope.launch {
                 _isTtsPlaying.value = true
                 try {
@@ -790,6 +835,7 @@ class PracticeViewModel @Inject constructor(
                     val correct = result?.exactMatch?.normalizedMatch == true || result?.isCorrect == true
                     if (correct) {
                         android.util.Log.d("PracticeViewModel", "Match confirmed! Updating progress...")
+                        stopAnswerTimer()
                         _isSuccess.value = true
 
                         // If it's correct and we have the last submitted drawing, save it to GCS
@@ -958,6 +1004,7 @@ class PracticeViewModel @Inject constructor(
                             _inputText.value = ""
                             _checkResult.value = null
                             _isSuccess.value = false
+                            resetAnswerTimer()
                             clearDrawing()
                         }
                     }
