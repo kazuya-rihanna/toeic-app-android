@@ -367,10 +367,14 @@ fun PracticeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
-                .verticalScroll(scrollState)
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(16.dp)
+            ) {
+                Spacer(modifier = Modifier.height(8.dp))
 
             when (val state = uiState) {
                 is PracticeUiState.Loading -> {
@@ -473,47 +477,6 @@ fun PracticeScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                if (isTimerRunning || timerElapsedMs > 0L) {
-                                    val totalSec = timerElapsedMs / 1000
-                                    val minutes = totalSec / 60
-                                    val seconds = totalSec % 60
-                                    val timeFormatted = String.format("%02d:%02d", minutes, seconds)
-
-                                    Surface(
-                                        shape = RoundedCornerShape(12.dp),
-                                        color = if (isTimerRunning) {
-                                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                                        } else {
-                                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                                        },
-                                        border = BorderStroke(
-                                            1.dp,
-                                            if (isTimerRunning) MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                                            else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                                        ),
-                                        modifier = Modifier.padding(end = 2.dp)
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Timer,
-                                                contentDescription = "Stopwatch",
-                                                tint = if (isTimerRunning) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                                modifier = Modifier.size(14.dp)
-                                            )
-                                            Text(
-                                                text = timeFormatted,
-                                                style = MaterialTheme.typography.labelMedium,
-                                                fontWeight = FontWeight.Bold,
-                                                color = if (isTimerRunning) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
-                                    }
-                                }
-
                                 IconButton(
                                     onClick = { viewModel.playTTS() },
                                     enabled = !isTtsPlaying,
@@ -1547,7 +1510,105 @@ fun PracticeScreen(
                             CheckResultDisplay(result = result)
                         }
                         
-                        Spacer(modifier = Modifier.height(32.dp))
+                        Spacer(modifier = Modifier.height(88.dp))
+                    }
+                }
+            }
+        }
+
+            // --- Fixed-Window Snackbar: Dictation Stopwatch Timer ---
+            AnimatedVisibility(
+                visible = isTimerRunning || timerElapsedMs > 0L,
+                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
+                    .fillMaxWidth()
+            ) {
+                val totalSec = timerElapsedMs / 1000
+                val minutes = totalSec / 60
+                val seconds = totalSec % 60
+                val tenths = (timerElapsedMs % 1000) / 100
+                val timeFormatted = String.format("%02d:%02d.%d", minutes, seconds, tenths)
+
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.inverseSurface,
+                    shadowElevation = 8.dp,
+                    tonalElevation = 6.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 10.dp)
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        // Left: Stopwatch Icon + Status & Elapsed Time
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Default.Timer,
+                                        contentDescription = "Timer",
+                                        tint = MaterialTheme.colorScheme.onPrimary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                            Column {
+                                Text(
+                                    text = if (isTimerRunning) "Dictation Timer (Listening...)" else "Timer Stopped",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.75f)
+                                )
+                                Text(
+                                    text = timeFormatted,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.inverseOnSurface
+                                )
+                            }
+                        }
+
+                        // Right: Quick Replay button & Close/Reset button
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            IconButton(
+                                onClick = { viewModel.playTTS() },
+                                enabled = !isTtsPlaying,
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.PlayArrow,
+                                    contentDescription = "Replay Audio",
+                                    tint = MaterialTheme.colorScheme.inverseOnSurface,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+                            IconButton(
+                                onClick = { viewModel.resetAnswerTimer() },
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Close Timer",
+                                    tint = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.7f),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
